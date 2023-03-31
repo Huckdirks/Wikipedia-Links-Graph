@@ -41,7 +41,7 @@ Double click `compile`, or run `bash compile` or `./compile` in the command line
 
 ### Running
 
-#### YOU HAVE TO COMPILE BEFORE TRYING TO RUN THE PROGRAM!!!
+**YOU HAVE TO COMPILE BEFORE TRYING TO RUN THE PROGRAM!!!**
 
 Double click `run`, or run `bash run` or `./run` in the command line in the root directory.
 
