@@ -9,6 +9,7 @@
   - [Compiling](#compiling)
   - [Running](#running)
 - [Future Features](#future-features)
+- [Suggestions](#suggestions)
 - [Contributing](#contributing)
 - [License](#license)
 
