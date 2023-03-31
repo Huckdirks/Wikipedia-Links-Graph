@@ -17,4 +17,4 @@ All the dependencies are already included in the `source/C++` folder. The depend
 
 ## Other
 
-- [bzcat](https://www.commandlinux.com/man-page/man1/bzcat.1.html)
+- [bzcat](https://www.commandlinux.com/man-page/man1/bzcat.1.html) (this should be installed by default)
