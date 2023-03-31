@@ -18,13 +18,13 @@
 
 ## Uses
 
-## [Dependencies](DEPENDENCIES.md)
+## Dependencies
 
 ### Install
 
 Double click `dependencies`, or run `bash dependencies` or `./dependencies` in the root directory or to install the python dependencies. All the c++ dependencies are included in `source/C++` already. You must have [pip](https://pip.pypa.io/en/stable/installation/) installed to download the new dependencies. Also, you'll need to install python yourself if you haven't already.
 
-#### [Dependecies](DEPENDENCIES.md)
+#### [List of Dependecies](DEPENDENCIES.md)
 
 ## Compiling & Running
 
@@ -41,7 +41,9 @@ Double click `compile`, or run `bash compile` or `./compile` in the command line
 
 Double click `run`, or run `bash run` or `./run` in the command line in the root directory.
 
-## [Future Features](FUTURE_FEATURES.md)
+## Future Features
+
+For any news on future features, or if you want to suggest some of your own, check out [FUTURE_FEATURES.md](FUTURE_FEATURES.md)
 
 ## Contributing
 
