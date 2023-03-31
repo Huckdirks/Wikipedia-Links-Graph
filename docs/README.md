@@ -19,6 +19,9 @@
 
 ## Uses
 
+In this current version, after loading in the data into the graph, the user can either find the most linked to pages up to a user specified number, or find all the pages linking to a page. Any pages inputted are case sensitive!!!
+
+If you want to learn about how it does this, or how to call the functions yourself, check out the [Program Structure](https://github.com/Huckdirks/Wikipedia_Links_Graph/wiki/Program-Structure#c) page in the wiki.
 ## Dependencies
 
 ### Install
