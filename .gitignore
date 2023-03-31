@@ -1,0 +1,8 @@
+# Directories
+data/
+source/Python/__pycache__
+.vscode/
+
+# Files
+source/C++/run
+.DS_Store

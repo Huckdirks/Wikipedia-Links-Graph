@@ -1,0 +1,3 @@
+# !#/bin/bash This doesn't work for me for some reason ¯\_(ツ)_/¯
+cd source/C++
+./run
