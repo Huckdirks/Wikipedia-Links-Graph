@@ -6,12 +6,12 @@
 ## Compiling and running
 
 ### Compiling
-To compile, just run ```bash bash compile``` or ```bash ./compile```  in the root directory.
+Run ```bash compile``` or ```./compile```  in the command line in the root directory, or double click compile.
 
 ### Running
-To run, just run ```bash bash run``` or ```bash ./run``` in the root directory.
+Run ```bash run``` or ```./run``` in the command line in the root directory, or double click run.
 ## Contributing
-Contributions are always welcomed! Look at [CONTRIBUTING.md](docs/CONTRIBUTING.md) for more information.
+Contributions are always welcomed! Look at [CONTRIBUTING.md](CONTRIBUTING.md) for more information.
 
 ## License
 The project is available under the [MIT](https://opensource.org/licenses/MIT) license.

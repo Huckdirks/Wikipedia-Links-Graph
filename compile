@@ -1,3 +1,0 @@
-# !#/bin/bash This doesn't work for me for some reason ¯\_(ツ)_/¯
-cd source/C++
-g++ -std=c++20 -Wextra -Wall -Werror -D_GLIBCXX_ASSERTIONS -O3 *.cpp -o run
