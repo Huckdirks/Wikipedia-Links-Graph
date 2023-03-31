@@ -45,6 +45,10 @@ Double click `run`, or run `bash run` or `./run` in the command line in the root
 
 For any news on future features, or if you want to suggest some of your own, check out [FUTURE_FEATURES.md](FUTURE_FEATURES.md)
 
+## Suggestions
+
+If you have any suggestions about anything, please create a [new discussion in suggestions](https://github.com/Huckdirks/Wikipedia_Graph/discussions/new?category=suggestions). I'm only a second year computer science student, so I'm sure there are many things I could improve on!
+
 ## Contributing
 
 Contributions are always welcomed! Look at [CONTRIBUTING.md](CONTRIBUTING.md) for more information.
