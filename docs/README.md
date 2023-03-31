@@ -14,7 +14,7 @@
 
 ## Introduction
 
-(Insert stuff here)
+(Insert intro stuff here)
 
 ## Uses
 
