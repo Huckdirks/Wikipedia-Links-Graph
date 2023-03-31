@@ -47,7 +47,7 @@ Double click `run`, or run `bash run` or `./run` in the command line in the root
 
 ## Future Features
 
-For any news on future features, or if you want to suggest some of your own, check out `[FUTURE_FEATURES.md](FUTURE_FEATURES.md)`.
+For any news on future features, or if you want to suggest some of your own, check out [FUTURE_FEATURES.md](FUTURE_FEATURES.md)
 
 ## Suggestions
 
@@ -55,7 +55,7 @@ If you have any suggestions about anything, please create a [new discussion in s
 
 ## Contributing
 
-Contributions are always welcomed! Look at `[CONTRIBUTING.md](CONTRIBUTING.md)` for more information.
+Contributions are always welcomed! Look at [CONTRIBUTING.md](CONTRIBUTING.md) for more information.
 
 ## License
 
