@@ -2,10 +2,8 @@
 import os
 import requests
 import tqdm
-""" from numba import jit
 
 
-@jit(nopython=True) """
 def download_wiki_dumps(files_to_download, download_num, DUMP_URL):
     # Check if directory to store files exists & create it if it doesn't
     original_dir = os.path.dirname(__file__)
