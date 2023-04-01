@@ -6,8 +6,6 @@
 - [Uses](#uses)
 - [Dependencies](#dependencies)
 - [Compiling & Running](#compiling--running)
-  - [Compiling](#compiling)
-  - [Running](#running)
 - [Quality Assurance](#quality-assurance)
 - [Future Features](#future-features)
 - [Suggestions](#suggestions)
