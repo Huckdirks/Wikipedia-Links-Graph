@@ -8,6 +8,7 @@
 - [Compiling & Running](#compiling--running)
   - [Compiling](#compiling)
   - [Running](#running)
+- [Quality Assurance](#quality-assurance)
 - [Future Features](#future-features)
 - [Suggestions](#suggestions)
 - [Contributing](#contributing)
@@ -44,6 +45,14 @@ Double click `compile`, or run `bash compile` or `./compile` in the command line
 **YOU HAVE TO COMPILE BEFORE TRYING TO RUN THE PROGRAM!!!**
 
 Double click `run`, or run `bash run` or `./run` in the command line in the root directory.
+
+## Quality Assurance
+Every new release is run with with [leaks](https://developer.apple.com/library/archive/documentation/Performance/Conceptual/ManagingMemory/Articles/FindingLeaks.html) (the apple version of valgrind) for memory leaks, and I compile with -Wall & -Wextra for getting as much standardization as possible, and -Wall to make sure all errors are dealt with before the files can compile.
+
+If there are any other/better ways to check for quality assurance, please let me know!
+Also, I know the python section could be more 
+
+✨𝒫𝓎𝓉𝒽ℴ𝓃𝒾𝒸✨, but I just started seriously learning python, so I'm sure there are many things I could improve on!
 
 ## Future Features
 
