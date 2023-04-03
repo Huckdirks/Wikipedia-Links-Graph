@@ -14,13 +14,13 @@ int menu::init_menu() {
 
     // Initialize python script
     // Change directory to the python script
-    const fs::path main_dir{fs::current_path()};
-    fs::current_path(main_dir.parent_path() / "Python");
+    const fs::path MAIN_DIR{fs::current_path()};
+    fs::current_path(MAIN_DIR.parent_path() / "Python");
     if (system("./init_python.sh")) {  // Returns 0 if successful ¯\_(ツ)_/¯
         std::cout << "\nError initializing python script\n";
         return 0;
     }
-    fs::current_path(main_dir);
+    fs::current_path(MAIN_DIR);
 
     if (load()) {
         // Keep the menu running as long as the user doesn't quit
@@ -35,9 +35,9 @@ int menu::init_menu() {
 // Menu interface
 int menu::interface() {
     std::cout << "\n\n\nWelcome to the Wiki Graph\n\nPress 1 to find the info on a single page\n2 to find the most linked to pages\n3 to find all the pages linking to a page\n0 or Q to quit\n";
-    const int choice{selector()};
+    const int CHOICE{selector()};
 
-    switch (choice) {
+    switch (CHOICE) {
         case 1:
             display_page();
             break;

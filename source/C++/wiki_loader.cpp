@@ -5,12 +5,11 @@
 
 // Load all articles into the graph
 int wiki_loader::load() {
-    // system("clear");
-    auto start{std::chrono::system_clock::now()};
+    const auto START_TIME{std::chrono::system_clock::now()};
 
     // Change directory to Articles-p
-    const fs::path main_dir{fs::current_path()};
-    fs::current_path(main_dir.parent_path().parent_path() / "data/load/");
+    const fs::path MAIN_DIR{fs::current_path()};
+    fs::current_path(MAIN_DIR.parent_path().parent_path() / "data/load/");
     if (!fs::exists("Articles-p")) {
         std::cout << "\n\nNo directory to load from found\n\n";
         return 0;
@@ -19,9 +18,9 @@ int wiki_loader::load() {
 
     // Get all file names ending in .ndjson in directory
     std::vector<std::string> file_names;
-    for (const auto &file : fs::directory_iterator(main_dir.parent_path().parent_path() / "data/load/Articles-p")) {
-        if (file.path().extension() == ".ndjson" && fs::file_size(file) != 0)
-            file_names.push_back(file.path().filename());
+    for (const auto &FILE : fs::directory_iterator(MAIN_DIR.parent_path().parent_path() / "data/load/Articles-p")) {
+        if (FILE.path().extension() == ".ndjson" && fs::file_size(FILE) != 0)
+            file_names.push_back(FILE.path().filename());
     }
 
     if (file_names.empty()) {
@@ -29,30 +28,27 @@ int wiki_loader::load() {
         return 0;
     }
 
-    std::set<std::string> titles;
+    std::set<std::string> titles;   // Set of titles to make sure all titles are sorted before adding to graph
     std::cout << "\nLoading " << file_names.size() << " files...\n";
-
     // Progress bar
     indicators::BlockProgressBar title_bar{indicators::option::BarWidth{80}, indicators::option::Start{"["}, indicators::option::End{"]"}, indicators::option::ShowElapsedTime{true}, indicators::option::ShowRemainingTime{true}, indicators::option::ForegroundColor{indicators::Color::red}, indicators::option::FontStyles{std::vector<indicators::FontStyle>{indicators::FontStyle::bold}}};
     int progress{};
-    // Hide cursor
-    indicators::show_console_cursor(false);
-    auto set_load_start{std::chrono::system_clock::now()};
+    indicators::show_console_cursor(false); // Hide cursor
 
     // Load in each file's titles to a set to make it ordered
-    for (const auto &file : file_names) {
-        const double percent{100 * ((double)progress / (file_names.size() - 1))};
-        if (title_bar.is_completed() || percent >= 100) {
+    for (const auto &FILE : file_names) {
+        const double PERCENT{100 * ((double)progress / (file_names.size() - 1))};
+        if (title_bar.is_completed() || PERCENT >= 100) {
             title_bar.set_option(indicators::option::ShowRemainingTime{false});
             title_bar.set_option(indicators::option::ForegroundColor{indicators::Color::green});
         }
-        title_bar.set_progress(percent);
-        file_in.open(file);
+        title_bar.set_progress(PERCENT);
+        file_in.open(FILE);
         file_in.peek();
 
         // Check if file is empty or if not able to open
         if (!file_in || file_in.eof())
-            std::cout << "\n\nNo Loading " << file << "\n\n";
+            std::cout << "\n\nNo Loading " << FILE << "\n\n";
         else {
             while (!file_in.eof())
                 load_title(titles);
@@ -70,25 +66,22 @@ int wiki_loader::load() {
     }
 
     // Show cursor
-    indicators::show_console_cursor(true);
     std::cout << termcolor::reset << "\n\nLoading " << titles.size() << " titles into the graph...\n";
     indicators::BlockProgressBar graph_titles_bar{indicators::option::BarWidth{80}, indicators::option::Start{"["}, indicators::option::End{"]"}, indicators::option::ShowElapsedTime{true}, indicators::option::ShowRemainingTime{true}, indicators::option::ForegroundColor{indicators::Color::red}, indicators::option::FontStyles{std::vector<indicators::FontStyle>{indicators::FontStyle::bold}}};
     progress = 0;
-    indicators::show_console_cursor(false);
-    auto title_load_start{std::chrono::system_clock::now()};
 
     // Load in each title to the graph
-    for (const auto &title : titles) {
-        const double percent{100 * ((double)progress / (titles.size() - 1))};
-        if (progress % 10000 == 0 || percent >= 100) {  // Only update progress bar every 1000 titles to save time
-            if (graph_titles_bar.is_completed() || percent >= 100) {
+    for (const auto &TITLE : titles) {
+        const double PERCENT{100 * ((double)progress / (titles.size() - 1))};
+        if (progress % 10000 == 0 || PERCENT >= 100) {  // Only update progress bar every 1000 titles to save time
+            if (graph_titles_bar.is_completed() || PERCENT >= 100) {
                 graph_titles_bar.set_option(indicators::option::ShowRemainingTime{false});
                 graph_titles_bar.set_option(indicators::option::ForegroundColor{indicators::Color::green});
             }
-            graph_titles_bar.set_progress(percent);
+            graph_titles_bar.set_progress(PERCENT);
         }
         graph_vertex page;
-        page.title = title;
+        page.title = TITLE;
         graph->push_back(page);
         ++progress;
     }
@@ -99,21 +92,18 @@ int wiki_loader::load() {
         return 0;
     }
 
-    indicators::show_console_cursor(true);
     std::cout << termcolor::reset << "\n\nLoading links into graph (Adjacent Nodes)...\n";
-
     indicators::BlockProgressBar links_bar{indicators::option::BarWidth{80}, indicators::option::Start{"["}, indicators::option::End{"]"}, indicators::option::ShowElapsedTime{true}, indicators::option::ShowRemainingTime{true}, indicators::option::ForegroundColor{indicators::Color::red}, indicators::option::FontStyles{std::vector<indicators::FontStyle>{indicators::FontStyle::bold}}};
     progress = 0;
-    indicators::show_console_cursor(false);
-    auto link_load_start{std::chrono::system_clock::now()};
+
     // Load in each file's links
-    for (const auto &file : file_names) {
-        file_in.open(file);
+    for (const auto &FILE : file_names) {
+        file_in.open(FILE);
         file_in.peek();
 
         // Check if file is empty or if not able to open
         if (!file_in || file_in.eof())
-            std::cout << "\n\nNo Loading " << file << "\n\n";
+            std::cout << "\n\nNo Loading " << FILE << "\n\n";
         else {
             while (!file_in.eof())
                 load_links(links_bar, progress);
@@ -124,9 +114,9 @@ int wiki_loader::load() {
     }
 
     indicators::show_console_cursor(true);
-    auto file_load_time{std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - start).count()};
+    auto file_load_time{std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - START_TIME).count()};
     std::cout << termcolor::reset << "\n\n" << graph->size() << " articles loaded from file in " << file_load_time << " seconds, or " << (float)file_load_time / 60 << " minutes!!!\n\n";
-    fs::current_path(main_dir);
+    fs::current_path(MAIN_DIR);
     return graph->size();
 }
 
@@ -138,22 +128,22 @@ inline void wiki_loader::load_title(std::set<std::string> &titles) {
     file_in.peek();
     const json JSON = json::parse(JSON_line);  // { } Initialization breaks this ¯\_(ツ)_/¯
 
-    std::string title{JSON[0].get<std::string>()};
-    titles.insert(title);
+    const std::string TITLE{JSON[0].get<std::string>()};
+    titles.insert(TITLE);
     return;
 }
 
 
 // Load in a link to the graph
 inline void wiki_loader::load_links(indicators::BlockProgressBar &bar, int &progress) {
-    const double percent{100 * ((double)progress / (graph->size() - 1))};
-    if (progress % 1000 == 0 || percent >= 100) {  // Only update progress bar every 1000 titles to save time
+    const double PERCENT{100 * ((double)progress / (graph->size() - 1))};
+    if (progress % 1000 == 0 || PERCENT >= 100) {  // Only update progress bar every 1000 titles to save time
         if (!bar.is_completed()) {
-            if (percent >= 100) {
+            if (PERCENT >= 100) {
                 bar.set_option(indicators::option::ShowRemainingTime{false});
                 bar.set_option(indicators::option::ForegroundColor{indicators::Color::green});
             }
-            bar.set_progress(percent);
+            bar.set_progress(PERCENT);
         }
     }
     std::string JSON_line;
@@ -161,12 +151,12 @@ inline void wiki_loader::load_links(indicators::BlockProgressBar &bar, int &prog
     file_in.peek();
     const json JSON = json::parse(JSON_line);  // { } Initialization breaks this ¯\_(ツ)_/¯
 
-    std::string title{JSON[0].get<std::string>()};
-    graph_vertex *page{graph->find(title)};
+    const std::string TITLE{JSON[0].get<std::string>()};
+    graph_vertex *page{graph->find(TITLE)};
 
     if (page != nullptr) {
-        for (const auto &link : JSON[1]) {
-            graph_vertex *adjacent_page{graph->find(link.get<std::string>())};
+        for (const auto &LINK : JSON[1]) {
+            graph_vertex *adjacent_page{graph->find(LINK.get<std::string>())};
             if (adjacent_page != nullptr) {
                 page->adjacent.push_back(adjacent_page);
                 ++adjacent_page->links_to;

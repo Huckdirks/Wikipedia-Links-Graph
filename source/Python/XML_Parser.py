@@ -43,28 +43,29 @@ class WikiXmlHandler(xml.sax.handler.ContentHandler):
 
 
 # Parse the wiki pages
-def process_wiki(title, text):
-    wiki = mwparserfromhell.parse(text)
-    links = [x.title.strip_code().strip() for x in wiki.filter_wikilinks()]
-    return title, links
+def process_wiki(TITLE, TEXT):
+    WIKI = mwparserfromhell.parse(TEXT)
+    LINKS = [x.title.strip_code().strip() for x in WIKI.filter_wikilinks()]
+    return TITLE, LINKS
 
 
 # Load data from XML files into the parser
-def find_articles(file, save=True):
+# I would declare file as const but since it gets deleted I made it normal (even tho file is technically a const string, not the file itself, but this is python so I'll just use the loose typing)
+def find_articles(file):
     # Set the directory to save the files to & filename
-    original_dir = os.path.dirname(__file__)
-    parent_dir = os.path.dirname(original_dir)
-    main_dir = os.path.dirname(parent_dir)
-    file_name = file.split('-')[-1].split('.')[-2]
-    file_name = f"{file_name}.ndjson"
-    out_dir = main_dir + "/data/load/Articles-p/" + file_name
+    ORIGINAL_DIR = os.path.dirname(__file__)
+    PARENT_DIR = os.path.dirname(ORIGINAL_DIR)
+    MAIN_DIR = os.path.dirname(PARENT_DIR)
+    FILE_NAME = file.split('-')[-1].split('.')[-2]
+    FILE_NAME = f"{FILE_NAME}.ndjson"
+    OUT_DIR = MAIN_DIR + "/data/load/Articles-p/" + FILE_NAME
 
     # If the file already exists, don't parse it again
-    if os.path.isfile(out_dir):
+    if os.path.isfile(OUT_DIR):
         return
 
-    dumps_dir = main_dir + "/data/load/Wiki_Dumps"
-    os.chdir(dumps_dir)
+    DUMPS_DIR = MAIN_DIR + "/data/load/Wiki_Dumps"
+    os.chdir(DUMPS_DIR)
 
     # Object for handling xml
     handler = WikiXmlHandler()
@@ -80,17 +81,16 @@ def find_articles(file, save=True):
         except StopIteration:
             break
 
-    if save:
-        with open(out_dir, 'w') as fout:
-            # Write as json
-            for page in handler._pages:
-                fout.write(json.dumps(page) + '\n')
+    with open(OUT_DIR, 'w') as fout:
+        # Write as json
+        for PAGE in handler._pages:
+            fout.write(json.dumps(PAGE) + '\n')
 
     # Delete the file after it's been parsed
     # ONLY KEEP THIS LINE IF YOU WANT TO DELETE THE FILES AFTER THEY'RE PARSED!!! IT'S A BITCH TO REDOWNLOAD THEM
     os.remove(file)
 
-    os.chdir(original_dir)
+    os.chdir(ORIGINAL_DIR)
     # Memory management
     del handler
     del parser

@@ -4,52 +4,52 @@ import requests
 import tqdm
 
 
-def download_wiki_dumps(files_to_download, download_num, DUMP_URL):
+def download_wiki_dumps(FILES_TO_DOWNLOAD, DOWNLOAD_NUM, DUMP_URL):
     # Check if directory to store files exists & create it if it doesn't
-    original_dir = os.path.dirname(__file__)
-    parent_dir = os.path.dirname(original_dir)
-    main_dir = os.path.dirname(parent_dir)
-    check_dir = main_dir + "/data/load/Articles-p/"
-    new_dir = main_dir + "/data/load/Wiki_Dumps"
-    if not os.path.isdir(new_dir):
-        os.mkdir(new_dir)
+    ORIGINAL_DIR = os.path.dirname(__file__)
+    PARENT_DIR = os.path.dirname(ORIGINAL_DIR)
+    MAIN_DIR = os.path.dirname(PARENT_DIR)
+    CHECK_DIR = MAIN_DIR + "/data/load/Articles-p/"
+    NEW_DIR = MAIN_DIR + "/data/load/Wiki_Dumps"
+    if not os.path.isdir(NEW_DIR):
+        os.mkdir(NEW_DIR)
     # Change directory to the new one
-    os.chdir(new_dir)
+    os.chdir(NEW_DIR)
 
     already_downloaded = 0
 
     os.system("clear")
-    print(f"Downloading all of Wikipedia in {download_num} segments...\nIf already downloaded, it won't download repeats again\n")
-    for file in tqdm.tqdm(files_to_download):
+    # I need to figure out how to only show how many files are left to download instead of the total number of files
+    print(f"Downloading all of Wikipedia in {DOWNLOAD_NUM} segments...\nIf already downloaded, it won't download repeats again")
+    for FILE in tqdm.tqdm(FILES_TO_DOWNLOAD):
         downloaded = False
         # Break & download the files if one of them is missing
-        if not os.path.isfile(file):
+        if not os.path.isfile(FILE):
             # Check if the file is already downloaded and parsed into JSON
-            if os.path.isdir(check_dir):
-                for check in os.listdir(check_dir):
-                    if file.split('-')[-1].split('.')[-2] in check:
+            if os.path.isdir(CHECK_DIR):
+                for CHECK in os.listdir(CHECK_DIR):
+                    if FILE.split('-')[-1].split('.')[-2] in CHECK:
                         already_downloaded += 1
                         downloaded = True
                         break
             if not downloaded:
-                url = DUMP_URL + file
-                file_name = file
+                URL = DUMP_URL + FILE
 
                 # Download the file in 50 MB chunks
-                download = requests.get(url, stream=True)
-                with open(file_name, "wb") as bz2:
+                download = requests.get(URL, stream=True)
+                with open(FILE, "wb") as bz2:
                     # 50 MB
-                    for chunk in download.iter_content(chunk_size=1024*1024*50):
-                        if chunk:
-                            bz2.write(chunk)
+                    for CHUNK in download.iter_content(chunk_size=1024*1024*50):
+                        if CHUNK:
+                            bz2.write(CHUNK)
         else:
             already_downloaded += 1
 
-    if already_downloaded == len(files_to_download):
+    if already_downloaded == len(FILES_TO_DOWNLOAD):
         os.system("clear")
         print("All files have already been downloaded!")
     else:
         print("\nAll files have been downloaded\n")
 
-    os.chdir(original_dir)
+    os.chdir(ORIGINAL_DIR)
     return
