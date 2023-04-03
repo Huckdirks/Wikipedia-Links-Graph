@@ -21,8 +21,8 @@ int graph_vertex::display(const bool DISPLAY_LINKS) const {
     std::cout << "\nTitle: " << title << "\nTimes linked: " << links_to << '\n';
     if (DISPLAY_LINKS) {
         std::cout << "Links:\n";
-        for (const auto &I : adjacent)
-            std::cout << '\t' << I->title << '\n';
+        for (const auto &LINK : adjacent)
+            std::cout << '\t' << LINK->title << '\n';
     }
     return 1;
 }
