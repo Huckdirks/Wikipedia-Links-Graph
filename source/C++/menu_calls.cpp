@@ -34,28 +34,31 @@ int menu_calls::display_page() {
 // Display top n
 int menu_calls::display_top_n() {
     std::string num;
-    bool flag{};
+    bool is_digit{};
     bool save{};
     bool csv{};
+    int n{};
 
     system("clear");
     std::cout << "\nHow many pages would you like to display/save?\n";
 
-    // Check for valid input
+    // Check if input is a number
     do {
-        flag = true;
+        is_digit = true;
         std::cin >> num;
         std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         for (const char &C : num) {
             if (!isdigit(C)) {
                 std::cout << "\nPlease enter a number\nTry again\n";
-                flag = false;
+                is_digit = false;
                 break;
             }
         }
 
-    } while (!flag);
-    int n{std::stoi(num)};
+    } while (!is_digit);
+    n = std::stoi(num);
+    if (n > graph.size())   // Make sure it doesn't go out of bounds
+        n = graph.size();
 
     system("clear");
     std::cout << "Would you like to display or save the top " << n << " linked to pages to a file?\nPress D for display and S for save\n";
