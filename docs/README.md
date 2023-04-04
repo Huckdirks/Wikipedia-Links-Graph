@@ -15,7 +15,10 @@
 ## Introduction
 
 (Insert intro stuff here)
+
 Also add shoutout to [Will Koehrsen](https://github.com/WillKoehrsen/wikipedia-data-science/blob/master/notebooks/Downloading%20and%20Parsing%20Wikipedia%20Articles.ipynb) for basically the whole python section
+
+Also add how as of today (4/3/23) I found out that wikipedia already had the answers I guess [Most Linked to Pages](https://en.wikipedia.org/wiki/Special:MostLinkedPages) & [Pages Linking to a Page](https://en.wikipedia.org/wiki/Special:WhatLinksHere), but I SWEAR IT DIDN'T WHEN I STARTED THIS PROJECT!!!
 
 ## Uses
 

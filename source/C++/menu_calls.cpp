@@ -19,7 +19,7 @@ int menu_calls::display_page() {
     const auto PAGE = graph.find(title);
     if (PAGE == nullptr) {
         std::cout << "\nPage not found\n\n";
-        return 0;
+        return 1;
     }
 
     std::cout << "\nDo you want to also display " << PAGE->title << "'s links to pages?\n";
@@ -27,17 +27,17 @@ int menu_calls::display_page() {
     system("clear");
     PAGE->display(response);
 
-    return 1;
+    return 0;
 }
 
 
 // Display top n
 int menu_calls::display_top_n() {
     std::string num;
+    unsigned int n{};
     bool is_digit{};
     bool save{};
     bool csv{};
-    int n{};
 
     system("clear");
     std::cout << "\nHow many pages would you like to display/save?\n";
@@ -108,7 +108,7 @@ int menu_calls::display_top_n() {
                 file_out << PAGE->title << ',' << PAGE->links_to << '\n';
         } else {
             std::string file_name{"top_" + std::to_string(n) + "_linked_articles.txt"};
-            int place{1};
+            unsigned int place{1};
             file_out.open(file_name);
             for (const auto &PAGE : TOP_N_LIST) {
                 file_out << place << ") " << PAGE->title << ": " << PAGE->links_to << '\n';
@@ -121,7 +121,7 @@ int menu_calls::display_top_n() {
     }
 
     std::cout << "\nTop " << n << " most linked to pages found in " << (float)END_TIME / 1000 << " seconds, or " << ((double)(END_TIME / 1000) / 60) << " minutes\n\n";
-    return 1;
+    return 0;
 }
 
 
@@ -139,7 +139,7 @@ int menu_calls::display_linked_to() {
     if (graph.find(title) == nullptr) {
         system("clear");
         std::cout << "Page not found\n\n";
-        return 0;
+        return 1;
     }
 
     system("clear");
@@ -162,7 +162,7 @@ int menu_calls::display_linked_to() {
     const auto LINKED_TO{graph.linked_to(title)};
     if (LINKED_TO.empty()) {
         std::cout << "\nNo pages link to " << title << ", or " << title << " isn't found\n";
-        return 0;
+        return 1;
     }
 
     if (!save) {
@@ -193,7 +193,7 @@ int menu_calls::display_linked_to() {
                 file_out << PAGE->title << ',';
         } else {
             std::string file_name{"pages_linking_to_" + save_title + ".txt"};
-            int place{1};
+            unsigned int place{1};
             file_out.open(file_name);
             file_out << "Pages that link to " << title << ":\n";
             for (const auto &PAGE : LINKED_TO) {
@@ -206,7 +206,7 @@ int menu_calls::display_linked_to() {
         fs::current_path(MAIN_DIR);
         std::cout << "\nPages that link to " << title << " saved\n";
     }
-    return 1;
+    return 0;
 }
 
 

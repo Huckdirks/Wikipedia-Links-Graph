@@ -18,16 +18,17 @@ int menu::init_menu() {
     fs::current_path(MAIN_DIR.parent_path() / "Python");
     if (system("./init_python.sh")) {  // Returns 0 if successful ¯\_(ツ)_/¯
         std::cout << "\nError initializing python script\n";
-        return 0;
+        return 1;
     }
     fs::current_path(MAIN_DIR);
 
-    if (load()) {
-        // Keep the menu running as long as the user doesn't quit
-        do flag = interface();
-        while (!flag);
+    if (!load()){
+        std::cout << "\nError loading graph\n";
         return 1;
     }
+    // Keep the menu running as long as the user doesn't quit
+    do flag = interface();
+    while (!flag);
     return 0;
 }
 
@@ -38,6 +39,11 @@ int menu::interface() {
     const int CHOICE{selector()};
 
     switch (CHOICE) {
+        case 0:
+            system("clear");
+            std::cout << "\nGoodbye!!!\n";
+            return 1;
+
         case 1:
             display_page();
             break;
@@ -49,11 +55,6 @@ int menu::interface() {
         case 3:
             display_linked_to();
             break;
-
-        case 0:
-            system("clear");
-            std::cout << "\nGoodbye!!!\n";
-            return 1;
 
         default:
             system("clear");
@@ -67,7 +68,7 @@ int menu::interface() {
 // Menu selector
 int menu::selector() {
     std::string num;
-    int n{};
+    unsigned int n{};
     bool flag{};
 
     do {
@@ -88,7 +89,7 @@ int menu::selector() {
 
         if (flag) {
             n = std::stoi(num);
-            if (n < 0 || n > 3) {
+            if (n > 3) {
                 std::cout << "\nPlease enter a number between 0 and 2\nTry again\n";
                 flag = false;
             }

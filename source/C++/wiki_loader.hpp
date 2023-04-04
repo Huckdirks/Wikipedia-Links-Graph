@@ -30,7 +30,7 @@ class wiki_loader {
     std::ifstream file_in;
     wiki_graph *graph;
     void load_title(std::set<std::string> &titles);
-    void load_links(indicators::BlockProgressBar &bar, int &progress);
+    void load_links(indicators::BlockProgressBar &bar, unsigned int &progress);
 };
 
 #endif

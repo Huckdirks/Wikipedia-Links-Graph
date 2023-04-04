@@ -16,7 +16,7 @@ void graph_vertex::operator=(const graph_vertex &VERTEX) {
 // Display the article title, the number of times it is linked to, and the titles of the articles it links to if display_links is true
 int graph_vertex::display(const bool DISPLAY_LINKS) const {
     if (title.empty())
-        return 0;
+        return 1;
 
     std::cout << "\nTitle: " << title << "\nTimes linked: " << links_to << '\n';
     if (DISPLAY_LINKS) {
@@ -24,7 +24,7 @@ int graph_vertex::display(const bool DISPLAY_LINKS) const {
         for (const auto &LINK : adjacent)
             std::cout << '\t' << LINK->title << '\n';
     }
-    return 1;
+    return 0;
 }
 
 
@@ -75,19 +75,16 @@ int wiki_graph::find_index(const std::string TO_FIND) {
 }
 
 // Get top n most linked to vertices & display (wrapper function)
-std::vector<graph_vertex *> wiki_graph::top_n(const int N) {
+std::vector<graph_vertex *> wiki_graph::top_n(const unsigned int N) {
     if (N <= 0 || vertex_list.empty())
         return {};
 
     if (N == 1) {
         std::vector<graph_vertex *> top_n_list;
-        int best{};
         graph_vertex *best_vertex{nullptr};
-        for (auto &i : vertex_list) {
-            if (i.links_to > best) {
-                best = i.links_to;
-                best_vertex = &i;
-            }
+        for (auto &vertex: vertex_list) {
+            if (vertex.links_to > best_vertex->links_to)
+                best_vertex = &vertex;
         }
         top_n_list.push_back(best_vertex);
         top_n_list.shrink_to_fit();
@@ -154,7 +151,7 @@ bool wiki_graph::empty() const {
 
 
 // Get size
-int wiki_graph::size() const {
+unsigned int wiki_graph::size() const {
     return vertex_list.size();
 }
 
@@ -170,7 +167,8 @@ void wiki_graph::push_back(const graph_vertex vertex) {
 // Find a vertex in the graph by title
 // Implementation adapted from https://www.geeksforgeeks.org/binary-search/
 graph_vertex *wiki_graph::binary_search(const std::string TO_FIND) {
-    int lo{}, hi = vertex_list.size() - 1, mid{};  // { } initialization doesnt work with hi so imma keep it like this
+    unsigned int lo{}, mid{};
+    long unsigned int hi{vertex_list.size() - 1};   // Needs to be long unsigned int for { } initialization
 
     // This below check covers all cases , so need to check for mid=lo-(hi-lo)/2
     while (hi - lo > 1) {
@@ -193,7 +191,8 @@ graph_vertex *wiki_graph::binary_search(const std::string TO_FIND) {
 // Find the index of a vertex in the graph by title
 // Implementation adapted from https://www.geeksforgeeks.org/binary-search/
 int wiki_graph::binary_search_index(const std::string TO_FIND) {
-    int lo{}, hi = vertex_list.size() - 1, mid{};
+    unsigned int lo{}, mid{};
+    long unsigned int hi{vertex_list.size() - 1};   // Needs to be long unsigned int for { } initialization
 
     // This below check covers all cases , so need to check for mid=lo-(hi-lo)/2
     while (hi - lo > 1) {
@@ -215,18 +214,17 @@ int wiki_graph::binary_search_index(const std::string TO_FIND) {
 
 // Find top (n) most linked to pages
 // Parallel
-std::vector<graph_vertex *> wiki_graph::top_n_linked(const int N) {
+std::vector<graph_vertex *> wiki_graph::top_n_linked(const unsigned int N) {
     std::vector<graph_vertex *> top_n;
-    int best{-1};  // Set to -1 so the first vertex will always be the best
 
     // Fill top_n with blank vertex pointers so there's something to compare to
     graph_vertex blank;
-    for (int i{}; i < N; ++i)
+    for (unsigned int i{}; i < N; ++i)
         top_n.push_back(&blank);
 
     // Set up for parallelization
-    int cores = std::thread::hardware_concurrency();
-    int segment_size = vertex_list.size() / cores;
+    unsigned int cores{std::thread::hardware_concurrency()};
+    long unsigned int segment_size{vertex_list.size() / cores};
 
     // // If the segment size is < n, then remove a core to make the segment size bigger
     // There's probably a better way to do this but I'm too lazy to figure it out rn
@@ -240,7 +238,7 @@ std::vector<graph_vertex *> wiki_graph::top_n_linked(const int N) {
     std::unique_ptr<indicators::BlockProgressBar[]> block_bars{std::make_unique<indicators::BlockProgressBar[]>(cores)};
 
     // Set up progress bars
-    for (int i{}; i < cores; ++i)
+    for (unsigned int i{}; i < cores; ++i)
         block_bars[i].set_option(indicators::option::BarWidth{50}), block_bars[i].set_option(indicators::option::PrefixText{"Finding top " + std::to_string(N) + " in section " + std::to_string(i + 1) + '/' + std::to_string(cores) + ' '}), block_bars[i].set_option(indicators::option::Start{"["}), block_bars[i].set_option(indicators::option::End{"]"}), block_bars[i].set_option(indicators::option::ShowElapsedTime{true}), block_bars[i].set_option(indicators::option::ShowRemainingTime{true}), block_bars[i].set_option(indicators::option::ForegroundColor{indicators::Color::red}), block_bars[i].set_option(indicators::option::FontStyles{std::vector<indicators::FontStyle>{indicators::FontStyle::bold}});
 
     // Set up dynamic progress bar for each segment
@@ -248,38 +246,39 @@ std::vector<graph_vertex *> wiki_graph::top_n_linked(const int N) {
     indicators::show_console_cursor(false);
 
     // Split the graph into (cores) segments and run top_n_linked_segment on each segment in parallel
-    for (int i{}; i < cores; ++i) {
+    for (unsigned int i{}; i < cores; ++i) {
         bars.push_back(block_bars[i]);
         futures[i] = std::async(std::launch::async, &wiki_graph::top_n_linked_segment, this, N, i * segment_size, (i + 1) * segment_size, std::ref(bars));
     }
 
     // Wait for all the functions to finish and get the results
-    for (int i{}; i < cores; ++i)
+    for (unsigned int i{}; i < cores; ++i)
         futures[i].wait();
 
     std::cout << '\n';
 
     indicators::BlockProgressBar total_bar{indicators::option::BarWidth{50}, indicators::option::PrefixText{"Searching through section 1/" + std::to_string(cores)}, indicators::option::Start{"["}, indicators::option::End{"]"}, indicators::option::ShowElapsedTime{true}, indicators::option::ShowRemainingTime{true}, indicators::option::ForegroundColor{indicators::Color::red}, indicators::option::FontStyles{std::vector<indicators::FontStyle>{indicators::FontStyle::bold}}};
-    int progress{};
-    int section{1};
+    unsigned int progress{};
+    unsigned int section{1};
 
     // Go through the results of top_n_linked_segment's results and find the top n
-    for (int i{}; i < cores; ++i) {
+    for (unsigned int i{}; i < cores; ++i) {
         const auto SEGMENT{futures[i].get()};
+        double percent{100 * ((double)progress / (N * cores))};
         for (const auto &VERTEX : SEGMENT) {
             // Progress bar
-            const double PERCENT{100 * ((double)progress / (N * cores))};
-            if (fmod(PERCENT, ((float)100 / cores)) == 0) {
+            percent = 100 * ((double)progress / (N * cores));
+            if (fmod(percent, ((float)100 / cores)) == 0) {
                 total_bar.set_option(indicators::option::PrefixText{"Searching through section " + std::to_string(section) + '/' + std::to_string(cores) + ' '});
                 ++section;
             }
-            if (total_bar.is_completed() || PERCENT >= 100) {
+            if (total_bar.is_completed() || percent >= 100) {
                 total_bar.set_option(indicators::option::ForegroundColor{indicators::Color::green});
                 total_bar.set_option(indicators::option::PrefixText{"Found top " + std::to_string(N) + " pages "});
                 total_bar.set_option(indicators::option::ShowRemainingTime{false});
             }
             if (progress % 100 == 0)  // Only update the progress bar every 100 iterations
-                total_bar.set_progress(PERCENT);
+                total_bar.set_progress(percent);
             ++progress;
 
             // Actual work
@@ -288,8 +287,7 @@ std::vector<graph_vertex *> wiki_graph::top_n_linked(const int N) {
                 continue;
 
             // If the current vertex has more links than the current best
-            if (VERTEX->links_to > best) {
-                best = VERTEX->links_to;
+            if (VERTEX->links_to > top_n[0]->links_to) {
                 top_n.pop_back();
                 top_n.insert(top_n.begin(), VERTEX);
                 continue;
@@ -297,7 +295,7 @@ std::vector<graph_vertex *> wiki_graph::top_n_linked(const int N) {
 
             // If the current vertex has less links than the current best go through the top_n vector and find where it should be inserted
             for (int j = N - 1; j > 0; --j) {
-                if (VERTEX->title == top_n[j]->title)
+                if (VERTEX->title == top_n[j]->title)   // If duplicate
                     break;
                 else if (VERTEX->links_to < top_n[j]->links_to) {  // If the current vertex has less links than the current top_n[j], make the previous top_n[j] the current vertex
                     top_n.pop_back();
@@ -317,25 +315,25 @@ std::vector<graph_vertex *> wiki_graph::top_n_linked(const int N) {
 
 
 // Find top (n) most linked to pages in a segment of the graph
-std::vector<graph_vertex *> wiki_graph::top_n_linked_segment(const int N, const int SEGMENT_START, const int SEGMENT_END, indicators::DynamicProgress<indicators::BlockProgressBar> &bars) {
+std::vector<graph_vertex *> wiki_graph::top_n_linked_segment(const unsigned int N, const unsigned int SEGMENT_START, const unsigned int SEGMENT_END, indicators::DynamicProgress<indicators::BlockProgressBar> &bars) {
     std::vector<graph_vertex *> top_n;
-    int best{-1};  // Set to -1 so the first vertex will always be the best
-    const int SEGMENT_SIZE{SEGMENT_END - SEGMENT_START};
-    const int SEGMENT_NUM{(SEGMENT_END / SEGMENT_SIZE) - 1};
+    const unsigned int SEGMENT_SIZE{SEGMENT_END - SEGMENT_START};
+    const unsigned int SEGMENT_NUM{(SEGMENT_END / SEGMENT_SIZE) - 1};
+    double percent{};
 
     // Fill top_n with first n vertex pointers so there's something to compare to
-    for (int i{SEGMENT_START}; i < SEGMENT_START + N; ++i)
+    for (unsigned int i{SEGMENT_START}; i < SEGMENT_START + N; ++i)
         top_n.push_back(&vertex_list[i]);
 
-    for (int i = SEGMENT_START; i < SEGMENT_END; ++i) {
+    for (unsigned int i = SEGMENT_START; i < SEGMENT_END; ++i) {
         // Progress bar
-        const double PERCENT{100 * ((double)(i - SEGMENT_START) / (SEGMENT_SIZE - 1))};
-        if ((i - SEGMENT_START) % (SEGMENT_SIZE / 1000) == 0 || PERCENT >= 100) {  // Only update the progress bar every 0.1% of the segment
-            if (bars[SEGMENT_NUM].is_completed() || PERCENT >= 100) {
+        percent = 100 * ((double)(i - SEGMENT_START) / (SEGMENT_SIZE - 1));
+        if ((i - SEGMENT_START) % (SEGMENT_SIZE / 1000) == 0 || percent >= 100) {  // Only update the progress bar every 0.1% of the segment
+            if (bars[SEGMENT_NUM].is_completed() || percent >= 100) {
                 bars[SEGMENT_NUM].set_option(indicators::option::ShowRemainingTime{false});
                 bars[SEGMENT_NUM].set_option(indicators::option::ForegroundColor{indicators::Color::green});
             }
-            bars[SEGMENT_NUM].set_progress(PERCENT);
+            bars[SEGMENT_NUM].set_progress(percent);
         }
 
         // Actual work
@@ -344,8 +342,7 @@ std::vector<graph_vertex *> wiki_graph::top_n_linked_segment(const int N, const 
             continue;
 
         // If the current vertex has more links than the current best
-        if (vertex_list[i].links_to > best) {
-            best = vertex_list[i].links_to;
+        if (vertex_list[i].links_to > top_n[0]->links_to) {
             top_n.pop_back();
             top_n.insert(top_n.begin(), &vertex_list[i]);
             continue;
@@ -376,15 +373,15 @@ std::vector<graph_vertex *> wiki_graph::top_n_linked_segment(const int N, const 
 std::vector<graph_vertex *> wiki_graph::all_linked_to(const std::string linked_to) {
     std::vector<graph_vertex *> linked_to_list;
     // Set up for parallelization
-    const int CORES = std::thread::hardware_concurrency();
-    const int SEGMENT_SIZE = vertex_list.size() / CORES;
+    const unsigned int CORES{std::thread::hardware_concurrency()};
+    const long unsigned int SEGMENT_SIZE{vertex_list.size() / CORES};
 
     // Make an array the size of the # of cores the computer has of futures to hold the results of each thread
     std::unique_ptr<std::future<std::vector<graph_vertex *>>[]> futures{std::make_unique<std::future<std::vector<graph_vertex *>>[]>(CORES)};
     std::unique_ptr<indicators::BlockProgressBar[]> block_bars{std::make_unique<indicators::BlockProgressBar[]>(CORES)};
 
     // Set up progress bars
-    for (int i{}; i < CORES; ++i)
+    for (unsigned int i{}; i < CORES; ++i)
         block_bars[i].set_option(indicators::option::BarWidth{50}), block_bars[i].set_option(indicators::option::PrefixText{"Finding linked to pages in section " + std::to_string(i + 1) + '/' + std::to_string(CORES) + ' '}), block_bars[i].set_option(indicators::option::Start{"["}), block_bars[i].set_option(indicators::option::End{"]"}), block_bars[i].set_option(indicators::option::ShowElapsedTime{true}), block_bars[i].set_option(indicators::option::ShowRemainingTime{true}), block_bars[i].set_option(indicators::option::ForegroundColor{indicators::Color::red}), block_bars[i].set_option(indicators::option::FontStyles{std::vector<indicators::FontStyle>{indicators::FontStyle::bold}});
 
     // Set up dynamic progress bar for each segment
@@ -392,21 +389,21 @@ std::vector<graph_vertex *> wiki_graph::all_linked_to(const std::string linked_t
     indicators::show_console_cursor(false);
 
     // Split the graph into (CORES) segments and run top_n_linked_segment on each segment in parallel
-    for (int i{}; i < CORES; ++i) {
+    for (unsigned int i{}; i < CORES; ++i) {
         bars.push_back(block_bars[i]);
         futures[i] = std::async(std::launch::async, &wiki_graph::all_linked_to_segment, this, linked_to, i * SEGMENT_SIZE, (i + 1) * SEGMENT_SIZE, std::ref(bars));
     }
 
     // Wait for all the functions to finish and get the results
-    for (int i{}; i < CORES; ++i)
+    for (unsigned int i{}; i < CORES; ++i)
         futures[i].wait();
 
     std::cout << '\n';
 
     // Combine the results of each thread into one vector
-    for (int i{}; i < CORES; ++i) {
+    for (unsigned int i{}; i < CORES; ++i) {
         std::vector<graph_vertex *> temp = futures[i].get();
-        std::move(temp.begin(), temp.end(), std::back_inserter(linked_to_list));    // moving is faster than copying
+        std::move(temp.begin(), temp.end(), std::back_inserter(linked_to_list));    // moving is faster than copying I guess
     }
 
     // Sort the vector by title to make it fancy
@@ -420,20 +417,21 @@ std::vector<graph_vertex *> wiki_graph::all_linked_to(const std::string linked_t
 
 
 // Find all the pages linking to a given page in a segment of the graph
-std::vector<graph_vertex *> wiki_graph::all_linked_to_segment(const std::string linked_to, const int SEGMENT_START, const int SEGMENT_END, indicators::DynamicProgress<indicators::BlockProgressBar> &bars) {
+std::vector<graph_vertex *> wiki_graph::all_linked_to_segment(const std::string linked_to, const unsigned int SEGMENT_START, const unsigned int SEGMENT_END, indicators::DynamicProgress<indicators::BlockProgressBar> &bars) {
     std::vector<graph_vertex *> linked_to_list;
-    const int SEGMENT_SIZE{SEGMENT_END - SEGMENT_START};
-    const int SEGMENT_NUM{(SEGMENT_END / SEGMENT_SIZE) - 1};
+    const unsigned int SEGMENT_SIZE{SEGMENT_END - SEGMENT_START};
+    const unsigned int SEGMENT_NUM{(SEGMENT_END / SEGMENT_SIZE) - 1};
+    double percent{};
 
-    for (int i = SEGMENT_START; i < SEGMENT_END; ++i) {
+    for (unsigned int i = SEGMENT_START; i < SEGMENT_END; ++i) {
         // Progress bar
-        const double PERCENT{100 * ((double)(i - SEGMENT_START) / (SEGMENT_SIZE - 1))};
-        if ((i - SEGMENT_START) % (SEGMENT_SIZE / 1000) == 0 || PERCENT >= 100) {  // Only update the progress bar every 0.1% of the segment
-            if (bars[SEGMENT_NUM].is_completed() || PERCENT >= 100) {
+        percent = 100 * ((double)(i - SEGMENT_START) / (SEGMENT_SIZE - 1));
+        if ((i - SEGMENT_START) % (SEGMENT_SIZE / 1000) == 0 || percent >= 100) {  // Only update the progress bar every 0.1% of the segment
+            if (bars[SEGMENT_NUM].is_completed() || percent >= 100) {
                 bars[SEGMENT_NUM].set_option(indicators::option::ShowRemainingTime{false});
                 bars[SEGMENT_NUM].set_option(indicators::option::ForegroundColor{indicators::Color::green});
             }
-            bars[SEGMENT_NUM].set_progress(PERCENT);
+            bars[SEGMENT_NUM].set_progress(percent);
         }
 
         // Actual work
