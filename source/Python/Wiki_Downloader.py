@@ -4,7 +4,7 @@ import requests
 import tqdm
 
 
-def download_wiki_dumps(FILES_TO_DOWNLOAD, DOWNLOAD_NUM, DUMP_URL):
+def download_wiki_dumps(FILES_TO_DOWNLOAD, DUMP_URL):
     # Check if directory to store files exists & create it if it doesn't
     ORIGINAL_DIR = os.path.dirname(__file__)
     PARENT_DIR = os.path.dirname(ORIGINAL_DIR)
@@ -16,20 +16,16 @@ def download_wiki_dumps(FILES_TO_DOWNLOAD, DOWNLOAD_NUM, DUMP_URL):
     # Change directory to the new one
     os.chdir(NEW_DIR)
 
-    already_downloaded = 0
-
     os.system("clear")
-    # I need to figure out how to only show how many files are left to download instead of the total number of files
-    print(f"Downloading all of Wikipedia in {DOWNLOAD_NUM} segments...\nIf already downloaded, it won't download repeats again")
+    print(f"Downloading all of Wikipedia in {len(FILES_TO_DOWNLOAD)} segments...")
     for FILE in tqdm.tqdm(FILES_TO_DOWNLOAD):
         downloaded = False
-        # Break & download the files if one of them is missing
+        # Download a file if it's missing
         if not os.path.isfile(FILE):
             # Check if the file is already downloaded and parsed into JSON
             if os.path.isdir(CHECK_DIR):
                 for CHECK in os.listdir(CHECK_DIR):
                     if FILE.split('-')[-1].split('.')[-2] in CHECK:
-                        already_downloaded += 1
                         downloaded = True
                         break
             if not downloaded:
@@ -42,10 +38,8 @@ def download_wiki_dumps(FILES_TO_DOWNLOAD, DOWNLOAD_NUM, DUMP_URL):
                     for CHUNK in download.iter_content(chunk_size=1024*1024*50):
                         if CHUNK:
                             bz2.write(CHUNK)
-        else:
-            already_downloaded += 1
 
-    if already_downloaded == len(FILES_TO_DOWNLOAD):
+    if len(FILES_TO_DOWNLOAD) == 0:
         os.system("clear")
         print("All files have already been downloaded!")
     else:

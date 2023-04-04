@@ -37,21 +37,20 @@ if __name__ == "__main__":
     if not os.path.isdir(MAIN_DIR + "/data/load/"):
         os.mkdir(MAIN_DIR + "/data/load/")
 
-    downloaded_num = 0
-    # Check if all the files in Articles-p already exist, and exit if they do
+    # Check if all a file in Articles-p already exists, and remove from files_to_download if they do
     if os.path.isdir(CHECK_DIR):
-        for FILE in files_to_download:
+        for FILE in files_to_download[:]:
             FILE_NAME = FILE.split('-')[-1].split('.')[-2]
             CHECK_FILE_LIST = os.listdir(CHECK_DIR)
             for CHECK in CHECK_FILE_LIST:
                 if FILE_NAME in CHECK:
-                    downloaded_num += 1
+                    files_to_download.remove(FILE)
 
-    if downloaded_num == download_num:
+    if len(files_to_download) == 0:
         print("All files have already been downloaded & parsed!\n")
         exit()
     else:
         START_TIME = timer()
-        Wiki_Downloader.download_wiki_dumps(files_to_download, download_num, DUMP_URL)
+        Wiki_Downloader.download_wiki_dumps(files_to_download, DUMP_URL)
         Multiprocessor.find_article_links(files_to_download)
         print(f"\n{timer() - START_TIME} seconds to download Wikipedia & parse it.")
