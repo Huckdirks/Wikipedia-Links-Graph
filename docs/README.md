@@ -49,7 +49,7 @@ Double click `compile`, or run `bash compile` or `./compile` in the command line
 Double click `run`, or run `bash run` or `./run` in the command line in the root directory.
 
 ## Quality Assurance
-Every new release is run with with [leaks](https://developer.apple.com/library/archive/documentation/Performance/Conceptual/ManagingMemory/Articles/FindingLeaks.html) (the apple version of valgrind) to insure there are no memory leaks, and I compile with `-Wall` & `-Wextra` for getting as much standardization as possible, and `-Werror` to make sure all errors are dealt with before the files can compile.
+Every new release is run with with [leaks](https://developer.apple.com/library/archive/documentation/Performance/Conceptual/ManagingMemory/Articles/FindingLeaks.html) (the apple version of valgrind) to insure there are no memory leaks, and the program is compiled with `-Wall` & `-Wextra` for getting as much standardization as possible, and `-Werror` to make sure all errors are dealt with before the files can compile. All variables, functions, classes, modules, & files are written in [snake_case](https://en.wikipedia.org/wiki/Snake_case) to make sure everything is consistent, and all const variables are written in ALL-CAPS.
 
 If there are any other/better ways to check for quality assurance, please let me know!
 Also, I know the python section could be more 

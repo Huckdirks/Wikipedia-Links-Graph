@@ -15,7 +15,7 @@ int menu::init_menu() {
     // Initialize python script
     // Change directory to the python script
     const fs::path MAIN_DIR{fs::current_path()};
-    fs::current_path(MAIN_DIR.parent_path() / "Python");
+    fs::current_path(MAIN_DIR.parent_path() / "python");
     if (system("./init_python.sh")) {  // Returns 0 if successful ¯\_(ツ)_/¯
         std::cout << "\nError initializing python script\n";
         return 1;
