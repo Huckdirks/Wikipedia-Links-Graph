@@ -8,7 +8,7 @@ import gc
 
 
 # Content handler for Wiki XML data using SAX
-# Lmao I just copied this from https://github.com/WillKoehrsen/wikipedia-data-science/blob/master/notebooks/Downloading%20and%20Parsing%20Wikipedia%20Articles.ipynb and barely modified it
+# Lmao I just copied this from https://github.com/WillKoehrsen/wikipedia-data-science/blob/master/notebooks/Downloading%20and%20Parsing%20Wikipedia%20Articles.ipynb and barely modified it, but I cite it in the readme
 class WikiXmlHandler(xml.sax.handler.ContentHandler):
     def __init__(self):
         xml.sax.handler.ContentHandler.__init__(self)
