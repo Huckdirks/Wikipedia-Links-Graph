@@ -4,7 +4,7 @@ import tqdm
 import os
 
 # Other Modules
-import XML_Parser
+import XML_parser
 
 
 def find_article_links(FILES):
@@ -22,7 +22,7 @@ def find_article_links(FILES):
 
     print("\nFinding article links from dumps...")
     # Run partitions in parallel using a threadpool with tqdm progress bar
-    for x in tqdm.tqdm(pool.imap_unordered(XML_Parser.find_articles, FILES), total=len(FILES)):
+    for x in tqdm.tqdm(pool.imap_unordered(XML_parser.find_articles, FILES), total=len(FILES)):
         results.append(x)
 
     pool.close()

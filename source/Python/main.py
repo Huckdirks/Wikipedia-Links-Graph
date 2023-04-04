@@ -4,8 +4,8 @@ import os
 from bs4 import BeautifulSoup
 
 # Other Modules
-import Wiki_Downloader
-import Multiprocessor
+import wiki_downloader
+import multiprocessor
 from timeit import default_timer as timer
 
 
@@ -51,6 +51,6 @@ if __name__ == "__main__":
         exit()
     else:
         START_TIME = timer()
-        Wiki_Downloader.download_wiki_dumps(files_to_download, DUMP_URL)
-        Multiprocessor.find_article_links(files_to_download)
+        wiki_downloader.download_wiki_dumps(files_to_download, DUMP_URL)
+        multiprocessor.find_article_links(files_to_download)
         print(f"\n{timer() - START_TIME} seconds to download Wikipedia & parse it.")

@@ -15,6 +15,7 @@
 ## Introduction
 
 (Insert intro stuff here)
+Also add shoutout to [Will Koehrsen](https://github.com/WillKoehrsen/wikipedia-data-science/blob/master/notebooks/Downloading%20and%20Parsing%20Wikipedia%20Articles.ipynb) for basically the whole python section
 
 ## Uses
 
