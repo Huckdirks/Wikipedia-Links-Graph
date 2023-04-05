@@ -47,7 +47,7 @@ if __name__ == "__main__":
                     files_to_download.remove(FILE)
 
     if len(files_to_download) == 0:
-        print("All files have already been downloaded & parsed!\n")
+        print("All files from Wikipedia have already been downloaded & parsed!\n")
         exit()
     else:
         START_TIME = timer()

@@ -216,6 +216,7 @@ int wiki_graph::binary_search_index(const std::string TO_FIND) {
 // Parallel
 std::vector<graph_vertex *> wiki_graph::top_n_linked(const unsigned int N) {
     std::vector<graph_vertex *> top_n;
+    int best{-1};
 
     // Fill top_n with blank vertex pointers so there's something to compare to
     graph_vertex blank;
@@ -287,7 +288,8 @@ std::vector<graph_vertex *> wiki_graph::top_n_linked(const unsigned int N) {
                 continue;
 
             // If the current vertex has more links than the current best
-            if (VERTEX->links_to > top_n[0]->links_to) {
+            if (VERTEX->links_to > best) {
+                best = VERTEX->links_to;
                 top_n.pop_back();
                 top_n.insert(top_n.begin(), VERTEX);
                 continue;
@@ -319,6 +321,7 @@ std::vector<graph_vertex *> wiki_graph::top_n_linked_segment(const unsigned int 
     std::vector<graph_vertex *> top_n;
     const unsigned int SEGMENT_SIZE{SEGMENT_END - SEGMENT_START};
     const unsigned int SEGMENT_NUM{(SEGMENT_END / SEGMENT_SIZE) - 1};
+    int best{-1};
     double percent{};
 
     // Fill top_n with first n vertex pointers so there's something to compare to
@@ -342,7 +345,8 @@ std::vector<graph_vertex *> wiki_graph::top_n_linked_segment(const unsigned int 
             continue;
 
         // If the current vertex has more links than the current best
-        if (vertex_list[i].links_to > top_n[0]->links_to) {
+        if (vertex_list[i].links_to > best) {
+            best = vertex_list[i].links_to;
             top_n.pop_back();
             top_n.insert(top_n.begin(), &vertex_list[i]);
             continue;
@@ -402,7 +406,7 @@ std::vector<graph_vertex *> wiki_graph::all_linked_to(const std::string linked_t
 
     // Combine the results of each thread into one vector
     for (unsigned int i{}; i < CORES; ++i) {
-        std::vector<graph_vertex *> temp = futures[i].get();
+        std::vector<graph_vertex *> temp{futures[i].get()};
         std::move(temp.begin(), temp.end(), std::back_inserter(linked_to_list));    // moving is faster than copying I guess
     }
 

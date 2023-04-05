@@ -29,7 +29,7 @@ If you want to learn about how it does this, or how to call the functions yourse
 
 ### Install
 
-Double click `dependencies`, or run `bash dependencies` or `./dependencies` in the root directory or to install the python dependencies. All the c++ dependencies are included in `source/C++` already. You must have [pip](https://pip.pypa.io/en/stable/installation/) installed to download the new dependencies. Also, you'll need to install python yourself if you haven't already.
+Double click `dependencies`, or run `bash dependencies` or `./dependencies` in the root directory or to install the python dependencies. All the c++ dependencies are included in `source/c++` already. You must have [pip](https://pip.pypa.io/en/stable/installation/) installed to download the new dependencies. Also, you'll need to install python yourself if you haven't already.
 
 **[List of Dependecies](DEPENDENCIES.md)**
 
@@ -49,16 +49,16 @@ Double click `compile`, or run `bash compile` or `./compile` in the command line
 Double click `run`, or run `bash run` or `./run` in the command line in the root directory.
 
 ## Quality Assurance
-Every new release is run with with [leaks](https://developer.apple.com/library/archive/documentation/Performance/Conceptual/ManagingMemory/Articles/FindingLeaks.html) (the apple version of valgrind) to insure there are no memory leaks, and the program is compiled with `-Wall` & `-Wextra` for getting as much standardization as possible, and `-Werror` to make sure all errors are dealt with before the files can compile. All variables, functions, classes, modules, & files are written in [snake_case](https://en.wikipedia.org/wiki/Snake_case) to make sure everything is consistent, and all const variables are written in ALL-CAPS.
+Every new release is run with with [leaks](https://developer.apple.com/library/archive/documentation/Performance/Conceptual/ManagingMemory/Articles/FindingLeaks.html) (the apple version of valgrind) to insure there are no memory leaks, and the program is compiled with `-Wall` & `-Wextra` for getting as much standardization as possible, and `-Werror` to make sure all errors are dealt with before the files can be compiled. All variable, function, classe, module, & file names are written in [snake_case](https://en.wikipedia.org/wiki/Snake_case) to make sure everything is consistent, and all `const` variables are written in ALL-CAPS. The code is also quite commented, so it should be easy enough to understand what's going on.
 
 If there are any other/better ways to check for quality assurance, please let me know!
-Also, I know the python section could be more 
 
+Also, I know the python section could be more
 ✨𝒫𝓎𝓉𝒽ℴ𝓃𝒾𝒸✨, but I just started seriously learning python, so I'm sure there are many things I could improve on!
 
 ## Future Features
 
-For any news on future features, or if you want to suggest some of your own, check out [FUTURE_FEATURES.md](FUTURE_FEATURES.md)
+For any news on future features, or if you want to suggest some of your own, check out [FUTURE_FEATURES.md](FUTURE_FEATURES.md).
 
 ## Suggestions
 
