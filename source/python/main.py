@@ -46,11 +46,11 @@ if __name__ == "__main__":
                 if FILE_NAME in CHECK:
                     files_to_download.remove(FILE)
 
-    if len(files_to_download) == 0:
-        print("All files from Wikipedia have already been downloaded & parsed!\n")
-        exit()
-    else:
+    if files_to_download:
         START_TIME = timer()
         wiki_downloader.download_wiki_dumps(files_to_download, DUMP_URL)
         multiprocessor.find_article_links(files_to_download)
         print(f"\n{timer() - START_TIME} seconds to download Wikipedia & parse it.")
+    else:
+        print("All files from Wikipedia have already been downloaded & parsed!\n")
+        exit()
