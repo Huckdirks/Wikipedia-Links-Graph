@@ -53,4 +53,3 @@ if __name__ == "__main__":
         print(f"\n{timer() - START_TIME} seconds to download Wikipedia & parse it.")
     else:
         print("All files from Wikipedia have already been downloaded & parsed!\n")
-        exit()

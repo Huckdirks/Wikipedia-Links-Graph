@@ -152,20 +152,20 @@ inline void wiki_loader::load_links(indicators::BlockProgressBar &bar, unsigned 
     std::getline(file_in, JSON_line);
     file_in.peek();
     const json JSON = json::parse(JSON_line);  // { } Initialization breaks this ¯\_(ツ)_/¯
-
     const std::string TITLE{JSON[0].get<std::string>()};
-    graph_vertex *page{graph->find(TITLE)};
 
-    if (page != nullptr) {
-        for (const auto &LINK : JSON[1]) {
-            graph_vertex *adjacent_page{graph->find(LINK.get<std::string>())};
-            if (adjacent_page != nullptr) {
-                page->adjacent.push_back(adjacent_page);
-                ++adjacent_page->links_to;
-            }
-        }
-        page->adjacent.shrink_to_fit();  // Shrink the adjacent vector to fit the number of adjacent nodes (good for memory 👍)
-    }
     ++progress;
+    graph_vertex *page{graph->find(TITLE)};
+    if (page == nullptr)
+        return;
+        
+    for (const auto &LINK : JSON[1]) {
+        graph_vertex *adjacent_page{graph->find(LINK.get<std::string>())};
+        if (adjacent_page != nullptr) {
+            page->adjacent.push_back(adjacent_page);
+            ++adjacent_page->links_to;
+        }
+    }
+    page->adjacent.shrink_to_fit();  // Shrink the adjacent vector to fit the number of adjacent nodes (good for memory 👍)
     return;
 }
