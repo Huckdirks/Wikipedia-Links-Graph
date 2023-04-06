@@ -9,7 +9,7 @@ import multiprocessor
 from timeit import default_timer as timer
 
 
-if __name__ == "__main__":
+def main():
     # Get the HTML of the page
     DUMP_URL = "https://dumps.wikimedia.org/enwiki/latest/"
     DUMP_HTML = requests.get(DUMP_URL).text
@@ -29,7 +29,8 @@ if __name__ == "__main__":
     ORIGINAL_DIR = os.path.dirname(__file__)
     PARENT_DIR = os.path.dirname(ORIGINAL_DIR)
     MAIN_DIR = os.path.dirname(PARENT_DIR)
-    CHECK_DIR = MAIN_DIR + "/data/load/Articles-p/"
+    ARTICLES_P_DIR = MAIN_DIR + "/data/load/Articles-p/"
+    WIKI_DUMPS_DIR = MAIN_DIR + "/data/load/Wiki_Dumps/"
 
     # Create data directories if they don't exist
     if not os.path.isdir(MAIN_DIR + "/data/"):
@@ -37,14 +38,19 @@ if __name__ == "__main__":
     if not os.path.isdir(MAIN_DIR + "/data/load/"):
         os.mkdir(MAIN_DIR + "/data/load/")
 
-    # Check if all a file in Articles-p already exists, and remove from files_to_download if they do
-    if os.path.isdir(CHECK_DIR):
+    # Check if a file in Articles-p already exists, and remove from files_to_download if it does
+    if os.path.isdir(ARTICLES_P_DIR):
         for FILE in files_to_download[:]:
-            FILE_NAME = FILE.split('-')[-1].split('.')[-2]
-            CHECK_FILE_LIST = os.listdir(CHECK_DIR)
-            for CHECK in CHECK_FILE_LIST:
-                if FILE_NAME in CHECK:
+            for CHECK in os.listdir(ARTICLES_P_DIR):
+                if FILE.split('-')[-1].split('.')[-2] in CHECK:
                     files_to_download.remove(FILE)
+    # Check if a file in Wiki_Dumps already exists, and remove from files_to_download if it does
+    elif os.path.isdir(WIKI_DUMPS_DIR):
+        for FILE in files_to_download[:]:
+            for CHECK in os.listdir(WIKI_DUMPS_DIR):
+                if FILE in CHECK:
+                    files_to_download.remove(FILE)
+
 
     if files_to_download:
         START_TIME = timer()
@@ -53,3 +59,8 @@ if __name__ == "__main__":
         print(f"\n{timer() - START_TIME} seconds to download Wikipedia & parse it.")
     else:
         print("All files from Wikipedia have already been downloaded & parsed!\n")
+
+
+
+if __name__ == "__main__":
+    main()

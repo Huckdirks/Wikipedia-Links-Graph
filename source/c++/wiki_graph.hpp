@@ -24,11 +24,10 @@ class graph_vertex {
     int links_to{};
 
     // Constructors (I only had to do this because -Werror=deprecated-copy from -Wextra)
-    graph_vertex() = default;                                // Default constructor
-    constexpr graph_vertex(const graph_vertex &) = default;  // Copy constructor
-
-    void operator=(const graph_vertex &VERTEX);
-    int display(const bool DISPLAY_LINKS) const;
+    graph_vertex() = default;                                      // Default constructor
+    constexpr graph_vertex(const graph_vertex &VERTEX) = default;  // Copy constructor
+    void operator=(const graph_vertex &VERTEX);                    // Copy assignment operator
+    int display(const bool DISPLAY_LINKS) const;                   // Display vertex
 };
 
 
@@ -36,6 +35,8 @@ class graph_vertex {
 // Also a wrapper for deque<graph_vertex> vertex_list inside wiki_graph
 class wiki_graph {
    public:
+    unsigned int num_edges{};                                     // Number of edges in graph
+    
     graph_vertex &operator[](const unsigned int INDEX);  // [] operator overload for ints
     graph_vertex &operator[](const std::string VALUE);   // [] operator overload
 

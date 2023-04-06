@@ -111,9 +111,6 @@ std::vector<graph_vertex *> wiki_graph::linked_to(const std::string TO_FIND) {
         return {};
 
     auto linked_to = all_linked_to(TO_FIND);
-    if (linked_to.empty())  // You never know
-        return {};
-
     linked_to.shrink_to_fit();
     return linked_to;
 }

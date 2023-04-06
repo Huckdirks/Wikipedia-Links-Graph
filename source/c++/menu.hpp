@@ -23,6 +23,7 @@ class menu_calls {
     int display_page();
     int display_top_n();
     int display_linked_to();
+    int display_wiki_info();
     bool y_or_n();
 
    private:

@@ -23,10 +23,9 @@ int menu_calls::display_page() {
     }
 
     std::cout << "\nDo you want to also display " << PAGE->title << "'s links to pages?\n";
-    const bool response{y_or_n()};
+    const bool RESPONSE{y_or_n()};
     system("clear");
-    PAGE->display(response);
-
+    PAGE->display(RESPONSE);
     return 0;
 }
 
@@ -49,12 +48,12 @@ int menu_calls::display_top_n() {
         std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         for (const char &C : num) {
             if (!isdigit(C)) {
+                system("clear");
                 std::cout << "\nPlease enter a number\nTry again\n";
                 is_digit = false;
                 break;
             }
         }
-
     } while (!is_digit);
     n = std::stoi(num);
     if (n > graph.size())   // Make sure it doesn't go out of bounds
@@ -66,8 +65,10 @@ int menu_calls::display_top_n() {
     do {
         std::cin >> response;
         response = toupper(response);
-        if (response != 'D' && response != 'S')
+        if (response != 'D' && response != 'S'){
+            system("clear");
             std::cout << "\nPlease enter D or S\n";
+        }
     } while (response != 'D' && response != 'S');
     if (response == 'S') {
         save = true;
@@ -148,8 +149,10 @@ int menu_calls::display_linked_to() {
     do {
         std::cin >> response;
         response = toupper(response);
-        if (response != 'D' && response != 'S')
+        if (response != 'D' && response != 'S'){
+            system("clear");
             std::cout << "\nPlease enter D or S\n";
+        }
     } while (response != 'D' && response != 'S');
     if (response == 'S') {
         save = true;
@@ -206,6 +209,19 @@ int menu_calls::display_linked_to() {
         fs::current_path(MAIN_DIR);
         std::cout << "\nPages that link to " << title << " saved\n";
     }
+    return 0;
+}
+
+
+// Display info about the Wikipedia dump
+int menu_calls::display_wiki_info(){
+    system("clear");
+    std::cout << "\nThis program uses the Wikipedia XML dump\n";
+    std::cout << "The dump can be found at https://dumps.wikimedia.org/enwiki/latest/\n";
+    std::cout << "The dump is licensed under the Creative Commons Attribution-ShareAlike 3.0 Unported License\n";
+    std::cout << "The full license can be found at https://creativecommons.org/licenses/by-sa/3.0/legalcode\n";
+
+    std::cout << "\nWikipedia contains " << graph.size() << " pages and " << graph.num_edges << " links to other Wikipedia pages\n";
     return 0;
 }
 

@@ -164,6 +164,7 @@ inline void wiki_loader::load_links(indicators::BlockProgressBar &bar, unsigned 
         if (adjacent_page != nullptr) {
             page->adjacent.push_back(adjacent_page);
             ++adjacent_page->links_to;
+            ++graph->num_edges;
         }
     }
     page->adjacent.shrink_to_fit();  // Shrink the adjacent vector to fit the number of adjacent nodes (good for memory 👍)

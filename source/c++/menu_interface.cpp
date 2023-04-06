@@ -35,7 +35,7 @@ int menu::init_menu() {
 
 // Menu interface
 int menu::interface() {
-    std::cout << "\n\n\nWelcome to the Wiki Graph\n\nPress 1 to find the info on a single page\n2 to find the most linked to pages\n3 to find all the pages linking to a page\n0 or Q to quit\n";
+    std::cout << "\n\n\nWelcome to the Wiki Graph\n\nPress 1 to find the info on a single page\n2 to view info on the whole wiki\n3 to find the most linked to pages\n4 to find all the pages linking to a page\n0 or Q to quit\n";
     const int CHOICE{selector()};
 
     switch (CHOICE) {
@@ -49,10 +49,14 @@ int menu::interface() {
             break;
 
         case 2:
-            display_top_n();
+            display_wiki_info();
             break;
 
         case 3:
+            display_top_n();
+            break;
+
+        case 4:
             display_linked_to();
             break;
 
@@ -89,8 +93,8 @@ int menu::selector() {
 
         if (flag) {
             n = std::stoi(num);
-            if (n > 3) {
-                std::cout << "\nPlease enter a number between 0 and 2\nTry again\n";
+            if (n > 4) {
+                std::cout << "\nPlease enter a number between 0 and 4\nTry again\n";
                 flag = false;
             }
         }
