@@ -52,6 +52,8 @@ Every new release is run with with [leaks](https://developer.apple.com/library/a
 
 Also, I know the python section could probably be more ✨𝒫𝓎𝓉𝒽ℴ𝓃𝒾𝒸✨, but I just started seriously learning python, so I'm sure there are many things I could improve on!
 
+I've also tested out every function and section of the code multiple times with all the data to make sure everything runs properly!
+
 If there are any other/better ways to check for quality assurance, please let me know in the [suggestions](https://github.com/Huckdirks/Wikipedia_Links_Graph/discussions/new?category=suggestions)!
 
 ## Future Features
