@@ -4,8 +4,10 @@
 
 - [Introduction](#introduction)
 - [Uses](#uses)
-- [Dependencies](#dependencies)
 - [Compiling & Running](#compiling--running)
+    - [Dependencies](#dependencies)
+    - [Compiling](#compiling)
+    - [Running](#running)
 - [Quality Assurance](#quality-assurance)
 - [Future Features](#future-features)
 - [Suggestions](#suggestions)
@@ -14,26 +16,23 @@
 
 ## Introduction
 
-(Insert intro stuff here)
-
-Also add shoutout to [Will Koehrsen](https://github.com/WillKoehrsen/wikipedia-data-science/blob/master/notebooks/Downloading%20and%20Parsing%20Wikipedia%20Articles.ipynb) for basically the whole python section
-
-Also add how as of today (4/3/23) I found out that wikipedia already had the answers I guess [Most Linked to Pages](https://en.wikipedia.org/wiki/Special:MostLinkedPages) & [Pages Linking to a Page](https://en.wikipedia.org/wiki/Special:WhatLinksHere), but I SWEAR IT DIDN'T WHEN I STARTED THIS PROJECT!!!
+A while ago, I had the question of what was the most linked to Wikipedia page by other Wikipdedia pages. I'd already found the [page with the most links to other pages](https://en.wikipedia.org/wiki/Wikipedia:Articles_with_the_most_references): [List of Android smartphones](https://en.wikipedia.org/wiki/List_of_Android_smartphones), but I couldn't find anywhere that answered my question. I guess I was kinda stupid, because as of 4/3/23 I found out that Wikipedia already had the answers I guess: [Most Linked to Pages](https://en.wikipedia.org/wiki/Special:MostLinkedPages) & [Pages Linking to a Page](https://en.wikipedia.org/wiki/Special:WhatLinksHere). Since I wasn't able to find the answers on Wikipedia (Even though it was [always there](https://en.wikipedia.org/wiki/Wikipedia:Wikipedia_records#Links) 🤦), I decided to make my own program to find the answers. At first, I had to download all of Wikipedia, and then extract all the titles and links from the pages. To do this, I copied most of my Python section from [Will Koehrsen's Downloading and Parsing Wikipedia Articles](https://github.com/WillKoehrsen/wikipedia-data-science/blob/master/notebooks/Downloading%20and%20Parsing%20Wikipedia%20Articles.ipynb). There was still a fair amount that I had to figure out and change to actually get it working (eg. Inside In [4]: it tells you to use `soup_dump.find_all('li', {'class': 'file'}, limit = 10)[:4]`, when it actually needs `soup_dump.find_all('a')`) so it still took me quite some time to figure out the intention of the code & all the libraries to update & fix it. Once I figured out how to download & parse all of Wikipedia into `json` files using Python, I wrote the analysis section of the program in C++. The program loads all of the data parsed by the Python section into a graph (using the [Adjacency List](https://www.programiz.com/dsa/graph-adjacency-list) implementation), which can then be analyzied by the methods below!
 
 ## Uses
 
-In this current version, after loading in the data into the graph, the user can either find the most linked to pages up to a user specified number, or find all the pages linking to a page. Any pages inputted are case sensitive!!!
+In this current version, after loading in the data into the graph, the user can find all the information about a given page, information about the graph/Wikipedia as a whole, find the most linked to pages up to a user specified number, or find all the pages linking to a page. Any pages inputted are case sensitive!!! All data the user decides to save is saved in the `data/user_data` folder. The program also saves the data it loads in from the `data` folder, so it doesn't have to load it in again.
 
 If you want to learn about how it does this, or how to call the functions yourself, check out the [Program Structure](https://github.com/Huckdirks/Wikipedia_Links_Graph/wiki/Program-Structure#c) page in the wiki.
-## Dependencies
 
-### Install
+## Compiling & Running
+
+### Dependencies
+
+#### Install
 
 Double click `dependencies`, or run `bash dependencies` or `./dependencies` in the root directory or to install the python dependencies. All the c++ dependencies are included in `source/c++` already. You must have [pip](https://pip.pypa.io/en/stable/installation/) installed to download the new dependencies. Also, you'll need to install python yourself if you haven't already.
 
 **[List of Dependecies](DEPENDENCIES.md)**
-
-## Compiling & Running
 
 ### Compiling
 
