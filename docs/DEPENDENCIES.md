@@ -2,7 +2,7 @@
 
 ## C++
 
-All the dependencies are already included in the `source/c++` folder. The dependencies are:
+All the dependencies are already included in the `source/c++/` folder. The dependencies are:
 
 - [nlohmann/json](https://github.com/nlohmann/json)
 - [indicators](https://github.com/p-ranav/indicators)

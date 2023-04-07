@@ -72,7 +72,7 @@ the consequences for any action they deem in violation of this Code of Conduct:
 ### 1. Correction
 
 **Community Impact**: Use of inappropriate language or other behavior deemed
-unprofessional or unwelcome in the community.
+unwelcome in the community.
 
 **Consequence**: A private, written warning from community leaders, providing
 clarity around the nature of the violation and an explanation of why the
@@ -86,9 +86,8 @@ of actions.
 **Consequence**: A warning with consequences for continued behavior. No
 interaction with the people involved, including unsolicited interaction with
 those enforcing the Code of Conduct, for a specified period of time. This
-includes avoiding interactions in community spaces as well as external channels
-like social media. Violating these terms may lead to a temporary or
-permanent ban.
+includes avoiding interactions in community spaces. Violating these terms may lead to a 
+temporary or permanent ban.
 
 ### 3. Temporary Ban
 
