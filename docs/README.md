@@ -30,7 +30,7 @@ If you want to learn about how it does this, or how to call the functions yourse
 
 #### Install
 
-Double click `dependencies`, or run `bash dependencies` or `./dependencies` in the root directory or to install the python dependencies. All the c++ dependencies are included in `source/c++` already. You must have [pip](https://pip.pypa.io/en/stable/installation/) installed to download the new dependencies. Also, you'll need to install python yourself if you haven't already.
+Double click `dependencies`, or run `bash dependencies` or `./dependencies` in the root directory or to install the python dependencies. All the c++ dependencies are included in `source/c++` already. You must have [pip](https://pip.pypa.io/en/stable/installation/) installed to download the new dependencies. Also, you'll need to install [python](https://www.python.org/downloads/) yourself if you haven't already.
 
 **[List of Dependecies](DEPENDENCIES.md)**
 
