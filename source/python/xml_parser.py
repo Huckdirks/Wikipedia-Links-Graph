@@ -3,6 +3,7 @@ import xml.sax
 import subprocess
 import mwparserfromhell
 import os
+from os.path import dirname, isfile
 import json
 import gc
 
@@ -53,15 +54,15 @@ def process_wiki(TITLE, TEXT):
 # I would declare file as const but since it gets deleted I made it normal (even tho file is technically a const string, not the file itself, but this is python so I'll just use the loose typing)
 def find_articles(file):
     # Set the directory to save the files to & filename
-    ORIGINAL_DIR = os.path.dirname(__file__)
-    PARENT_DIR = os.path.dirname(ORIGINAL_DIR)
-    MAIN_DIR = os.path.dirname(PARENT_DIR)
+    ORIGINAL_DIR = dirname(__file__)
+    PARENT_DIR = dirname(ORIGINAL_DIR)
+    MAIN_DIR = dirname(PARENT_DIR)
     FILE_NAME = file.split('-')[-1].split('.')[-2]
     FILE_NAME = f"{FILE_NAME}.ndjson"
     OUT_DIR = MAIN_DIR + "/data/load/Articles-p/" + FILE_NAME
 
     # If the file already exists, don't parse it again
-    if os.path.isfile(OUT_DIR):
+    if isfile(OUT_DIR):
         return
 
     DUMPS_DIR = MAIN_DIR + "/data/load/Wiki_Dumps"

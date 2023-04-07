@@ -1,17 +1,18 @@
 # Libraries
 import os
+from os.path import dirname, isdir, isfile
 import requests
 import tqdm
 
 
 def download_wiki_dumps(FILES_TO_DOWNLOAD, DUMP_URL):
     # Check if directory to store files exists & create it if it doesn't
-    ORIGINAL_DIR = os.path.dirname(__file__)
-    PARENT_DIR = os.path.dirname(ORIGINAL_DIR)
-    MAIN_DIR = os.path.dirname(PARENT_DIR)
+    ORIGINAL_DIR = dirname(__file__)
+    PARENT_DIR = dirname(ORIGINAL_DIR)
+    MAIN_DIR = dirname(PARENT_DIR)
     CHECK_DIR = MAIN_DIR + "/data/load/Articles-p/"
     NEW_DIR = MAIN_DIR + "/data/load/Wiki_Dumps"
-    if not os.path.isdir(NEW_DIR):
+    if not isdir(NEW_DIR):
         os.mkdir(NEW_DIR)
     # Change directory to the new one
     os.chdir(NEW_DIR)
@@ -21,9 +22,9 @@ def download_wiki_dumps(FILES_TO_DOWNLOAD, DUMP_URL):
     for FILE in tqdm.tqdm(FILES_TO_DOWNLOAD):
         downloaded = False
         # Download a file if it's missing
-        if not os.path.isfile(FILE):
+        if not isfile(FILE):
             # Check if the file is already downloaded and parsed into JSON
-            if os.path.isdir(CHECK_DIR):
+            if isdir(CHECK_DIR):
                 for CHECK in os.listdir(CHECK_DIR):
                     if FILE.split('-')[-1].split('.')[-2] in CHECK:
                         downloaded = True

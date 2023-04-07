@@ -1,6 +1,7 @@
 # Libraries
 import requests
 import os
+from os.path import dirname, isdir
 from bs4 import BeautifulSoup
 
 # Other Modules
@@ -26,26 +27,26 @@ def main():
             download_num += 1
 
     # Change directory to Articles-p
-    ORIGINAL_DIR = os.path.dirname(__file__)
-    PARENT_DIR = os.path.dirname(ORIGINAL_DIR)
-    MAIN_DIR = os.path.dirname(PARENT_DIR)
+    ORIGINAL_DIR = dirname(__file__)
+    PARENT_DIR = dirname(ORIGINAL_DIR)
+    MAIN_DIR = dirname(PARENT_DIR)
     ARTICLES_P_DIR = MAIN_DIR + "/data/load/Articles-p/"
     WIKI_DUMPS_DIR = MAIN_DIR + "/data/load/Wiki_Dumps/"
 
     # Create data directories if they don't exist
-    if not os.path.isdir(MAIN_DIR + "/data/"):
+    if not isdir(MAIN_DIR + "/data/"):
         os.mkdir(MAIN_DIR + "/data/")
-    if not os.path.isdir(MAIN_DIR + "/data/load/"):
+    if not isdir(MAIN_DIR + "/data/load/"):
         os.mkdir(MAIN_DIR + "/data/load/")
 
     # Check if a file in Articles-p already exists, and remove from files_to_download if it does
-    if os.path.isdir(ARTICLES_P_DIR):
+    if isdir(ARTICLES_P_DIR):
         for FILE in files_to_download[:]:
             for CHECK in os.listdir(ARTICLES_P_DIR):
                 if FILE.split('-')[-1].split('.')[-2] in CHECK:
                     files_to_download.remove(FILE)
     # Check if a file in Wiki_Dumps already exists, and remove from files_to_download if it does
-    elif os.path.isdir(WIKI_DUMPS_DIR):
+    elif isdir(WIKI_DUMPS_DIR):
         for FILE in files_to_download[:]:
             for CHECK in os.listdir(WIKI_DUMPS_DIR):
                 if FILE in CHECK:

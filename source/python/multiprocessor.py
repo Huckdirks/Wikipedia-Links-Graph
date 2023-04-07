@@ -2,6 +2,7 @@
 from multiprocessing import Pool
 import tqdm
 import os
+from os.path import dirname, isdir
 
 # Other Modules
 import xml_parser
@@ -12,12 +13,12 @@ def find_article_links(FILES):
     results = []
 
     # Change directory to Articles-p
-    ORIGINAL_DIR = os.path.dirname(__file__)
-    PARENT_DIR = os.path.dirname(ORIGINAL_DIR)
-    MAIN_DIR = os.path.dirname(PARENT_DIR)
+    ORIGINAL_DIR = dirname(__file__)
+    PARENT_DIR = dirname(ORIGINAL_DIR)
+    MAIN_DIR = dirname(PARENT_DIR)
     CHECK_DIR = MAIN_DIR + "/data/load/Articles-p/"
     # If directory doesn't exist, make it
-    if not os.path.isdir(CHECK_DIR):
+    if not isdir(CHECK_DIR):
         os.mkdir(CHECK_DIR)
 
     print("\nFinding article links from dumps...")
