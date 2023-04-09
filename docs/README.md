@@ -20,7 +20,7 @@ A while ago, I had the question of what was the most linked to Wikipedia page by
 
 ## Uses
 
-In this current version, after loading in the data into the graph, the user can find all the information about a given page, information about the graph/Wikipedia as a whole, find the most linked to pages up to a user specified number, or find all the pages linking to a page. Any pages inputted are case sensitive!!! All data the user decides to save is saved in the [`data/user_data/`](../data/user_data/) folder. The program also saves the data it needs to load in from the [`data/user_data/`](../data/user_data/) folder, so it doesn't have to download & parse all of Wikipedia every time it's run.
+In this current version, after loading in the data into the graph, the user can find all the information about a given page, information about the graph/Wikipedia as a whole, find the most linked to pages up to a user specified number, or find all the pages linking to a page. Any pages inputted are case sensitive!!! All data the user decides to save is saved in the `data/user_data/` folder. The program also saves the data it needs to load in from the `data/user_data/` folder, so it doesn't have to download & parse all of Wikipedia every time it's run.
 
 If you want to learn about how it does this, or how to call the functions yourself, check out the [Program Structure](https://github.com/Huckdirks/Wikipedia_Links_Graph/wiki/Program-Structure#c) page in the wiki.
 
