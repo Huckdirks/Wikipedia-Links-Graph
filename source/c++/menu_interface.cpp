@@ -1,12 +1,6 @@
 // Files to include
 #include "menu.hpp"
 
-int main() {
-    menu Menu;
-    return 0;
-}
-
-
 // Initialize menu
 int menu::init_menu() {
     bool flag{};
