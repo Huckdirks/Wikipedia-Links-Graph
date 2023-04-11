@@ -21,7 +21,8 @@ class graph_vertex {
    public:
     std::string title;
     std::vector<graph_vertex *> adjacent;  // Adjacent = links
-    int links_to{};
+    unsigned int links{};
+    unsigned int linked_to{};
 
     // Constructors (I only had to do this because -Werror=deprecated-copy from -Wextra)
     graph_vertex() = default;                                      // Default constructor

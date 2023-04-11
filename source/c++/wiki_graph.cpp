@@ -18,9 +18,9 @@ int graph_vertex::display(const bool DISPLAY_LINKS) const {
     if (title.empty())
         return 1;
 
-    std::cout << "\nTitle: " << title << "\nTimes linked: " << links_to << '\n';
+    std::cout << "\nTitle: " << title << "\nTimes linked: " << linked_to << '\n';
     if (DISPLAY_LINKS) {
-        std::cout << "Links:\n";
+        std::cout << "Amount of links: : " << links << "\nLinks:\n";
         for (const auto &LINK : adjacent)
             std::cout << '\t' << LINK->title << '\n';
     }
@@ -83,7 +83,7 @@ std::vector<graph_vertex *> wiki_graph::top_n(const unsigned int N) {
         std::vector<graph_vertex *> top_n_list;
         graph_vertex *best_vertex{nullptr};
         for (auto &vertex: vertex_list) {
-            if (vertex.links_to > best_vertex->links_to)
+            if (vertex.linked_to > best_vertex->linked_to)
                 best_vertex = &vertex;
         }
         top_n_list.push_back(best_vertex);
@@ -281,12 +281,12 @@ std::vector<graph_vertex *> wiki_graph::top_n_linked(const unsigned int N) {
 
             // Actual work
             // If the current vertex has less links than the current bottom
-            if (VERTEX->links_to < top_n.back()->links_to)
+            if (VERTEX->linked_to < top_n.back()->linked_to)
                 continue;
 
             // If the current vertex has more links than the current best
-            if (VERTEX->links_to > best) {
-                best = VERTEX->links_to;
+            if (VERTEX->linked_to > best) {
+                best = VERTEX->linked_to;
                 top_n.pop_back();
                 top_n.insert(top_n.begin(), VERTEX);
                 continue;
@@ -296,7 +296,7 @@ std::vector<graph_vertex *> wiki_graph::top_n_linked(const unsigned int N) {
             for (int j = N - 1; j > 0; --j) {
                 if (VERTEX->title == top_n[j]->title)   // If duplicate
                     break;
-                else if (VERTEX->links_to < top_n[j]->links_to) {  // If the current vertex has less links than the current top_n[j], make the previous top_n[j] the current vertex
+                else if (VERTEX->linked_to < top_n[j]->linked_to) {  // If the current vertex has less links than the current top_n[j], make the previous top_n[j] the current vertex
                     top_n.pop_back();
                     top_n.insert(top_n.begin() + j + 1, VERTEX);
                     break;
@@ -338,12 +338,12 @@ std::vector<graph_vertex *> wiki_graph::top_n_linked_segment(const unsigned int 
 
         // Actual work
         // If the current vertex has less links than the current bottom
-        if (vertex_list[i].links_to < top_n.back()->links_to)
+        if (vertex_list[i].linked_to < top_n.back()->linked_to)
             continue;
 
         // If the current vertex has more links than the current best
-        if (vertex_list[i].links_to > best) {
-            best = vertex_list[i].links_to;
+        if (vertex_list[i].linked_to > best) {
+            best = vertex_list[i].linked_to;
             top_n.pop_back();
             top_n.insert(top_n.begin(), &vertex_list[i]);
             continue;
@@ -353,7 +353,7 @@ std::vector<graph_vertex *> wiki_graph::top_n_linked_segment(const unsigned int 
         for (int j = N - 1; j > 0; --j) {
             if (vertex_list[i].title == top_n[j]->title)
                 break;
-            else if (vertex_list[i].links_to < top_n[j]->links_to) {  // If the current vertex has less links than the current top_n[j], make the previous top_n[j] the current vertex
+            else if (vertex_list[i].linked_to < top_n[j]->linked_to) {  // If the current vertex has less links than the current top_n[j], make the previous top_n[j] the current vertex
                 top_n.pop_back();
                 top_n.insert(top_n.begin() + j + 1, &vertex_list[i]);
                 break;

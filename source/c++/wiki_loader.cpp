@@ -163,7 +163,8 @@ inline void wiki_loader::load_links(indicators::BlockProgressBar &bar, unsigned 
         graph_vertex *adjacent_page{graph->find(LINK.get<std::string>())};
         if (adjacent_page != nullptr) {
             page->adjacent.push_back(adjacent_page);
-            ++adjacent_page->links_to;
+            ++page->links;
+            ++adjacent_page->linked_to;
             ++graph->num_edges;
         }
     }
