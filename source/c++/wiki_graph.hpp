@@ -53,7 +53,7 @@ class wiki_graph {
 
    private:
     // Adjacency list implementation
-    std::deque<graph_vertex> vertex_list;  // Can use a vector instead, but holding all the pages contiguously in memory is a bad idea
+    std::deque<graph_vertex> vertex_list;  // Can use a vector instead, but holding all the pages on Wikipedia contiguously in memory is a bad idea
 
     graph_vertex *binary_search(const std::string TO_FIND);                                                                                                                                                        // Binary search for value
     int binary_search_index(const std::string TO_FIND);                                                                                                                                                            // Binary search for index
