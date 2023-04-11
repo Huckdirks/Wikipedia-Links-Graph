@@ -106,13 +106,13 @@ int menu_calls::display_top_n() {
             file_out.open(file_name);
             file_out << "Title,# Links To\n";
             for (const auto &PAGE : TOP_N_LIST)
-                file_out << PAGE->title << ',' << PAGE->links_to << '\n';
+                file_out << PAGE->title << ',' << PAGE->linked_to << '\n';
         } else {
             std::string file_name{"top_" + std::to_string(n) + "_linked_articles.txt"};
             unsigned int place{1};
             file_out.open(file_name);
             for (const auto &PAGE : TOP_N_LIST) {
-                file_out << place << ") " << PAGE->title << ": " << PAGE->links_to << '\n';
+                file_out << place << ") " << PAGE->title << ": " << PAGE->linked_to << '\n';
                 ++place;
             }
         }

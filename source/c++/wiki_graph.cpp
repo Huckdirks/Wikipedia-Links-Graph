@@ -213,7 +213,7 @@ int wiki_graph::binary_search_index(const std::string TO_FIND) {
 // Parallel
 std::vector<graph_vertex *> wiki_graph::top_n_linked(const unsigned int N) {
     std::vector<graph_vertex *> top_n;
-    int best{-1};
+    unsigned int best{};
 
     // Fill top_n with blank vertex pointers so there's something to compare to
     graph_vertex blank;
@@ -284,8 +284,8 @@ std::vector<graph_vertex *> wiki_graph::top_n_linked(const unsigned int N) {
             if (VERTEX->linked_to < top_n.back()->linked_to)
                 continue;
 
-            // If the current vertex has more links than the current best
-            if (VERTEX->linked_to > best) {
+            // If the current vertex has more linked_to than the current best
+            if (VERTEX->linked_to >= best) {
                 best = VERTEX->linked_to;
                 top_n.pop_back();
                 top_n.insert(top_n.begin(), VERTEX);
@@ -318,7 +318,7 @@ std::vector<graph_vertex *> wiki_graph::top_n_linked_segment(const unsigned int 
     std::vector<graph_vertex *> top_n;
     const unsigned int SEGMENT_SIZE{SEGMENT_END - SEGMENT_START};
     const unsigned int SEGMENT_NUM{(SEGMENT_END / SEGMENT_SIZE) - 1};
-    int best{-1};
+    unsigned int best{};
     double percent{};
 
     // Fill top_n with first n vertex pointers so there's something to compare to
