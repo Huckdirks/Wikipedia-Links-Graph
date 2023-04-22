@@ -64,6 +64,7 @@ int menu_calls::display_top_n() {
     char response{};
     do {
         std::cin >> response;
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         response = toupper(response);
         if (response != 'D' && response != 'S'){
             system("clear");
@@ -135,6 +136,7 @@ int menu_calls::display_linked_to() {
     system("clear");
     std::cout << "\nWhat page would you like to find all the other pages linking to?\n";
     std::getline(std::cin, title);
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
     // Check if the page actually exists
     if (graph.find(title) == nullptr) {
@@ -148,6 +150,7 @@ int menu_calls::display_linked_to() {
     char response{};
     do {
         std::cin >> response;
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         response = toupper(response);
         if (response != 'D' && response != 'S'){
             system("clear");
