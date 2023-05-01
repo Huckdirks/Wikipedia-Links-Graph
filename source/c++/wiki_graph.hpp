@@ -11,6 +11,7 @@
 #include <future>
 #include <iostream>
 #include <iterator>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
