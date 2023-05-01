@@ -44,7 +44,7 @@ graph_vertex &wiki_graph::operator[](const unsigned int INDEX) {
 }
 
 // [ ] operator overload for strings
-graph_vertex &wiki_graph::operator[](const std::string PAGE) {
+graph_vertex &wiki_graph::operator[](const std::string &PAGE) {
     if (vertex_list.empty())
         throw std::out_of_range("Graph is empty");
 
@@ -59,7 +59,7 @@ graph_vertex &wiki_graph::operator[](const std::string PAGE) {
 // Wrapper Functions:
 
 // Binary search for value (wrapper function)
-graph_vertex *wiki_graph::find(const std::string TO_FIND) {
+graph_vertex *wiki_graph::find(const std::string &TO_FIND) {
     if (vertex_list.empty())
         return nullptr;
 
@@ -67,7 +67,7 @@ graph_vertex *wiki_graph::find(const std::string TO_FIND) {
 }
 
 // Binary search for index (wrapper function)
-int wiki_graph::find_index(const std::string TO_FIND) {
+int wiki_graph::find_index(const std::string &TO_FIND) {
     if (vertex_list.empty())
         return -1;
 
@@ -101,7 +101,7 @@ std::vector<graph_vertex *> wiki_graph::top_n(const unsigned int N) {
 
 
 // Get all vertices linked to a vertex (wrapper function)
-std::vector<graph_vertex *> wiki_graph::linked_to(const std::string TO_FIND) {
+std::vector<graph_vertex *> wiki_graph::linked_to(const std::string &TO_FIND) {
     if (vertex_list.empty())
         return {};
 
@@ -163,7 +163,7 @@ void wiki_graph::push_back(const graph_vertex vertex) {
 
 // Find a vertex in the graph by title
 // Implementation adapted from https://www.geeksforgeeks.org/binary-search/
-graph_vertex *wiki_graph::binary_search(const std::string TO_FIND) {
+graph_vertex *wiki_graph::binary_search(const std::string &TO_FIND) {
     unsigned int lo{}, mid{};
     long unsigned int hi{vertex_list.size() - 1};   // Needs to be long unsigned int for { } initialization
 
@@ -187,7 +187,7 @@ graph_vertex *wiki_graph::binary_search(const std::string TO_FIND) {
 
 // Find the index of a vertex in the graph by title
 // Implementation adapted from https://www.geeksforgeeks.org/binary-search/
-int wiki_graph::binary_search_index(const std::string TO_FIND) {
+int wiki_graph::binary_search_index(const std::string &TO_FIND) {
     unsigned int lo{}, mid{};
     long unsigned int hi{vertex_list.size() - 1};   // Needs to be long unsigned int for { } initialization
 
@@ -371,7 +371,7 @@ std::vector<graph_vertex *> wiki_graph::top_n_linked_segment(const unsigned int 
 
 // Find all the pages linking to a given page
 // Parallel
-std::vector<graph_vertex *> wiki_graph::all_linked_to(const std::string linked_to) {
+std::vector<graph_vertex *> wiki_graph::all_linked_to(const std::string &LINKED_TO) {
     std::vector<graph_vertex *> linked_to_list;
     // Set up for parallelization
     const unsigned int CORES{std::thread::hardware_concurrency()};
@@ -392,7 +392,7 @@ std::vector<graph_vertex *> wiki_graph::all_linked_to(const std::string linked_t
     // Split the graph into (CORES) segments and run top_n_linked_segment on each segment in parallel
     for (unsigned int i{}; i < CORES; ++i) {
         bars.push_back(block_bars[i]);
-        futures[i] = std::async(std::launch::async, &wiki_graph::all_linked_to_segment, this, linked_to, i * SEGMENT_SIZE, (i + 1) * SEGMENT_SIZE, std::ref(bars));
+        futures[i] = std::async(std::launch::async, &wiki_graph::all_linked_to_segment, this, LINKED_TO, i * SEGMENT_SIZE, (i + 1) * SEGMENT_SIZE, std::ref(bars));
     }
 
     // Wait for all the functions to finish and get the results
@@ -418,7 +418,7 @@ std::vector<graph_vertex *> wiki_graph::all_linked_to(const std::string linked_t
 
 
 // Find all the pages linking to a given page in a segment of the graph
-std::vector<graph_vertex *> wiki_graph::all_linked_to_segment(const std::string linked_to, const unsigned int SEGMENT_START, const unsigned int SEGMENT_END, indicators::DynamicProgress<indicators::BlockProgressBar> &bars) {
+std::vector<graph_vertex *> wiki_graph::all_linked_to_segment(const std::string &LINKED_TO, const unsigned int SEGMENT_START, const unsigned int SEGMENT_END, indicators::DynamicProgress<indicators::BlockProgressBar> &bars) {
     std::vector<graph_vertex *> linked_to_list;
     const unsigned int SEGMENT_SIZE{SEGMENT_END - SEGMENT_START};
     const unsigned int SEGMENT_NUM{(SEGMENT_END / SEGMENT_SIZE) - 1};
@@ -437,7 +437,7 @@ std::vector<graph_vertex *> wiki_graph::all_linked_to_segment(const std::string 
 
         // Actual work
         for (const auto &LINK : vertex_list[i].adjacent) {
-            if (LINK->title == linked_to) {
+            if (LINK->title == LINKED_TO) {
                 linked_to_list.push_back(&vertex_list[i]);
                 break;
             }
