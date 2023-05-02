@@ -6,11 +6,13 @@
 
 // Libraries
 #include <algorithm>
+#include <cmath>
 #include <deque>
 #include <execution>
 #include <future>
 #include <iostream>
 #include <iterator>
+#include <memory>
 #include <stdexcept>
 #include <string>
 #include <vector>
