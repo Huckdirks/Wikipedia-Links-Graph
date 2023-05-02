@@ -136,7 +136,6 @@ int menu_calls::display_linked_to() {
     system("clear");
     std::cout << "\nWhat page would you like to find all the other pages linking to?\n";
     std::getline(std::cin, title);
-    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
     // Check if the page actually exists
     if (graph.find(title) == nullptr) {
