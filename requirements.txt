@@ -1,0 +1,6 @@
+beautifulsoup4==4.12.0
+requests==2.29.0
+tqdm @ https://github.com/tqdm/tqdm@master
+mwparserfromhell @ https://github.com/earwig/mwparserfromhell@main
+json @ https://github.com/nlohmann/json@develop
+indicators @ https://github.com/p-ranav/indicators@master
