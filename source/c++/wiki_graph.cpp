@@ -36,22 +36,34 @@ int graph_vertex::display(const bool DISPLAY_LINKS) const {
 
 // [ ] operator overload for ints
 graph_vertex &wiki_graph::operator[](const unsigned int INDEX) {
-    if (vertex_list.empty())
+    /* if (vertex_list.empty())
         throw std::out_of_range("Graph is empty");
     if (INDEX >= vertex_list.size())
         throw std::out_of_range("Index out of bounds");
-    return vertex_list[INDEX];
+    return vertex_list[INDEX]; */
+    try {
+        return vertex_list.at(INDEX);
+    } catch (const std::out_of_range &EXCEPTION) {
+        std::cerr << EXCEPTION.what() << '\n';
+        exit(1);
+    }
 }
 
 // [ ] operator overload for strings
 graph_vertex &wiki_graph::operator[](const std::string &PAGE) {
-    if (vertex_list.empty())
+    /* if (vertex_list.empty())
         throw std::out_of_range("Graph is empty");
 
     int i{binary_search_index(PAGE)};
     if (i == -1)
         throw std::out_of_range("Page not found");
-    return vertex_list[i];
+    return vertex_list[i]; */
+    try {
+        return vertex_list.at(binary_search_index(PAGE));
+    } catch (const std::out_of_range &EXCEPTION) {
+        std::cerr << EXCEPTION.what() << '\n';
+        exit(1);
+    }
 }
 
 
@@ -121,23 +133,44 @@ std::vector<graph_vertex *> wiki_graph::linked_to(const std::string &TO_FIND) {
 // Load articles from file
 int wiki_graph::load() {
     wiki_loader loader(*this);
-    return loader.load();
+    //return loader.load();
+    try {
+        return loader.load();
+    }
+    catch (std::bad_alloc &e) {
+        std::cerr << e.what() << '\n';
+        exit(1);
+    }
 }
 
 
 // Get first vertex
 graph_vertex &wiki_graph::front() {
-    if (vertex_list.empty())
+    /* if (vertex_list.empty())
         throw std::out_of_range("Graph is empty");
-    return vertex_list.front();
+    return vertex_list.front(); */
+    try {
+        return vertex_list.front();
+    }
+    catch (std::out_of_range &e) {
+        std::cerr << e.what() << '\n';
+        exit(1);
+    }
 }
 
 
 // Get last vertex
 graph_vertex &wiki_graph::back() {
-    if (vertex_list.empty())
+    /* if (vertex_list.empty())
         throw std::out_of_range("Graph is empty");
-    return vertex_list.back();
+    return vertex_list.back(); */
+    try {
+        return vertex_list.back();
+    }
+    catch (std::out_of_range &e) {
+        std::cerr << e.what() << '\n';
+        exit(1);
+    }
 }
 
 
@@ -155,7 +188,15 @@ unsigned int wiki_graph::size() const {
 
 // Add vertex to the end of the list
 void wiki_graph::push_back(const graph_vertex vertex) {
-    return vertex_list.push_back(vertex);
+    //return vertex_list.push_back(vertex);
+    try {
+        //return vertex_list.push_back(vertex);
+        vertex_list.push_back(vertex);
+    }
+    catch (std::bad_alloc &e) {
+        std::cerr << e.what() << '\n';
+        exit(1);
+    }
 }
 
 
