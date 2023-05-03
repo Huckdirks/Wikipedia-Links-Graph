@@ -16,7 +16,7 @@ void graph_vertex::operator=(const graph_vertex &VERTEX) {
 // Display the article title, the number of times it is linked to, and the titles of the articles it links to if display_links is true
 int graph_vertex::display(const bool DISPLAY_LINKS) const {
     if (title.empty())
-        return 1;
+        return EXIT_FAILURE;
 
     std::cout << "\nTitle: " << title << "\nTimes linked: " << linked_to << '\n';
     if (DISPLAY_LINKS) {
@@ -24,7 +24,7 @@ int graph_vertex::display(const bool DISPLAY_LINKS) const {
         for (const auto &LINK : adjacent)
             std::cout << '\t' << LINK->title << '\n';
     }
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 
@@ -137,9 +137,10 @@ int wiki_graph::load() {
     try {
         return loader.load();
     }
-    catch (std::bad_alloc &e) {
-        std::cerr << e.what() << '\n';
-        exit(1);
+    catch (const std::bad_alloc &E) {
+        std::cerr << E.what() << '\n';
+        std::cerr << "Problem in wiki_graph::load()\n";
+        exit(EXIT_FAILURE);
     }
 }
 
@@ -152,9 +153,9 @@ graph_vertex &wiki_graph::front() {
     try {
         return vertex_list.front();
     }
-    catch (std::out_of_range &e) {
-        std::cerr << e.what() << '\n';
-        exit(1);
+    catch (const std::out_of_range &E) {
+        std::cerr << E.what() << '\n';
+        exit(EXIT_FAILURE);
     }
 }
 
@@ -167,9 +168,9 @@ graph_vertex &wiki_graph::back() {
     try {
         return vertex_list.back();
     }
-    catch (std::out_of_range &e) {
-        std::cerr << e.what() << '\n';
-        exit(1);
+    catch (const std::out_of_range &E) {
+        std::cerr << E.what() << '\n';
+        exit(EXIT_FAILURE);
     }
 }
 
@@ -191,11 +192,11 @@ void wiki_graph::push_back(const graph_vertex vertex) {
     //return vertex_list.push_back(vertex);
     try {
         //return vertex_list.push_back(vertex);
-        vertex_list.push_back(vertex);
+        return vertex_list.push_back(vertex);
     }
-    catch (std::bad_alloc &e) {
-        std::cerr << e.what() << '\n';
-        exit(1);
+    catch (const std::bad_alloc &E) {
+        std::cerr << E.what() << '\n';
+        exit(EXIT_FAILURE);
     }
 }
 

@@ -19,13 +19,20 @@ int wiki_loader::load() {
     // Get all file names ending in .ndjson in directory
     std::vector<std::string> file_names;
     for (const auto &FILE : fs::directory_iterator(MAIN_DIR.parent_path().parent_path() / "data/load/Articles-p")) {
-        if (FILE.path().extension() == ".ndjson" && fs::file_size(FILE) != 0)
-            file_names.push_back(FILE.path().filename());
+        if (FILE.path().extension() == ".ndjson" && fs::file_size(FILE) != 0){
+            try {
+                file_names.push_back(FILE.path().filename());
+            } catch (const std::exception &E) {
+                std::cerr << "\nError: " << E.what() << "\n\n";
+                return EXIT_FAILURE;
+            }
+            //file_names.push_back(FILE.path().filename());
+        }
     }
 
     if (file_names.empty()) {
         std::cout << "\n\nNo files found in directory\n\n";
-        return 0;
+        return EXIT_FAILURE;
     }
 
     std::set<std::string> titles;   // Set of titles to make sure all titles are sorted before adding to graph
@@ -44,7 +51,7 @@ int wiki_loader::load() {
             title_bar.set_option(indicators::option::ForegroundColor{indicators::Color::green});
         }
         title_bar.set_progress(percent);
-        file_in.open(FILE);
+        /* file_in.open(FILE);
         file_in.peek();
 
         // Check if file is empty or if not able to open
@@ -56,14 +63,38 @@ int wiki_loader::load() {
         }
 
         if (file_in.is_open())
+            file_in.close(); */
+        file_in.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+        try {
+            file_in.open(FILE);
+            file_in.peek();
+
+            // Check if file is empty or if not able to open
+            /* if (!file_in || file_in.eof()){
+                if (file_in.is_open())
+                    file_in.close(); */
+                //throw std::exception();
+            //if (file_in.eof() && file_in.is_open()) 
+                //file_in.close();
+                //throw std::ifstream::failure("No Loading " + FILE + '\n');
+                //std::cout << "\n\nNo Loading " << FILE << "\n\n";
+            while (!file_in.eof())
+                load_title(titles);
+
             file_in.close();
+        } catch (const std::ifstream::failure &E) {
+            std::cerr << E.what() << "\n";
+        }
+        /* } catch (const std::exception &e) {
+            std::cerr << "\n\nError loading " << FILE << "\n\n";
+        } */
         ++progress;
     }
 
     if (titles.empty()) {
         indicators::show_console_cursor(true);
         std::cout << "\n\nNo titles found in files\n\n";
-        return 0;
+        return EXIT_FAILURE;
     }
 
     // Show cursor
@@ -91,7 +122,7 @@ int wiki_loader::load() {
     if (graph->empty()) {
         indicators::show_console_cursor(true);
         std::cout << "\n\nNo titles loaded into graph\n\n";
-        return 0;
+        return EXIT_FAILURE;
     }
 
     std::cout << termcolor::reset << "\n\nLoading links into graph (Adjacent Nodes)...\n";
@@ -100,7 +131,7 @@ int wiki_loader::load() {
 
     // Load in each file's links
     for (const auto &FILE : file_names) {
-        file_in.open(FILE);
+        /* file_in.open(FILE);
         file_in.peek();
 
         // Check if file is empty or if not able to open
@@ -112,33 +143,69 @@ int wiki_loader::load() {
         }
 
         if (file_in.is_open())
+            file_in.close(); */
+        file_in.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+        try {
+            file_in.open(FILE);
+            file_in.peek();
+
+            // Check if file is empty or if not able to open
+            //if (!file_in || file_in.eof()){
+                //if (file_in.is_open())
+                    //file_in.close();
+                //throw std::exception();
+                //throw std::ifstream::failure("No Loading " + FILE + '\n');
+                //std::cout << "\n\nNo Loading " << FILE << "\n\n";
+            //}
+            
+            while (!file_in.eof())
+                load_links(links_bar, progress);
+
             file_in.close();
+        } catch (const std::ifstream::failure &E) {
+            std::cerr << E.what() << "\n\n";
+        }
     }
 
     indicators::show_console_cursor(true);
     auto file_load_time{std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - START_TIME).count()};
     std::cout << termcolor::reset << "\n\n" << graph->size() << " articles loaded from file in " << file_load_time << " seconds, or " << (float)file_load_time / 60 << " minutes!!!\n\n";
     fs::current_path(MAIN_DIR);
-    return graph->size();
+    return EXIT_SUCCESS;
 }
 
 
 // Load in a title to the set
-inline void wiki_loader::load_title(std::set<std::string> &titles) {
+inline int wiki_loader::load_title(std::set<std::string> &titles) {
     std::string JSON_line;
-    std::getline(file_in, JSON_line);
+    try {
+        std::getline(file_in, JSON_line);
+    } catch (const std::exception &e) {
+        std::cerr << "\n\nError loading line from file\n\n";
+        return EXIT_FAILURE;
+    }
+    //std::getline(file_in, JSON_line);
+
     file_in.peek();
     const json JSON = json::parse(JSON_line);  // { } Initialization breaks this ¯\_(ツ)_/¯
 
     const std::string TITLE{JSON[0].get<std::string>()};
-    titles.insert(TITLE);
-    return;
+    //titles.insert(TITLE);
+    try {
+        titles.insert(TITLE);
+    } catch (const std::exception &E) {
+        std::cerr << "\n\nError inserting title into set\n\n";
+        exit(EXIT_FAILURE);
+    }
+    return EXIT_SUCCESS;
 }
 
 
 // Load in a link to the graph
-inline void wiki_loader::load_links(indicators::BlockProgressBar &bar, unsigned int &progress) {
+inline int wiki_loader::load_links(indicators::BlockProgressBar &bar, unsigned int &progress) {
     const double PERCENT{100 * ((double)progress / (graph->size() - 1))};
+    std::string JSON_line;
+
     if (progress % 1000 == 0 || PERCENT >= 100) {  // Only update progress bar every 1000 titles to save time
         if (!bar.is_completed()) {
             if (PERCENT >= 100) {
@@ -148,8 +215,13 @@ inline void wiki_loader::load_links(indicators::BlockProgressBar &bar, unsigned 
             bar.set_progress(PERCENT);
         }
     }
-    std::string JSON_line;
-    std::getline(file_in, JSON_line);
+    
+    try {
+        std::getline(file_in, JSON_line);
+    } catch (const std::exception &E) {
+        std::cerr << "\n\nError loading line from file\n\n";
+        return EXIT_FAILURE;
+    }
     file_in.peek();
     const json JSON = json::parse(JSON_line);  // { } Initialization breaks this ¯\_(ツ)_/¯
     const std::string TITLE{JSON[0].get<std::string>()};
@@ -157,17 +229,29 @@ inline void wiki_loader::load_links(indicators::BlockProgressBar &bar, unsigned 
     ++progress;
     graph_vertex *page{graph->find(TITLE)};
     if (page == nullptr)
-        return;
+        return EXIT_FAILURE;
         
     for (const auto &LINK : JSON[1]) {
         graph_vertex *adjacent_page{graph->find(LINK.get<std::string>())};
-        if (adjacent_page != nullptr) {
+        /* if (adjacent_page != nullptr) {
             page->adjacent.push_back(adjacent_page);
             ++page->links;
             ++adjacent_page->linked_to;
             ++graph->num_edges;
+        } */
+        if (adjacent_page == nullptr)
+                continue;
+        try {
+
+            page->adjacent.push_back(adjacent_page);
+            ++page->links;
+            ++adjacent_page->linked_to;
+            ++graph->num_edges;
+        } catch (const std::exception &E) {
+            std::cerr << "\n\nError inserting adjacent page into vector\n\n";
+            exit(EXIT_FAILURE);
         }
     }
     page->adjacent.shrink_to_fit();  // Shrink the adjacent vector to fit the number of adjacent nodes (good for memory 👍)
-    return;
+    return EXIT_SUCCESS;
 }

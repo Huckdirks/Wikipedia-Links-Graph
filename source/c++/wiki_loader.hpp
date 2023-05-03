@@ -7,6 +7,7 @@
 #include "wiki_graph.hpp"
 
 // Libraries
+#include <exception>
 #include <filesystem>
 #include <fstream>
 #include <set>
@@ -30,8 +31,8 @@ class wiki_loader {
    private:
     std::ifstream file_in;
     wiki_graph *graph;
-    void load_title(std::set<std::string> &titles);
-    void load_links(indicators::BlockProgressBar &bar, unsigned int &progress);
+    int load_title(std::set<std::string> &titles);
+    int load_links(indicators::BlockProgressBar &bar, unsigned int &progress);
 };
 
 #endif

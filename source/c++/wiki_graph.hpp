@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <cmath>
 #include <deque>
+#include <exception>
 #include <execution>
 #include <future>
 #include <iostream>

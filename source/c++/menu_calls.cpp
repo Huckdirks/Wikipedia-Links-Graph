@@ -13,20 +13,26 @@ int menu_calls::display_page() {
 
     system("clear");
     std::cout << "\nWhat page would you like to display?\n";
-    std::getline(std::cin, title);
+    try {
+        std::getline(std::cin, title);
+    } catch (const std::exception &E) {
+        std::cerr << "\nError: " << E.what() << "\n\n";
+        return EXIT_FAILURE;
+    }
+    //std::getline(std::cin, title);
 
     system("clear");
     const auto PAGE = graph.find(title);
     if (PAGE == nullptr) {
         std::cout << "\nPage not found\n\n";
-        return 1;
+        return EXIT_FAILURE;
     }
 
     std::cout << "\nDo you want to also display " << PAGE->title << "'s links to pages?\n";
     const bool RESPONSE{y_or_n()};
     system("clear");
     PAGE->display(RESPONSE);
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 
@@ -104,18 +110,43 @@ int menu_calls::display_top_n() {
 
         if (csv) {
             std::string file_name{"top_" + std::to_string(n) + "_linked_articles.csv"};
-            file_out.open(file_name);
+            /* file_out.open(file_name);
             file_out << "Title,# Links To\n";
             for (const auto &PAGE : TOP_N_LIST)
-                file_out << PAGE->title << ',' << PAGE->linked_to << '\n';
+                file_out << PAGE->title << ',' << PAGE->linked_to << '\n'; */
+            file_out.exceptions(std::ofstream::failbit | std::ofstream::badbit);
+            try {
+                file_out.open(file_name);
+                file_out << "Title,# Links To\n";
+                for (const auto &PAGE : TOP_N_LIST)
+                    file_out << PAGE->title << ',' << PAGE->linked_to << '\n';
+            } catch (const std::ofstream::failure &E) {
+                std::cerr << "\nError: " << E.what() << "\n\n";
+                if (file_out.is_open())
+                    file_out.close();
+                return EXIT_FAILURE;
+            }
         } else {
             std::string file_name{"top_" + std::to_string(n) + "_linked_articles.txt"};
             unsigned int place{1};
-            file_out.open(file_name);
+            file_out.exceptions(std::ofstream::failbit | std::ofstream::badbit);
+            try {
+                file_out.open(file_name);
+                for (const auto &PAGE : TOP_N_LIST) {
+                    file_out << place << ") " << PAGE->title << ": " << PAGE->linked_to << '\n';
+                    ++place;
+                }
+            } catch (const std::ofstream::failure &E) {
+                std::cerr << "\nError: " << E.what() << "\n\n";
+                if (file_out.is_open())
+                    file_out.close();
+                return EXIT_FAILURE;
+            }
+            /* file_out.open(file_name);
             for (const auto &PAGE : TOP_N_LIST) {
                 file_out << place << ") " << PAGE->title << ": " << PAGE->linked_to << '\n';
                 ++place;
-            }
+            } */
         }
         if (file_out.is_open())
             file_out.close();
@@ -123,7 +154,7 @@ int menu_calls::display_top_n() {
     }
 
     std::cout << "\nTop " << n << " most linked to pages found in " << (float)END_TIME / 1000 << " seconds, or " << ((double)(END_TIME / 1000) / 60) << " minutes\n\n";
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 
@@ -141,7 +172,7 @@ int menu_calls::display_linked_to() {
     if (graph.find(title) == nullptr) {
         system("clear");
         std::cout << "Page not found\n\n";
-        return 1;
+        return EXIT_FAILURE;
     }
 
     system("clear");
@@ -167,7 +198,7 @@ int menu_calls::display_linked_to() {
     const auto LINKED_TO{graph.linked_to(title)};
     if (LINKED_TO.empty()) {
         std::cout << "\nNo pages link to " << title << ", or " << title << " isn't found\n";
-        return 1;
+        return EXIT_FAILURE;
     }
 
     if (!save) {
@@ -192,6 +223,38 @@ int menu_calls::display_linked_to() {
 
         if (csv) {
             std::string file_name{"pages_linking_to_" + save_title + ".csv"};
+            file_out.exceptions(std::ofstream::failbit | std::ofstream::badbit);
+            try {
+                file_out.open(file_name);
+                file_out << "Page,Pages linking to page\n" << title << ',';
+                for (const auto &PAGE : LINKED_TO)
+                    file_out << PAGE->title << ',';
+            } catch (const std::ofstream::failure &E) {
+                std::cerr << "\nError: " << E.what() << "\n\n";
+                if (file_out.is_open())
+                    file_out.close();
+                return EXIT_FAILURE;
+            }
+        } else {
+            std::string file_name{"pages_linking_to_" + save_title + ".txt"};
+            unsigned int place{1};
+            file_out.exceptions(std::ofstream::failbit | std::ofstream::badbit);
+            try {
+                file_out.open(file_name);
+                file_out << "Pages that link to " << title << ":\n";
+                for (const auto &PAGE : LINKED_TO) {
+                    file_out << place << ") " << PAGE->title << '\n';
+                    ++place;
+                }
+            } catch (const std::ofstream::failure &E) {
+                std::cerr << "\nError: " << E.what() << "\n\n";
+                if (file_out.is_open())
+                    file_out.close();
+                return EXIT_FAILURE;
+            }
+        }
+        /* if (csv) {
+            std::string file_name{"pages_linking_to_" + save_title + ".csv"};
             file_out.open(file_name);
             file_out << "Page,Pages linking to page\n" << title << ',';
             for (const auto &PAGE : LINKED_TO)
@@ -205,18 +268,18 @@ int menu_calls::display_linked_to() {
                 file_out << place << ") " << PAGE->title << '\n';
                 ++place;
             }
-        }
+        } */
         if (file_out.is_open())
             file_out.close();
         fs::current_path(MAIN_DIR);
         std::cout << "\nPages that link to " << title << " saved\n";
     }
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 
 // Display info about the Wikipedia dump
-int menu_calls::display_wiki_info(){
+void menu_calls::display_wiki_info(){
     system("clear");
     std::cout << "\nThis program uses the Wikipedia XML dump\n";
     std::cout << "The dump can be found at https://dumps.wikimedia.org/enwiki/latest/\n";
@@ -224,7 +287,7 @@ int menu_calls::display_wiki_info(){
     std::cout << "The full license can be found at https://creativecommons.org/licenses/by-sa/3.0/legalcode\n";
 
     std::cout << "\nWikipedia contains " << graph.size() << " pages and " << graph.num_edges << " links to other Wikipedia pages\n";
-    return 0;
+    return;
 }
 
 
@@ -233,6 +296,7 @@ bool menu_calls::y_or_n() {
     char response;
     std::cout << "\nPress Y for yes and anything else for no\n";
     std::cin >> response;
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
     if (toupper(response) == 'Y')
         return true;
