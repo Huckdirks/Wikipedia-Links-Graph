@@ -9,12 +9,19 @@ int wiki_loader::load() {
 
     // Change directory to Articles-p
     const fs::path MAIN_DIR{fs::current_path()};
-    fs::current_path(MAIN_DIR.parent_path().parent_path() / "data/load/");
+    try {
+        fs::current_path(MAIN_DIR.parent_path().parent_path() / "data/load/");
+        fs::current_path("Articles-p");
+    } catch (const fs::filesystem_error &E) {
+        std::cerr << "\nError: " << E.what() << "\n\n";
+        return EXIT_FAILURE;
+    }
+    /* fs::current_path(MAIN_DIR.parent_path().parent_path() / "data/load/");
     if (!fs::exists("Articles-p")) {
         std::cout << "\n\nNo directory to load from found\n\n";
         return 0;
     }
-    fs::current_path("Articles-p");
+    fs::current_path("Articles-p"); */
 
     // Get all file names ending in .ndjson in directory
     std::vector<std::string> file_names;
@@ -51,6 +58,8 @@ int wiki_loader::load() {
             title_bar.set_option(indicators::option::ForegroundColor{indicators::Color::green});
         }
         title_bar.set_progress(percent);
+
+        
         /* file_in.open(FILE);
         file_in.peek();
 
@@ -170,6 +179,12 @@ int wiki_loader::load() {
     indicators::show_console_cursor(true);
     auto file_load_time{std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - START_TIME).count()};
     std::cout << termcolor::reset << "\n\n" << graph->size() << " articles loaded from file in " << file_load_time << " seconds, or " << (float)file_load_time / 60 << " minutes!!!\n\n";
+    try {
+        fs::current_path(MAIN_DIR);
+    } catch (const fs::filesystem_error &E) {
+        std::cerr << E.what() << "\n\n";
+        return EXIT_FAILURE;
+    }
     fs::current_path(MAIN_DIR);
     return EXIT_SUCCESS;
 }
