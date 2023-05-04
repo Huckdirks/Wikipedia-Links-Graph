@@ -26,15 +26,8 @@ int wiki_loader::load() {
     // Get all file names ending in .ndjson in directory
     std::vector<std::string> file_names;
     for (const auto &FILE : fs::directory_iterator(MAIN_DIR.parent_path().parent_path() / "data/load/Articles-p")) {
-        if (FILE.path().extension() == ".ndjson" && fs::file_size(FILE) != 0){
-            try {
+        if (FILE.path().extension() == ".ndjson" && fs::file_size(FILE) != 0)
                 file_names.push_back(FILE.path().filename());
-            } catch (const std::exception &E) {
-                std::cerr << "\nError: " << E.what() << "\n\n";
-                return EXIT_FAILURE;
-            }
-            //file_names.push_back(FILE.path().filename());
-        }
     }
 
     if (file_names.empty()) {
@@ -73,7 +66,7 @@ int wiki_loader::load() {
 
         if (file_in.is_open())
             file_in.close(); */
-        file_in.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+        //file_in.exceptions(std::ifstream::failbit | std::ifstream::badbit);
         try {
             file_in.open(FILE);
             file_in.peek();
@@ -93,6 +86,7 @@ int wiki_loader::load() {
             file_in.close();
         } catch (const std::ifstream::failure &E) {
             std::cerr << E.what() << "\n";
+            return EXIT_FAILURE;
         }
         /* } catch (const std::exception &e) {
             std::cerr << "\n\nError loading " << FILE << "\n\n";
@@ -173,6 +167,7 @@ int wiki_loader::load() {
             file_in.close();
         } catch (const std::ifstream::failure &E) {
             std::cerr << E.what() << "\n\n";
+            return EXIT_FAILURE;
         }
     }
 
@@ -205,13 +200,7 @@ inline int wiki_loader::load_title(std::set<std::string> &titles) {
     const json JSON = json::parse(JSON_line);  // { } Initialization breaks this ¯\_(ツ)_/¯
 
     const std::string TITLE{JSON[0].get<std::string>()};
-    //titles.insert(TITLE);
-    try {
-        titles.insert(TITLE);
-    } catch (const std::exception &E) {
-        std::cerr << "\n\nError inserting title into set\n\n";
-        exit(EXIT_FAILURE);
-    }
+    titles.insert(TITLE);
     return EXIT_SUCCESS;
 }
 
@@ -233,12 +222,23 @@ inline int wiki_loader::load_links(indicators::BlockProgressBar &bar, unsigned i
     
     try {
         std::getline(file_in, JSON_line);
-    } catch (const std::exception &E) {
-        std::cerr << "\n\nError loading line from file\n\n";
+    } catch (const std::ifstream::failure &E) {
+        std::cerr << E.what() << "\n\n";
+        //std::cerr << "\n\nError loading line from file\n\n";
         return EXIT_FAILURE;
     }
     file_in.peek();
-    const json JSON = json::parse(JSON_line);  // { } Initialization breaks this ¯\_(ツ)_/¯
+    const json JSON{};
+    const json *JSON_ptr{&JSON};
+    json *change_ptr{const_cast<json *>(JSON_ptr)};
+    try {
+        *change_ptr = json::parse(JSON_line);
+        //const json JSON = json::parse(JSON_line);  // { } Initialization breaks this ¯\_(ツ)_/¯
+    } catch (const json::parse_error &E) {
+        std::cerr << E.what() << "\n\n";
+        return EXIT_FAILURE;
+    }
+    //const json JSON = json::parse(JSON_line);  // { } Initialization breaks this ¯\_(ツ)_/¯
     const std::string TITLE{JSON[0].get<std::string>()};
 
     ++progress;
@@ -248,24 +248,13 @@ inline int wiki_loader::load_links(indicators::BlockProgressBar &bar, unsigned i
         
     for (const auto &LINK : JSON[1]) {
         graph_vertex *adjacent_page{graph->find(LINK.get<std::string>())};
-        /* if (adjacent_page != nullptr) {
-            page->adjacent.push_back(adjacent_page);
-            ++page->links;
-            ++adjacent_page->linked_to;
-            ++graph->num_edges;
-        } */
         if (adjacent_page == nullptr)
                 continue;
-        try {
 
-            page->adjacent.push_back(adjacent_page);
-            ++page->links;
-            ++adjacent_page->linked_to;
-            ++graph->num_edges;
-        } catch (const std::exception &E) {
-            std::cerr << "\n\nError inserting adjacent page into vector\n\n";
-            exit(EXIT_FAILURE);
-        }
+        page->adjacent.push_back(adjacent_page);
+        ++page->links;
+        ++adjacent_page->linked_to;
+        ++graph->num_edges;
     }
     page->adjacent.shrink_to_fit();  // Shrink the adjacent vector to fit the number of adjacent nodes (good for memory 👍)
     return EXIT_SUCCESS;

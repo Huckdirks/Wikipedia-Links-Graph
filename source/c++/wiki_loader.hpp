@@ -25,7 +25,7 @@ class wiki_loader {
     /* wiki_loader(wiki_graph &Graph) {
         graph = &Graph;
     } */
-    wiki_loader(wiki_graph &Graph) : graph{&Graph} {}
+    wiki_loader(wiki_graph &Graph) : graph{&Graph} { file_in.exceptions(std::ifstream::failbit | std::ifstream::badbit); }
     int load();
 
    private:
