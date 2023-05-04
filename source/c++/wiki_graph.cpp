@@ -296,7 +296,10 @@ std::vector<graph_vertex *> wiki_graph::top_n_linked(const unsigned int N) {
         const auto *SEGMENT_PTR{&SEGMENT};
         auto change_ptr{const_cast<std::vector<graph_vertex *> *>(SEGMENT_PTR)};
         try {
-            change_ptr = &futures[i].get();
+            *change_ptr = futures[i].get();   // Might need to make the result of futures[i].get() a unique_ptr
+            //*change_ptr = std::make_unique<std::vector<graph_vertex *>>(futures[i].get());
+            //auto temp{std::make_unique<std::vector<graph_vertex *>>(futures[i].get())};
+            //change_ptr = temp.get();
         } catch (const std::future_error &E) {
             std::cerr << E.what() << '\n';
             exit(EXIT_FAILURE);
