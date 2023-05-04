@@ -9,21 +9,27 @@ int menu::init_menu() {
     // Initialize python script
     // Change directory to the python script
     const fs::path MAIN_DIR{fs::current_path()};
-    fs::current_path(MAIN_DIR.parent_path() / "python");
+    try {
+        fs::current_path(MAIN_DIR.parent_path() / "python");
+    } catch (const std::exception &e) {
+        std::cout << "\nError changing directory to python script\n";
+        return EXIT_FAILURE;
+    }
+    //fs::current_path(MAIN_DIR.parent_path() / "python");
     if (system("./init_python.sh")) {  // Returns 0 if successful ¯\_(ツ)_/¯
         std::cout << "\nError initializing python script\n";
-        return 1;
+        return EXIT_FAILURE;
     }
     fs::current_path(MAIN_DIR);
 
-    if (!load()){
+    if (load()){
         std::cout << "\nError loading graph\n";
-        return 1;
+        return EXIT_FAILURE;
     }
     // Keep the menu running as long as the user doesn't quit
     do flag = interface();
     while (!flag);
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 

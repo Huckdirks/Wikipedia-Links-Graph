@@ -50,8 +50,17 @@ int menu_calls::display_top_n() {
     // Check if input is a number
     do {
         is_digit = true;
-        std::cin >> num;
-        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        try {
+            std::cin >> num;
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        } catch (const std::exception &E) {
+            std::cerr << "\nError: " << E.what() << "\n\n";
+            return EXIT_FAILURE;
+        }
+        //std::cin >> num;
+        //std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+
         for (const char &C : num) {
             if (!isdigit(C)) {
                 system("clear");
@@ -69,8 +78,16 @@ int menu_calls::display_top_n() {
     std::cout << "Would you like to display or save the top " << n << " linked to pages to a file?\nPress D for display and S for save\n";
     char response{};
     do {
-        std::cin >> response;
-        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        try {
+            std::cin >> response;
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        } catch (const std::exception &E) {
+            std::cerr << "\nError: " << E.what() << "\n\n";
+            return EXIT_FAILURE;
+        }
+        //std::cin >> response;
+        //std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
         response = toupper(response);
         if (response != 'D' && response != 'S'){
             system("clear");
@@ -97,16 +114,61 @@ int menu_calls::display_top_n() {
             PAGE->display(false);
     } else {
         std::ofstream file_out;
+        file_out.exceptions(std::ofstream::failbit | std::ofstream::badbit);
         // Change directory to Articles-p
         const fs::path MAIN_DIR{fs::current_path()};
-        fs::current_path(MAIN_DIR.parent_path().parent_path() / "data/");
-        if (!fs::exists("user_data"))
+        try {
+            fs::current_path(MAIN_DIR.parent_path().parent_path() / "data/");
+        } catch (const fs::filesystem_error &E) {
+            std::cerr << "\nError: " << E.what() << "\n\n";
+            return EXIT_FAILURE;
+        }
+        //fs::current_path(MAIN_DIR.parent_path().parent_path() / "data/");
+        /* if (!fs::exists("user_data"))
             fs::create_directory("user_data");
-        fs::current_path("user_data");
+        fs::current_path("user_data"); */
+        try {
+            fs::current_path("user_data");
+        } catch (const fs::filesystem_error &E) {
+            try {
+                fs::create_directory("user_data");
+            } catch (const fs::filesystem_error &E) {
+                std::cerr << "\nError: " << E.what() << "\n\n";
+                return EXIT_FAILURE;
+            }
+            //fs::create_directory("user_data");
+            try {
+                fs::current_path("user_data");
+            } catch (const fs::filesystem_error &E) {
+                std::cerr << "\nError: " << E.what() << "\n\n";
+                return EXIT_FAILURE;
+            }
+            //std::cerr << "\nError: " << E.what() << "\n\n";
+            //return EXIT_FAILURE;
+        }
 
-        if (!fs::exists("top_linked_articles"))
+        try {
+            fs::current_path("top_linked_articles");
+        } catch (const fs::filesystem_error &E) {
+            try {
+                fs::create_directory("top_linked_articles");
+            } catch (const fs::filesystem_error &E) {
+                std::cerr << "\nError: " << E.what() << "\n\n";
+                return EXIT_FAILURE;
+            }
+            //fs::create_directory("top_linked_articles");
+            try {
+                fs::current_path("top_linked_articles");
+            } catch (const fs::filesystem_error &E) {
+                std::cerr << "\nError: " << E.what() << "\n\n";
+                return EXIT_FAILURE;
+            }
+            //std::cerr << "\nError: " << E.what() << "\n\n";
+            //return EXIT_FAILURE;
+        }
+        /* if (!fs::exists("top_linked_articles"))
             fs::create_directory("top_linked_articles");
-        fs::current_path("top_linked_articles");
+        fs::current_path("top_linked_articles"); */
 
         if (csv) {
             std::string file_name{"top_" + std::to_string(n) + "_linked_articles.csv"};
@@ -114,7 +176,6 @@ int menu_calls::display_top_n() {
             file_out << "Title,# Links To\n";
             for (const auto &PAGE : TOP_N_LIST)
                 file_out << PAGE->title << ',' << PAGE->linked_to << '\n'; */
-            file_out.exceptions(std::ofstream::failbit | std::ofstream::badbit);
             try {
                 file_out.open(file_name);
                 file_out << "Title,# Links To\n";
@@ -129,7 +190,6 @@ int menu_calls::display_top_n() {
         } else {
             std::string file_name{"top_" + std::to_string(n) + "_linked_articles.txt"};
             unsigned int place{1};
-            file_out.exceptions(std::ofstream::failbit | std::ofstream::badbit);
             try {
                 file_out.open(file_name);
                 for (const auto &PAGE : TOP_N_LIST) {
@@ -150,7 +210,13 @@ int menu_calls::display_top_n() {
         }
         if (file_out.is_open())
             file_out.close();
-        fs::current_path(MAIN_DIR);
+        try {
+            fs::current_path(MAIN_DIR);
+        } catch (const fs::filesystem_error &E) {
+            std::cerr << "\nError: " << E.what() << "\n\n";
+            return EXIT_FAILURE;
+        }
+        //fs::current_path(MAIN_DIR);
     }
 
     std::cout << "\nTop " << n << " most linked to pages found in " << (float)END_TIME / 1000 << " seconds, or " << ((double)(END_TIME / 1000) / 60) << " minutes\n\n";
@@ -166,7 +232,13 @@ int menu_calls::display_linked_to() {
 
     system("clear");
     std::cout << "\nWhat page would you like to find all the other pages linking to?\n";
-    std::getline(std::cin, title);
+    try {
+        std::getline(std::cin, title);
+    } catch (const std::ios_base::failure &E) {
+        std::cerr << "\nError: " << E.what() << "\n\n";
+        return EXIT_FAILURE;
+    }
+    //std::getline(std::cin, title);
 
     // Check if the page actually exists
     if (graph.find(title) == nullptr) {
@@ -179,8 +251,17 @@ int menu_calls::display_linked_to() {
     std::cout << "Would you like to display or save the pages linking to " << title << "?\nPress D for display and S for save\n";
     char response{};
     do {
-        std::cin >> response;
-        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        try {
+            std::cin >> response;
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        } catch (const std::ios_base::failure &E) {
+            std::cerr << "\nError: " << E.what() << "\n\n";
+            return EXIT_FAILURE;
+        }
+        //std::cin >> response;
+        //std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+
         response = toupper(response);
         if (response != 'D' && response != 'S'){
             system("clear");
@@ -207,12 +288,28 @@ int menu_calls::display_linked_to() {
             std::cout << i + 1 << ") " << LINKED_TO[i]->title << '\n';
     } else {
         std::ofstream file_out;
+        file_out.exceptions(std::ofstream::failbit | std::ofstream::badbit);
         // Change directory to Articles-p
-        const fs::path MAIN_DIR{fs::current_path()};
+        fs::path MAIN_DIR{fs::current_path()};
         fs::current_path(MAIN_DIR.parent_path().parent_path() / "data/");
-        if (!fs::exists("user_data"))
+        
+        try {
+            fs::current_path("user_data");
+        } catch (const fs::filesystem_error &E) {
             fs::create_directory("user_data");
-        fs::current_path("user_data");
+            try {
+                fs::current_path("user_data");
+            } catch (const fs::filesystem_error &E) {
+                std::cerr << "\nError: " << E.what() << "\n\n";
+                return EXIT_FAILURE;
+            }
+            //std::cerr << "\nError: " << E.what() << "\n\n";
+            //return EXIT_FAILURE;
+        }
+
+        /* if (!fs::exists("user_data"))
+            fs::create_directory("user_data");
+        fs::current_path("user_data"); */
 
         if (!fs::exists("pages_linking_to"))
             fs::create_directory("pages_linking_to");
