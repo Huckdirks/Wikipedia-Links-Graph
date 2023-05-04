@@ -5,4 +5,7 @@ cd $SCRIPT_DIR/source/c++
 echo "Compiling..."
 g++ -std=c++20 -Wextra -Wall -Werror -D_GLIBCXX_ASSERTIONS -O3 *.cpp -o run
 # -std=c++20 for C++ 20 Version | -Wextra, -Wall, & -Werror for warnings/errors | -D_GLIBCXX_ASSERTIONS for run-time bounds checking for C++ strings and containers | -O3 for optimization
+
+# Debug Build (No Optimization with Debug Symbols)
+# g++ -std=c++20 -Wextra -Wall -Werror -D_GLIBCXX_ASSERTIONS -g3 *.cpp -o run
 echo "Compiled successfully!"
