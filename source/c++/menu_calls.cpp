@@ -291,12 +291,24 @@ int menu_calls::display_linked_to() {
         file_out.exceptions(std::ofstream::failbit | std::ofstream::badbit);
         // Change directory to Articles-p
         fs::path MAIN_DIR{fs::current_path()};
-        fs::current_path(MAIN_DIR.parent_path().parent_path() / "data/");
+        try {
+            fs::current_path(MAIN_DIR.parent_path().parent_path() / "data/");
+        } catch (const fs::filesystem_error &E) {
+            std::cerr << "\nError: " << E.what() << "\n\n";
+            return EXIT_FAILURE;
+        }
+        //fs::current_path(MAIN_DIR.parent_path().parent_path() / "data/");
         
         try {
             fs::current_path("user_data");
         } catch (const fs::filesystem_error &E) {
-            fs::create_directory("user_data");
+            try {
+                fs::create_directory("user_data");
+            } catch (const fs::filesystem_error &E) {
+                std::cerr << "\nError: " << E.what() << "\n\n";
+                return EXIT_FAILURE;
+            }
+            //fs::create_directory("user_data");
             try {
                 fs::current_path("user_data");
             } catch (const fs::filesystem_error &E) {
@@ -311,16 +323,31 @@ int menu_calls::display_linked_to() {
             fs::create_directory("user_data");
         fs::current_path("user_data"); */
 
-        if (!fs::exists("pages_linking_to"))
+        try {
+            fs::current_path("pages_linking_to");
+        } catch (const fs::filesystem_error &E) {
+            try {
+                fs::create_directory("pages_linking_to");
+            } catch (const fs::filesystem_error &E) {
+                std::cerr << "\nError: " << E.what() << "\n\n";
+                return EXIT_FAILURE;
+            }
+            try {
+                fs::current_path("pages_linking_to");
+            } catch (const fs::filesystem_error &E) {
+                std::cerr << "\nError: " << E.what() << "\n\n";
+                return EXIT_FAILURE;
+            }
+        }
+        /* if (!fs::exists("pages_linking_to"))
             fs::create_directory("pages_linking_to");
-        fs::current_path("pages_linking_to");
+        fs::current_path("pages_linking_to"); */
 
         std::string save_title{title};
         std::replace(save_title.begin(), save_title.end(), ' ', '_');  // Replace spaces with underscores in the title for ✨𝒻ℴ𝓇𝓂𝒶𝓉𝓉𝒾𝓃ℊ✨
 
         if (csv) {
             std::string file_name{"pages_linking_to_" + save_title + ".csv"};
-            file_out.exceptions(std::ofstream::failbit | std::ofstream::badbit);
             try {
                 file_out.open(file_name);
                 file_out << "Page,Pages linking to page\n" << title << ',';
@@ -335,7 +362,6 @@ int menu_calls::display_linked_to() {
         } else {
             std::string file_name{"pages_linking_to_" + save_title + ".txt"};
             unsigned int place{1};
-            file_out.exceptions(std::ofstream::failbit | std::ofstream::badbit);
             try {
                 file_out.open(file_name);
                 file_out << "Pages that link to " << title << ":\n";
@@ -368,7 +394,13 @@ int menu_calls::display_linked_to() {
         } */
         if (file_out.is_open())
             file_out.close();
-        fs::current_path(MAIN_DIR);
+        try {
+            fs::current_path(MAIN_DIR);
+        } catch (const fs::filesystem_error &E) {
+            std::cerr << "\nError: " << E.what() << "\n\n";
+            return EXIT_FAILURE;
+        }
+        //fs::current_path(MAIN_DIR);
         std::cout << "\nPages that link to " << title << " saved\n";
     }
     return EXIT_SUCCESS;
@@ -392,8 +424,17 @@ void menu_calls::display_wiki_info(){
 bool menu_calls::y_or_n() {
     char response;
     std::cout << "\nPress Y for yes and anything else for no\n";
-    std::cin >> response;
-    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    //std::cin >> response;
+    //std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    try {
+        std::cin >> response;
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    } catch (const std::ios_base::failure &E) {
+        std::cerr << "\nError: " << E.what() << "\n\n";
+        std::cin.clear();   // Clear the error flags
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        return false;   // Not an essential function so we can just return false
+    }
 
     if (toupper(response) == 'Y')
         return true;
