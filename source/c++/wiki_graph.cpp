@@ -451,6 +451,7 @@ std::vector<graph_vertex *> wiki_graph::all_linked_to(const std::string &LINKED_
 
     // Sort the vector by title to make it fancy
     // Also IDK why VSCode is mad about std::execution::par, it works fine. Just get rid of that parameter if you really don't like the error
+    // HA I figured out why. Just configure your intellisense to use g++(17+) instead of clang (also clang won't allow you to compile with std::execution::par)
     std::sort(std::execution::par, linked_to_list.begin(), linked_to_list.end(), [](graph_vertex *a, graph_vertex *b) { return a->title < b->title; });
 
     indicators::show_console_cursor(true);

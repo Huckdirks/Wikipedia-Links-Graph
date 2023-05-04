@@ -271,7 +271,7 @@ int menu_calls::display_linked_to() {
     if (response == 'S') {
         save = true;
         system("clear");
-        std::cout << "Would you like to save as a .csv file instead of a .txt?\nPress Y for yes and N for no\n";
+        std::cout << "Would you like to save as a .csv file instead of a .txt?";
         csv = y_or_n();
     }
 
