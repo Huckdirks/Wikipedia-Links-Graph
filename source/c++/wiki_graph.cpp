@@ -1,6 +1,5 @@
 // Files to include
 #include "wiki_graph.hpp"
-
 #include "wiki_loader.hpp"
 
 // Graph Vertex Functions:
@@ -133,15 +132,7 @@ std::vector<graph_vertex *> wiki_graph::linked_to(const std::string &TO_FIND) {
 // Load articles from file
 int wiki_graph::load() {
     wiki_loader loader(*this);
-    //return loader.load();
-    try {
-        return loader.load();
-    }
-    catch (const std::bad_alloc &E) {
-        std::cerr << E.what() << '\n';
-        std::cerr << "Problem in wiki_graph::load()\n";
-        exit(EXIT_FAILURE);
-    }
+    return loader.load();
 }
 
 
@@ -189,15 +180,7 @@ unsigned int wiki_graph::size() const {
 
 // Add vertex to the end of the list
 void wiki_graph::push_back(const graph_vertex vertex) {
-    //return vertex_list.push_back(vertex);
-    try {
-        //return vertex_list.push_back(vertex);
-        return vertex_list.push_back(vertex);
-    }
-    catch (const std::bad_alloc &E) {
-        std::cerr << E.what() << '\n';
-        exit(EXIT_FAILURE);
-    }
+    return vertex_list.push_back(vertex);
 }
 
 
@@ -288,7 +271,13 @@ std::vector<graph_vertex *> wiki_graph::top_n_linked(const unsigned int N) {
     // Split the graph into (cores) segments and run top_n_linked_segment on each segment in parallel
     for (unsigned int i{}; i < cores; ++i) {
         bars.push_back(block_bars[i]);
-        futures[i] = std::async(std::launch::async, &wiki_graph::top_n_linked_segment, this, N, i * segment_size, (i + 1) * segment_size, std::ref(bars));
+        try {
+            futures[i] = std::async(std::launch::async, &wiki_graph::top_n_linked_segment, this, N, i * segment_size, (i + 1) * segment_size, std::ref(bars));
+        } catch (const std::future_error &E) {
+            std::cerr << E.what() << '\n';
+            exit(EXIT_FAILURE);
+        }
+        //futures[i] = std::async(std::launch::async, &wiki_graph::top_n_linked_segment, this, N, i * segment_size, (i + 1) * segment_size, std::ref(bars));
     }
 
     // Wait for all the functions to finish and get the results
@@ -303,7 +292,18 @@ std::vector<graph_vertex *> wiki_graph::top_n_linked(const unsigned int N) {
 
     // Go through the results of top_n_linked_segment's results and find the top n
     for (unsigned int i{}; i < cores; ++i) {
-        const auto SEGMENT{futures[i].get()};
+        const std::vector<graph_vertex *> SEGMENT{};    // For exception handling for the future I need to set it's value in the try block, but since it's const after being set I use const_cast to set it
+        const auto *SEGMENT_PTR{&SEGMENT};
+        auto change_ptr{const_cast<std::vector<graph_vertex *> *>(SEGMENT_PTR)};
+        try {
+            change_ptr = &futures[i].get();
+        } catch (const std::future_error &E) {
+            std::cerr << E.what() << '\n';
+            exit(EXIT_FAILURE);
+        }
+        //change_ptr = &futures[i].get();
+
+        //futures[i].get();
         double percent{100 * ((double)progress / (N * cores))};
         for (const auto &VERTEX : SEGMENT) {
             // Progress bar
@@ -434,7 +434,12 @@ std::vector<graph_vertex *> wiki_graph::all_linked_to(const std::string &LINKED_
     // Split the graph into (CORES) segments and run top_n_linked_segment on each segment in parallel
     for (unsigned int i{}; i < CORES; ++i) {
         bars.push_back(block_bars[i]);
-        futures[i] = std::async(std::launch::async, &wiki_graph::all_linked_to_segment, this, LINKED_TO, i * SEGMENT_SIZE, (i + 1) * SEGMENT_SIZE, std::ref(bars));
+        try {
+            futures[i] = std::async(std::launch::async, &wiki_graph::all_linked_to_segment, this, LINKED_TO, i * SEGMENT_SIZE, (i + 1) * SEGMENT_SIZE, std::ref(bars));
+        } catch (const std::future_error &E) {
+            std::cerr << E.what() << '\n';
+        }
+        //futures[i] = std::async(std::launch::async, &wiki_graph::all_linked_to_segment, this, LINKED_TO, i * SEGMENT_SIZE, (i + 1) * SEGMENT_SIZE, std::ref(bars));
     }
 
     // Wait for all the functions to finish and get the results
@@ -445,7 +450,12 @@ std::vector<graph_vertex *> wiki_graph::all_linked_to(const std::string &LINKED_
 
     // Combine the results of each thread into one vector
     for (unsigned int i{}; i < CORES; ++i) {
-        std::vector<graph_vertex *> temp{futures[i].get()};
+        std::vector<graph_vertex *> temp{};
+        try {
+            temp = futures[i].get();
+        } catch (const std::future_error &E) {
+            std::cerr << E.what() << '\n';
+        }
         std::move(temp.begin(), temp.end(), std::back_inserter(linked_to_list));    // moving is faster than copying I guess
     }
 
