@@ -22,9 +22,6 @@ using json = nlohmann::json;
 // File IO
 class wiki_loader {
    public:
-    /* wiki_loader(wiki_graph &Graph) {
-        graph = &Graph;
-    } */
     wiki_loader(wiki_graph &Graph) : graph{&Graph} { file_in.exceptions(std::ifstream::failbit | std::ifstream::badbit); }
     int load();
 
