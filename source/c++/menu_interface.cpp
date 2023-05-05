@@ -7,6 +7,22 @@ int menu::init_menu() {
     system("clear");
 
     // Initialize python script
+    //python_init python;
+    //python.init_python();
+
+    FILE *python_file{};
+    const std::string MAIN_PY_PATH = "/Users/Huck/Desktop/Coding/Personal_Projects/Wiki_Graph/Wikipedia_Graph/source/python/main.py";
+    Py_Initialize();
+    PyObject* sys_path = PySys_GetObject("path");
+    PyList_Append(sys_path, PyUnicode_FromString("/Users/Huck/Desktop/Coding/Personal_Projects/Wiki_Graph/Wikipedia_Graph/source/python"));
+    
+    python_file = fopen(MAIN_PY_PATH.c_str(), "r");
+    // Run the main python script
+    PyRun_SimpleFile(python_file, MAIN_PY_PATH.c_str());
+
+    Py_Finalize();
+
+    /* // Initialize python script
     // Change directory to the python script
     const fs::path MAIN_DIR{fs::current_path()};
     try {
@@ -20,7 +36,7 @@ int menu::init_menu() {
         std::cout << "\nError initializing python script\n";
         return EXIT_FAILURE;
     }
-    fs::current_path(MAIN_DIR);
+    fs::current_path(MAIN_DIR); */
 
     if (load()){
         std::cout << "\nError loading graph\n";

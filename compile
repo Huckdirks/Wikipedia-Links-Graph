@@ -3,9 +3,11 @@
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
 echo "Compiling..."
-g++ -std=c++20 -Wextra -Wall -Werror -fexceptions -fno-common -D_GLIBCXX_ASSERTIONS -O3 $SCRIPT_DIR/source/c++/*.cpp -o $SCRIPT_DIR/source/c++/run
+
+# Release Build (Max Optimization with No Debug)
+g++ -std=c++20 -Wextra -Wall -Werror -fexceptions -fno-common -D_GLIBCXX_ASSERTIONS -O3 `python3-config --includes --embed` $SCRIPT_DIR/source/c++/*.cpp -o $SCRIPT_DIR/source/c++/run `python3.11-config --ldflags --embed`
 # Debug Build (No Optimization with Max Debug)
-# g++ -std=c++20 -Wextra -Wall -Werror -fexceptions -fno-common -D_GLIBCXX_ASSERTIONS -g3 $SCRIPT_DIR/source/c++/*.cpp -o run
+#g++ -std=c++20 -Wextra -Wall -Werror -fexceptions -fno-common -D_GLIBCXX_ASSERTIONS -g3 `python3-config --includes --embed` $SCRIPT_DIR/source/c++/*.cpp -o $SCRIPT_DIR/source/c++/run `python3.11-config --ldflags --embed`
 
 # https://developers.redhat.com/blog/2018/03/21/compiler-and-linker-flags-gcc
 # -std=c++20: Specifies the C++ standard version whose features are requested to be enabled. The default, if no C++ language dialect options are given, is -std=gnu++98.
@@ -19,7 +21,7 @@ g++ -std=c++20 -Wextra -Wall -Werror -fexceptions -fno-common -D_GLIBCXX_ASSERTI
 # -g3: Produce debugging information for use by GDB. This means to use the most expressive format available (DWARF 2, stabs, or the native format if neither of those are supported), including GDB extensions if at all possible.
 
 if [ $? -eq 0 ]; then
-  echo "\nCompilation successful. Output file: ../source/c++/run"
+  echo "\nCompilation successful. Output file: Wikipedia_Graph/source/c++/run"
 else
   echo "\nCompilation failed."
   exit 1

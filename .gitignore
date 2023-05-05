@@ -6,3 +6,5 @@ source/Python/__pycache__
 # Files
 source/C++/run
 .DS_Store
+*.plist
+*.dSYM
