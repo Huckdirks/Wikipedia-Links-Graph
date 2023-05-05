@@ -1,0 +1,30 @@
+#!/bin/sh
+
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+
+echo "Compiling..."
+
+# Release Build (Max Optimization with No Debug)
+g++ -std=c++20 -Wextra -Wall -Werror -fexceptions -fno-common -D_GLIBCXX_ASSERTIONS -O3 `python3-config --includes --embed` $SCRIPT_DIR/source/c++/*.cpp -o $SCRIPT_DIR/source/c++/run `python3.11-config --ldflags --embed`
+# Debug Build (No Optimization with Max Debug)
+#g++ -std=c++20 -Wextra -Wall -Werror -fexceptions -fno-common -D_GLIBCXX_ASSERTIONS -g3 `python3-config --includes --embed` $SCRIPT_DIR/source/c++/*.cpp -o $SCRIPT_DIR/source/c++/run `python3.11-config --ldflags --embed`
+
+# https://developers.redhat.com/blog/2018/03/21/compiler-and-linker-flags-gcc
+# -std=c++20: Specifies the C++ standard version whose features are requested to be enabled. The default, if no C++ language dialect options are given, is -std=gnu++98.
+# -Wextra: Enables some extra warning flags that are not enabled by -Wall.
+# -Wall: Enables all the warnings about constructions that some users consider questionable, and that are easy to avoid (or modify to prevent the warning), even in conjunction with macros.
+# -Werror: Make all warnings into errors.
+# -fexceptions: Enable exception handling. Also recommended for hardening of multi-threaded C and C++ code.
+# -fno-common: Specifies that the compiler places uninitialized global variables in the BSS section of the object file. This inhibits the merging of tentative definitions by the linker so you get a multiple-definition error if the same variable is accidentally defined in more than one compilation unit.
+# _GLIBCXX_ASSERTIONS: Undefined by default. When defined, enables extra error checking in the form of precondition assertions, such as bounds checking in strings and null pointer checks when dereferencing smart pointers.
+# -O3: Optimize yet more. -O3 turns on all optimizations specified by -O2 and also turns on the -finline-functions, -funswitch-loops, -fpredictive-commoning, -fgcse-after-reload, -ftree-vectorize, -ftree-partial-pre and -fipa-cp-clone options.
+# -g3: Produce debugging information for use by GDB. This means to use the most expressive format available (DWARF 2, stabs, or the native format if neither of those are supported), including GDB extensions if at all possible.
+# `python3-config --includes --embed`: Returns the include directories and flags needed to compile a Python extension in the same way that the interpreter was compiled. This is needed to compile C++ code that uses the Python C API.
+# `python3-config --ldflags --embed`: Returns the linker flags needed to link a Python extension library in the same way that the interpreter was linked. This is needed to compile C++ code that uses the Python C API.
+
+if [ $? -eq 0 ]; then
+  echo "\nCompilation successful. Output file: Wikipedia_Graph/source/c++/run"
+else
+  echo "\nCompilation failed."
+  exit 1
+fi
