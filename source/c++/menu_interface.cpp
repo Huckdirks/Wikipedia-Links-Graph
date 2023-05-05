@@ -7,36 +7,25 @@ int menu::init_menu() {
     system("clear");
 
     // Initialize python script
-    //python_init python;
-    //python.init_python();
-
+    const std::string PYTHON_PATH{fs::current_path().parent_path().string() + "/python/"};
+    const std::string MAIN_PY_PATH{PYTHON_PATH + "main.py"};
     FILE *python_file{};
-    const std::string MAIN_PY_PATH = "/Users/Huck/Desktop/Coding/Personal_Projects/Wiki_Graph/Wikipedia_Graph/source/python/main.py";
+
     Py_Initialize();
+
+    // Add any other files besides main.py in Wikipedia_Graph/source/python/ to the python path
     PyObject* sys_path = PySys_GetObject("path");
-    PyList_Append(sys_path, PyUnicode_FromString("/Users/Huck/Desktop/Coding/Personal_Projects/Wiki_Graph/Wikipedia_Graph/source/python"));
-    
-    python_file = fopen(MAIN_PY_PATH.c_str(), "r");
-    // Run the main python script
-    PyRun_SimpleFile(python_file, MAIN_PY_PATH.c_str());
+    PyList_Append(sys_path, PyUnicode_FromString(PYTHON_PATH.c_str()));
 
-    Py_Finalize();
-
-    /* // Initialize python script
-    // Change directory to the python script
-    const fs::path MAIN_DIR{fs::current_path()};
     try {
-        fs::current_path(MAIN_DIR.parent_path() / "python");
-    } catch (const std::exception &e) {
-        std::cout << "\nError changing directory to python script\n";
+        python_file = fopen(MAIN_PY_PATH.c_str(), "r");
+    } catch (std::exception &e) {
+        std::cout << "\nError loading python script\n";
         return EXIT_FAILURE;
     }
-    //fs::current_path(MAIN_DIR.parent_path() / "python");
-    if (system("./init_python.sh")) {  // Returns 0 if successful ¯\_(ツ)_/¯
-        std::cout << "\nError initializing python script\n";
-        return EXIT_FAILURE;
-    }
-    fs::current_path(MAIN_DIR); */
+    // Run the main python script & finalize python
+    PyRun_SimpleFile(python_file, MAIN_PY_PATH.c_str());
+    Py_Finalize();
 
     if (load()){
         std::cout << "\nError loading graph\n";

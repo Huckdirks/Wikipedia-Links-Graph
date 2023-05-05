@@ -2,7 +2,6 @@
 #define MENU_HPP
 
 // Files to include
-#include "utility.hpp"
 #include "wiki_graph.hpp"
 
 // Libraries
@@ -13,6 +12,7 @@
 #include <iostream>
 #include <limits>
 #include <string>
+#include <Python.h>
 
 // Namespaces
 namespace fs = std::filesystem;
@@ -35,7 +35,7 @@ class menu_calls {
 };
 
 // Menu Interface
-class menu : public menu_calls, public python_init {
+class menu : public menu_calls {
    public:
     menu() { init_menu(); }
 
