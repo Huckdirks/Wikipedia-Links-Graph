@@ -5,6 +5,7 @@
 #include "indicators/indicators.hpp"
 
 // Libraries
+#include <atomic>
 #include <algorithm>
 #include <cmath>
 #include <deque>
@@ -25,7 +26,9 @@ class graph_vertex {
    public:
     std::string title;
     std::vector<graph_vertex *> adjacent;  // Adjacent = links
-    unsigned int links{};
+    //std::atomic_int links{};           // Gets modified by multiple threads so it needs to be atomic
+    //std::atomic_int linked_to{};
+    unsigned int links{};   // These should be atomic but everything breaks for some reason when I make them atomic
     unsigned int linked_to{};
 
     // Constructors (I only had to do this because -Werror=deprecated-copy from -Wextra)

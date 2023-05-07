@@ -8,7 +8,6 @@
 #include "wiki_graph.hpp"
 
 // Libraries
-#include <atomic>
 #include <exception>
 #include <filesystem>
 #include <fstream>
@@ -31,10 +30,10 @@ class wiki_loader {
    private:
     //std::ifstream file_in;
     wiki_graph *graph;
-    std::set<std::string> load_titles(const std::string FILE_NAME, std::atomic_int &progress, const unsigned int NUM_FILES, indicators::BlockProgressBar &title_bar);
+    std::set<std::string> load_titles(const std::string FILE_NAME, unsigned int &progress, const unsigned int NUM_FILES, indicators::BlockProgressBar &title_bar);
     int load_title(std::set<std::string> &titles, std::ifstream &file_in);
-    int load__links();
-    int load_page_links(indicators::BlockProgressBar &bar, std::atomic_int &progress);
+    int load_links(std::ifstream &file_in);
+    int load_page_links(indicators::BlockProgressBar &bar, unsigned int &progress);
 };
 
 #endif
