@@ -16,12 +16,6 @@ int wiki_loader::load() {
         std::cerr << "\nError: " << E.what() << "\n\n";
         return EXIT_FAILURE;
     }
-    /* fs::current_path(MAIN_DIR.parent_path().parent_path() / "data/load/");
-    if (!fs::exists("Articles-p")) {
-        std::cout << "\n\nNo directory to load from found\n\n";
-        return 0;
-    }
-    fs::current_path("Articles-p"); */
 
     // Get all file names ending in .ndjson in directory
     std::vector<std::string> file_names;
@@ -36,14 +30,40 @@ int wiki_loader::load() {
     }
 
     std::set<std::string> titles;   // Set of titles to make sure all titles are sorted before adding to graph
+    BS::thread_pool pool;
     std::cout << "\nLoading " << file_names.size() << " files...\n";
     // Progress bar
     indicators::BlockProgressBar title_bar{indicators::option::BarWidth{80}, indicators::option::Start{"["}, indicators::option::End{"]"}, indicators::option::ShowElapsedTime{true}, indicators::option::ShowRemainingTime{true}, indicators::option::ForegroundColor{indicators::Color::red}, indicators::option::FontStyles{std::vector<indicators::FontStyle>{indicators::FontStyle::bold}}};
     unsigned int progress{};
-    double percent{};
+    std::vector <std::future<std::set<std::string>>> title_futures;
+    //double percent{};
     indicators::show_console_cursor(false); // Hide cursor
-
     // Load in each file's titles to a set to make it ordered
+    //for (const auto &FILE : file_names)
+    unsigned int y{};
+    for (unsigned int i{}; i < file_names.size(); ++i){
+        title_futures.push_back(pool.submit([this, file_names, i]() -> std::set<std::string> {
+            std::ifstream file_in;
+            std::set<std::string> titles;
+            const std::string FILE_NAME{file_names[i]};
+            try {
+                file_in.open(FILE_NAME);
+                file_in.peek();
+
+                // Check if file is empty or if not able to open
+                while (!file_in.eof())
+                    load_title(titles, file_in);
+
+                file_in.close();
+            } catch (const std::ifstream::failure &E) {
+                std::cerr << E.what() << "\n";
+                return titles;
+            }
+            //++progress;
+            return titles;
+        }));
+    }
+    /* // Load in each file's titles to a set to make it ordered
     for (const auto &FILE : file_names) {
         percent = 100 * ((double)progress / (file_names.size() - 1));
         if (title_bar.is_completed() || percent >= 100) {
@@ -52,34 +72,11 @@ int wiki_loader::load() {
         }
         title_bar.set_progress(percent);
 
-        
-        /* file_in.open(FILE);
-        file_in.peek();
-
-        // Check if file is empty or if not able to open
-        if (!file_in || file_in.eof())
-            std::cout << "\n\nNo Loading " << FILE << "\n\n";
-        else {
-            while (!file_in.eof())
-                load_title(titles);
-        }
-
-        if (file_in.is_open())
-            file_in.close(); */
-        //file_in.exceptions(std::ifstream::failbit | std::ifstream::badbit);
         try {
             file_in.open(FILE);
             file_in.peek();
 
             // Check if file is empty or if not able to open
-            /* if (!file_in || file_in.eof()){
-                if (file_in.is_open())
-                    file_in.close(); */
-                //throw std::exception();
-            //if (file_in.eof() && file_in.is_open()) 
-                //file_in.close();
-                //throw std::ifstream::failure("No Loading " + FILE + '\n');
-                //std::cout << "\n\nNo Loading " << FILE << "\n\n";
             while (!file_in.eof())
                 load_title(titles);
 
@@ -88,11 +85,8 @@ int wiki_loader::load() {
             std::cerr << E.what() << "\n";
             return EXIT_FAILURE;
         }
-        /* } catch (const std::exception &e) {
-            std::cerr << "\n\nError loading " << FILE << "\n\n";
-        } */
         ++progress;
-    }
+    } */
 
     if (titles.empty()) {
         indicators::show_console_cursor(true);
@@ -104,11 +98,11 @@ int wiki_loader::load() {
     std::cout << termcolor::reset << "\n\nLoading " << titles.size() << " titles into the graph...\n";
     indicators::BlockProgressBar graph_titles_bar{indicators::option::BarWidth{80}, indicators::option::Start{"["}, indicators::option::End{"]"}, indicators::option::ShowElapsedTime{true}, indicators::option::ShowRemainingTime{true}, indicators::option::ForegroundColor{indicators::Color::red}, indicators::option::FontStyles{std::vector<indicators::FontStyle>{indicators::FontStyle::bold}}};
     progress = 0;
-    percent = 0;
+    //percent = 0;
 
     // Load in each title to the graph
     for (const auto &TITLE : titles) {
-        percent = 100 * ((double)progress / (titles.size() - 1));
+        double percent = 100 * ((double)progress / (titles.size() - 1));
         if (progress % 10000 == 0 || percent >= 100) {  // Only update progress bar every 1000 titles to save time
             if (graph_titles_bar.is_completed() || percent >= 100) {
                 graph_titles_bar.set_option(indicators::option::ShowRemainingTime{false});
@@ -134,35 +128,12 @@ int wiki_loader::load() {
 
     // Load in each file's links
     for (const auto &FILE : file_names) {
-        /* file_in.open(FILE);
-        file_in.peek();
-
-        // Check if file is empty or if not able to open
-        if (!file_in || file_in.eof())
-            std::cout << "\n\nNo Loading " << FILE << "\n\n";
-        else {
-            while (!file_in.eof())
-                load_links(links_bar, progress);
-        }
-
-        if (file_in.is_open())
-            file_in.close(); */
-        file_in.exceptions(std::ifstream::failbit | std::ifstream::badbit);
         try {
             file_in.open(FILE);
             file_in.peek();
-
-            // Check if file is empty or if not able to open
-            //if (!file_in || file_in.eof()){
-                //if (file_in.is_open())
-                    //file_in.close();
-                //throw std::exception();
-                //throw std::ifstream::failure("No Loading " + FILE + '\n');
-                //std::cout << "\n\nNo Loading " << FILE << "\n\n";
-            //}
             
             while (!file_in.eof())
-                load_links(links_bar, progress);
+                load_page_links(links_bar, progress);
 
             file_in.close();
         } catch (const std::ifstream::failure &E) {
@@ -185,8 +156,39 @@ int wiki_loader::load() {
 }
 
 
+// Load all the titles
+// Parallel
+std::set<std::string> wiki_loader::load_titles(const std::string FILE, std::atomic_int &progress, const unsigned int NUM_FILES, indicators::BlockProgressBar &title_bar) {
+    std::ifstream file_in;
+    file_in.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+    std::set<std::string> titles;
+    double percent = 100 * ((double)progress / (NUM_FILES));
+    if (title_bar.is_completed() || percent >= 100) {
+        title_bar.set_option(indicators::option::ShowRemainingTime{false});
+        title_bar.set_option(indicators::option::ForegroundColor{indicators::Color::green});
+    }
+    title_bar.set_progress(percent);
+
+    try {
+        file_in.open(FILE);
+        file_in.peek();
+
+        // Check if file is empty or if not able to open
+        while (!file_in.eof())
+            load_title(titles, file_in);
+
+        file_in.close();
+    } catch (const std::ifstream::failure &E) {
+        std::cerr << E.what() << "\n";
+        exit(EXIT_FAILURE);
+    }
+    ++progress;
+    return titles;
+}
+
+
 // Load in a title to the set
-inline int wiki_loader::load_title(std::set<std::string> &titles) {
+inline int wiki_loader::load_title(std::set<std::string> &titles, std::ifstream &file_in) {
     std::string JSON_line;
     try {
         std::getline(file_in, JSON_line);
@@ -205,8 +207,11 @@ inline int wiki_loader::load_title(std::set<std::string> &titles) {
 }
 
 
+// Load in 
+
+
 // Load in a link to the graph
-inline int wiki_loader::load_links(indicators::BlockProgressBar &bar, unsigned int &progress) {
+inline int wiki_loader::load_page_links(indicators::BlockProgressBar &bar, std::atomic_int &progress) {
     const double PERCENT{100 * ((double)progress / (graph->size() - 1))};
     std::string JSON_line;
 
