@@ -20,7 +20,7 @@ int menu::init_menu() {
     try {
         python_file = fopen(MAIN_PY_PATH.c_str(), "r");
     } catch (const std::exception &E) {
-        std::cout << "\nError loading python script\n";
+        std::cerr << "\nError loading python script\n";
         return EXIT_FAILURE;
     }
     // Run the main python script & finalize python

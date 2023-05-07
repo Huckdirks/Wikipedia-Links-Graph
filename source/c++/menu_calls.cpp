@@ -24,7 +24,7 @@ int menu_calls::display_page() {
     system("clear");
     const auto PAGE = graph.find(title);
     if (PAGE == nullptr) {
-        std::cout << "\nPage not found\n\n";
+        std::cerr << "\nPage not found\n\n";
         return EXIT_FAILURE;
     }
 
@@ -85,8 +85,6 @@ int menu_calls::display_top_n() {
             std::cerr << "\nError: " << E.what() << "\n\n";
             return EXIT_FAILURE;
         }
-        //std::cin >> response;
-        //std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
         response = toupper(response);
         if (response != 'D' && response != 'S'){
@@ -123,10 +121,6 @@ int menu_calls::display_top_n() {
             std::cerr << "\nError: " << E.what() << "\n\n";
             return EXIT_FAILURE;
         }
-        //fs::current_path(MAIN_DIR.parent_path().parent_path() / "data/");
-        /* if (!fs::exists("user_data"))
-            fs::create_directory("user_data");
-        fs::current_path("user_data"); */
         try {
             fs::current_path("user_data");
         } catch (const fs::filesystem_error &E) {
@@ -136,15 +130,12 @@ int menu_calls::display_top_n() {
                 std::cerr << "\nError: " << E.what() << "\n\n";
                 return EXIT_FAILURE;
             }
-            //fs::create_directory("user_data");
             try {
                 fs::current_path("user_data");
             } catch (const fs::filesystem_error &E) {
                 std::cerr << "\nError: " << E.what() << "\n\n";
                 return EXIT_FAILURE;
             }
-            //std::cerr << "\nError: " << E.what() << "\n\n";
-            //return EXIT_FAILURE;
         }
 
         try {
@@ -156,26 +147,16 @@ int menu_calls::display_top_n() {
                 std::cerr << "\nError: " << E.what() << "\n\n";
                 return EXIT_FAILURE;
             }
-            //fs::create_directory("top_linked_articles");
             try {
                 fs::current_path("top_linked_articles");
             } catch (const fs::filesystem_error &E) {
                 std::cerr << "\nError: " << E.what() << "\n\n";
                 return EXIT_FAILURE;
             }
-            //std::cerr << "\nError: " << E.what() << "\n\n";
-            //return EXIT_FAILURE;
         }
-        /* if (!fs::exists("top_linked_articles"))
-            fs::create_directory("top_linked_articles");
-        fs::current_path("top_linked_articles"); */
 
         if (csv) {
             std::string file_name{"top_" + std::to_string(n) + "_linked_articles.csv"};
-            /* file_out.open(file_name);
-            file_out << "Title,# Links To\n";
-            for (const auto &PAGE : TOP_N_LIST)
-                file_out << PAGE->title << ',' << PAGE->linked_to << '\n'; */
             try {
                 file_out.open(file_name);
                 file_out << "Title,# Links To\n";
@@ -202,11 +183,6 @@ int menu_calls::display_top_n() {
                     file_out.close();
                 return EXIT_FAILURE;
             }
-            /* file_out.open(file_name);
-            for (const auto &PAGE : TOP_N_LIST) {
-                file_out << place << ") " << PAGE->title << ": " << PAGE->linked_to << '\n';
-                ++place;
-            } */
         }
         if (file_out.is_open())
             file_out.close();
@@ -216,7 +192,6 @@ int menu_calls::display_top_n() {
             std::cerr << "\nError: " << E.what() << "\n\n";
             return EXIT_FAILURE;
         }
-        //fs::current_path(MAIN_DIR);
     }
 
     std::cout << "\nTop " << n << " most linked to pages found in " << (float)END_TIME / 1000 << " seconds, or " << ((double)(END_TIME / 1000) / 60) << " minutes\n\n";
@@ -238,12 +213,11 @@ int menu_calls::display_linked_to() {
         std::cerr << "\nError: " << E.what() << "\n\n";
         return EXIT_FAILURE;
     }
-    //std::getline(std::cin, title);
 
     // Check if the page actually exists
     if (graph.find(title) == nullptr) {
         system("clear");
-        std::cout << "Page not found\n\n";
+        std::cerr << "Page not found\n\n";
         return EXIT_FAILURE;
     }
 
@@ -258,9 +232,6 @@ int menu_calls::display_linked_to() {
             std::cerr << "\nError: " << E.what() << "\n\n";
             return EXIT_FAILURE;
         }
-        //std::cin >> response;
-        //std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-
 
         response = toupper(response);
         if (response != 'D' && response != 'S'){
@@ -297,7 +268,6 @@ int menu_calls::display_linked_to() {
             std::cerr << "\nError: " << E.what() << "\n\n";
             return EXIT_FAILURE;
         }
-        //fs::current_path(MAIN_DIR.parent_path().parent_path() / "data/");
         
         try {
             fs::current_path("user_data");
@@ -308,20 +278,13 @@ int menu_calls::display_linked_to() {
                 std::cerr << "\nError: " << E.what() << "\n\n";
                 return EXIT_FAILURE;
             }
-            //fs::create_directory("user_data");
             try {
                 fs::current_path("user_data");
             } catch (const fs::filesystem_error &E) {
                 std::cerr << "\nError: " << E.what() << "\n\n";
                 return EXIT_FAILURE;
             }
-            //std::cerr << "\nError: " << E.what() << "\n\n";
-            //return EXIT_FAILURE;
         }
-
-        /* if (!fs::exists("user_data"))
-            fs::create_directory("user_data");
-        fs::current_path("user_data"); */
 
         try {
             fs::current_path("pages_linking_to");
@@ -339,9 +302,6 @@ int menu_calls::display_linked_to() {
                 return EXIT_FAILURE;
             }
         }
-        /* if (!fs::exists("pages_linking_to"))
-            fs::create_directory("pages_linking_to");
-        fs::current_path("pages_linking_to"); */
 
         std::string save_title{title};
         std::replace(save_title.begin(), save_title.end(), ' ', '_');  // Replace spaces with underscores in the title for ✨𝒻ℴ𝓇𝓂𝒶𝓉𝓉𝒾𝓃ℊ✨
@@ -376,22 +336,6 @@ int menu_calls::display_linked_to() {
                 return EXIT_FAILURE;
             }
         }
-        /* if (csv) {
-            std::string file_name{"pages_linking_to_" + save_title + ".csv"};
-            file_out.open(file_name);
-            file_out << "Page,Pages linking to page\n" << title << ',';
-            for (const auto &PAGE : LINKED_TO)
-                file_out << PAGE->title << ',';
-        } else {
-            std::string file_name{"pages_linking_to_" + save_title + ".txt"};
-            unsigned int place{1};
-            file_out.open(file_name);
-            file_out << "Pages that link to " << title << ":\n";
-            for (const auto &PAGE : LINKED_TO) {
-                file_out << place << ") " << PAGE->title << '\n';
-                ++place;
-            }
-        } */
         if (file_out.is_open())
             file_out.close();
         try {
@@ -400,7 +344,6 @@ int menu_calls::display_linked_to() {
             std::cerr << "\nError: " << E.what() << "\n\n";
             return EXIT_FAILURE;
         }
-        //fs::current_path(MAIN_DIR);
         std::cout << "\nPages that link to " << title << " saved\n";
     }
     return EXIT_SUCCESS;
@@ -424,8 +367,6 @@ void menu_calls::display_wiki_info(){
 bool menu_calls::y_or_n() {
     char response;
     std::cout << "\nPress Y for yes and anything else for no\n";
-    //std::cin >> response;
-    //std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     try {
         std::cin >> response;
         std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
