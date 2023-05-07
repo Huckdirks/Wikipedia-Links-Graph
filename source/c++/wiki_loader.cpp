@@ -69,7 +69,7 @@ int wiki_loader::load() {
     for (auto &title_future : title_futures)
         titles.merge(title_future.get());
 
-    std::cout << "\n\nLoaded " << titles.size() << " titles in " << std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - START_TITLE_TIME).count() << " seconds\n\n";
+    std::cout << "\nLoaded " << titles.size() << " titles in " << std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - START_TITLE_TIME).count() << " seconds";
         //title_bar.tick();
     /* // Load in each file's titles to a set to make it ordered
     for (const auto &FILE : file_names) {
