@@ -1,5 +1,5 @@
 // Files to include
-#include "menu.hpp"
+#include "include/menu.hpp"
 
 // Libraries
 #include <csignal>

@@ -1,5 +1,5 @@
 // Files to include
-#include "wiki_loader.hpp"
+#include "include/wiki_loader.hpp"
 
 // MAKE LOAD ACCEPT A PATH TO THE DIRECTORY OF FILES TO LOAD SO IT ISN'T HARD CODED
 

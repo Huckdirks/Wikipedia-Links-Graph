@@ -1,5 +1,5 @@
 // Files to include
-#include "menu.hpp"
+#include "include/menu.hpp"
 
 // Initialize menu
 int menu::init_menu() {

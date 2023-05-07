@@ -1,6 +1,6 @@
 // Files to include
-#include "wiki_graph.hpp"
-#include "wiki_loader.hpp"
+#include "include/wiki_graph.hpp"
+#include "include/wiki_loader.hpp"
 
 // Graph Vertex Functions:
 // Operator overloads
