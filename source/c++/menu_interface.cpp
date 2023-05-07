@@ -47,30 +47,26 @@ int menu::interface() {
         case 0:
             system("clear");
             std::cout << "\nGoodbye!!!\n";
-            return 1;
+            return EXIT_FAILURE;
 
         case 1:
-            display_page();
-            break;
+            return display_page();
 
         case 2:
-            display_wiki_info();
-            break;
+            return display_wiki_info();
 
         case 3:
-            display_top_n();
-            break;
+            return display_top_n();
 
         case 4:
-            display_linked_to();
-            break;
+            return display_linked_to();
 
         default:
             system("clear");
             std::cout << "\nInvalid input\n";
             break;
     }
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 

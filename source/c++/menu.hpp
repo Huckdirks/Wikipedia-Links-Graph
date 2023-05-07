@@ -27,7 +27,7 @@ class menu_calls {
     int display_page();
     int display_top_n();
     int display_linked_to();
-    void display_wiki_info();
+    int display_wiki_info();
     bool y_or_n();
 
    private:

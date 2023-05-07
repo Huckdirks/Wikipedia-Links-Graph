@@ -351,7 +351,7 @@ int menu_calls::display_linked_to() {
 
 
 // Display info about the Wikipedia dump
-void menu_calls::display_wiki_info(){
+int menu_calls::display_wiki_info(){
     system("clear");
     std::cout << "\nThis program uses the Wikipedia XML dump\n";
     std::cout << "The dump can be found at https://dumps.wikimedia.org/enwiki/latest/\n";
@@ -359,7 +359,7 @@ void menu_calls::display_wiki_info(){
     std::cout << "The full license can be found at https://creativecommons.org/licenses/by-sa/3.0/legalcode\n";
 
     std::cout << "\nWikipedia contains " << graph.size() << " pages and " << graph.num_edges << " links to other Wikipedia pages\n";
-    return;
+    return EXIT_SUCCESS;
 }
 
 
