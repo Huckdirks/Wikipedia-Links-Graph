@@ -113,7 +113,7 @@ int wiki_loader::load() {
             file_in.peek();
             
             while (!file_in.eof())
-                load_page_links(file_in, links_bar, progress);
+                load_links(file_in, links_bar, progress);
 
             file_in.close();
         } catch (const std::ifstream::failure &E) {
@@ -158,7 +158,7 @@ inline int wiki_loader::load_title(std::set<std::string> &titles, std::ifstream 
 
 
 // Load in a link to the graph
-inline int wiki_loader::load_page_links(std::ifstream &file_in, indicators::BlockProgressBar &bar, unsigned int &progress) {
+inline int wiki_loader::load_links(std::ifstream &file_in, indicators::BlockProgressBar &bar, unsigned int &progress) {
     const double PERCENT{100 * ((double)progress / (graph->size() - 1))};
     std::string JSON_line;
 
