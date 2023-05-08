@@ -33,14 +33,7 @@ int wiki_loader::load() {
     BS::thread_pool pool;
     const auto START_TITLE_TIME{std::chrono::system_clock::now()};
     std::cout << "\nLoading page titles from " << file_names.size() << " files...\n";
-    // Progress bar
-    //indicators::BlockProgressBar title_bar{indicators::option::BarWidth{80}, indicators::option::Start{"["}, indicators::option::End{"]"}, indicators::option::ShowElapsedTime{true}, indicators::option::ShowRemainingTime{true}, indicators::option::ForegroundColor{indicators::Color::red}, indicators::option::FontStyles{std::vector<indicators::FontStyle>{indicators::FontStyle::bold}}};
-    unsigned int progress{};    // I would make this an atomic but it breaks pool.submit()
     std::vector <std::future<std::set<std::string>>> title_futures;
-    //double percent{};
-    //indicators::show_console_cursor(false); // Hide cursor
-    // Load in each file's titles to a set to make it ordered
-    //for (const auto &FILE : file_names)
     for (unsigned int i{}; i < file_names.size(); ++i){
         title_futures.push_back(pool.submit([this, file_names, i]() -> std::set<std::string> {
             std::ifstream file_in;
@@ -61,7 +54,6 @@ int wiki_loader::load() {
                 std::cerr << E.what() << "\n";
                 return titles;
             }
-            //++progress;
             return titles;
         }));
     }
@@ -70,31 +62,6 @@ int wiki_loader::load() {
         titles.merge(title_future.get());
 
     std::cout << "Loaded " << titles.size() << " titles in " << std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - START_TITLE_TIME).count() << " seconds";
-        //title_bar.tick();
-    /* // Load in each file's titles to a set to make it ordered
-    for (const auto &FILE : file_names) {
-        percent = 100 * ((double)progress / (file_names.size() - 1));
-        if (title_bar.is_completed() || percent >= 100) {
-            title_bar.set_option(indicators::option::ShowRemainingTime{false});
-            title_bar.set_option(indicators::option::ForegroundColor{indicators::Color::green});
-        }
-        title_bar.set_progress(percent);
-
-        try {
-            file_in.open(FILE);
-            file_in.peek();
-
-            // Check if file is empty or if not able to open
-            while (!file_in.eof())
-                load_title(titles);
-
-            file_in.close();
-        } catch (const std::ifstream::failure &E) {
-            std::cerr << E.what() << "\n";
-            return EXIT_FAILURE;
-        }
-        ++progress;
-    } */
 
     if (titles.empty()) {
         indicators::show_console_cursor(true);
@@ -106,9 +73,8 @@ int wiki_loader::load() {
     std::cout << termcolor::reset << "\n\nLoading " << titles.size() << " titles into the graph...\n";
     indicators::BlockProgressBar graph_titles_bar{indicators::option::BarWidth{80}, indicators::option::Start{"["}, indicators::option::End{"]"}, indicators::option::ShowElapsedTime{true}, indicators::option::ShowRemainingTime{true}, indicators::option::ForegroundColor{indicators::Color::red}, indicators::option::FontStyles{std::vector<indicators::FontStyle>{indicators::FontStyle::bold}}};
     indicators::show_console_cursor(false); // Hide cursor
-    //unsigned int progress{};
+    unsigned int progress{};    // I would make this an atomic but it breaks pool.submit()
     double percent{};
-    //percent = 0;
 
     // Load in each title to the graph
     for (const auto &TITLE : titles) {
@@ -181,7 +147,6 @@ inline int wiki_loader::load_title(std::set<std::string> &titles, std::ifstream 
         std::cerr << "\n\nError loading line from file\n\n";
         return EXIT_FAILURE;
     }
-    //std::getline(file_in, JSON_line);
 
     file_in.peek();
     const json JSON = json::parse(JSON_line);  // { } Initialization breaks this ¯\_(ツ)_/¯
@@ -194,7 +159,6 @@ inline int wiki_loader::load_title(std::set<std::string> &titles, std::ifstream 
 
 // Load in a link to the graph
 inline int wiki_loader::load_page_links(std::ifstream &file_in, indicators::BlockProgressBar &bar, unsigned int &progress) {
-//inline int wiki_loader::load_links(std::ifstream &file_in) {
     const double PERCENT{100 * ((double)progress / (graph->size() - 1))};
     std::string JSON_line;
 
@@ -212,7 +176,6 @@ inline int wiki_loader::load_page_links(std::ifstream &file_in, indicators::Bloc
         std::getline(file_in, JSON_line);
     } catch (const std::ifstream::failure &E) {
         std::cerr << E.what() << "\n\n";
-        //std::cerr << "\n\nError loading line from file\n\n";
         return EXIT_FAILURE;
     }
     file_in.peek();
@@ -221,12 +184,10 @@ inline int wiki_loader::load_page_links(std::ifstream &file_in, indicators::Bloc
     json *change_ptr{const_cast<json *>(JSON_ptr)};
     try {
         *change_ptr = json::parse(JSON_line);
-        //const json JSON = json::parse(JSON_line);  // { } Initialization breaks this ¯\_(ツ)_/¯
     } catch (const json::parse_error &E) {
         std::cerr << E.what() << "\n\n";
         return EXIT_FAILURE;
     }
-    //const json JSON = json::parse(JSON_line);  // { } Initialization breaks this ¯\_(ツ)_/¯
     const std::string TITLE{JSON[0].get<std::string>()};
 
     ++progress;
@@ -236,18 +197,10 @@ inline int wiki_loader::load_page_links(std::ifstream &file_in, indicators::Bloc
         
     for (const auto &LINK : JSON[1]) {
         graph_vertex *adjacent_page{graph->find(LINK.get<std::string>())};
-        // Make adjacent page a unique pointer so that it can be moved into the vector
         if (adjacent_page == nullptr)
                 continue;
 
-        try {
-            page->adjacent.push_back(adjacent_page);
-        } catch (const std::exception &E) {
-            std::cerr << E.what() << "\n\n";
-            exit(EXIT_FAILURE);
-        }
-        //page->adjacent.push_back(adjacent_page);    // Shit breaks right here when this function is ran parallel (it's giving an allocation error for the vector so I might just have to cut my losses and not do this parallel)
-                                                    // Maybe make graph_vertex.adjacent a vector of shared_ptr's, but honestly idk if that'll fix it cause it's saying the problem is with the vector
+        page->adjacent.push_back(adjacent_page);
         ++page->links;
         ++adjacent_page->linked_to;
         ++graph->num_edges;
