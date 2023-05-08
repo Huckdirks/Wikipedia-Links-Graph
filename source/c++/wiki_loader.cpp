@@ -45,7 +45,6 @@ int wiki_loader::load() {
                 file_in.open(FILE_NAME);
                 file_in.peek();
 
-                // Check if file is empty or if not able to open
                 while (!file_in.eof())
                     load_title(titles, file_in);
 
@@ -61,19 +60,18 @@ int wiki_loader::load() {
     for (auto &title_future : title_futures)
         titles.merge(title_future.get());
 
-    std::cout << "Loaded " << titles.size() << " titles in " << std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - START_TITLE_TIME).count() << " seconds";
-
     if (titles.empty()) {
         indicators::show_console_cursor(true);
         std::cout << "\n\nNo titles found in files\n\n";
         return EXIT_FAILURE;
     }
+    std::cout << "Loaded " << titles.size() << " titles in " << std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - START_TITLE_TIME).count() << " seconds";
 
     // Show cursor
     std::cout << termcolor::reset << "\n\nLoading " << titles.size() << " titles into the graph...\n";
     indicators::BlockProgressBar graph_titles_bar{indicators::option::BarWidth{80}, indicators::option::Start{"["}, indicators::option::End{"]"}, indicators::option::ShowElapsedTime{true}, indicators::option::ShowRemainingTime{true}, indicators::option::ForegroundColor{indicators::Color::red}, indicators::option::FontStyles{std::vector<indicators::FontStyle>{indicators::FontStyle::bold}}};
     indicators::show_console_cursor(false); // Hide cursor
-    unsigned int progress{};    // I would make this an atomic but it breaks pool.submit()
+    unsigned int progress{};
     double percent{};
 
     // Load in each title to the graph
@@ -158,6 +156,7 @@ inline int wiki_loader::load_title(std::set<std::string> &titles, std::ifstream 
 
 
 // Load in a link to the graph
+// I would make this parallel, but I tried and it gave an allocation error (malloc: *** error for object 0x11ef65120: pointer being freed was not allocated) for the vector on the line "page->adjacent.push_back(adjacent_page);" while doing it parallel so I know I somehow fucked it up pretty bad ¯\_(ツ)_/¯
 inline int wiki_loader::load_links(std::ifstream &file_in, indicators::BlockProgressBar &bar, unsigned int &progress) {
     const double PERCENT{100 * ((double)progress / (graph->size() - 1))};
     std::string JSON_line;
