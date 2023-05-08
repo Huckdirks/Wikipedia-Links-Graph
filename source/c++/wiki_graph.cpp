@@ -35,11 +35,6 @@ int graph_vertex::display(const bool DISPLAY_LINKS) const {
 
 // [ ] operator overload for ints
 graph_vertex &wiki_graph::operator[](const unsigned int INDEX) {
-    /* if (vertex_list.empty())
-        throw std::out_of_range("Graph is empty");
-    if (INDEX >= vertex_list.size())
-        throw std::out_of_range("Index out of bounds");
-    return vertex_list[INDEX]; */
     try {
         return vertex_list.at(INDEX);
     } catch (const std::out_of_range &EXCEPTION) {
@@ -50,13 +45,6 @@ graph_vertex &wiki_graph::operator[](const unsigned int INDEX) {
 
 // [ ] operator overload for strings
 graph_vertex &wiki_graph::operator[](const std::string &PAGE) {
-    /* if (vertex_list.empty())
-        throw std::out_of_range("Graph is empty");
-
-    int i{binary_search_index(PAGE)};
-    if (i == -1)
-        throw std::out_of_range("Page not found");
-    return vertex_list[i]; */
     try {
         return vertex_list.at(binary_search_index(PAGE));
     } catch (const std::out_of_range &EXCEPTION) {
@@ -138,9 +126,6 @@ int wiki_graph::load() {
 
 // Get first vertex
 graph_vertex &wiki_graph::front() {
-    /* if (vertex_list.empty())
-        throw std::out_of_range("Graph is empty");
-    return vertex_list.front(); */
     try {
         return vertex_list.front();
     }
@@ -153,9 +138,6 @@ graph_vertex &wiki_graph::front() {
 
 // Get last vertex
 graph_vertex &wiki_graph::back() {
-    /* if (vertex_list.empty())
-        throw std::out_of_range("Graph is empty");
-    return vertex_list.back(); */
     try {
         return vertex_list.back();
     }
@@ -277,7 +259,6 @@ std::vector<graph_vertex *> wiki_graph::top_n_linked(const unsigned int N) {
             std::cerr << E.what() << '\n';
             exit(EXIT_FAILURE);
         }
-        //futures[i] = std::async(std::launch::async, &wiki_graph::top_n_linked_segment, this, N, i * segment_size, (i + 1) * segment_size, std::ref(bars));
     }
 
     // Wait for all the functions to finish and get the results
@@ -293,20 +274,15 @@ std::vector<graph_vertex *> wiki_graph::top_n_linked(const unsigned int N) {
     // Go through the results of top_n_linked_segment's results and find the top n
     for (unsigned int i{}; i < cores; ++i) {
         const std::vector<graph_vertex *> SEGMENT{};    // For exception handling for the future I need to set it's value in the try block, but since it's const after being set I use const_cast to set it
-        const auto *SEGMENT_PTR{&SEGMENT};
-        auto change_ptr{const_cast<std::vector<graph_vertex *> *>(SEGMENT_PTR)};
         try {
+            const auto *SEGMENT_PTR{&SEGMENT};
+            auto change_ptr{const_cast<std::vector<graph_vertex *> *>(SEGMENT_PTR)};
             *change_ptr = futures[i].get();   // Might need to make the result of futures[i].get() a unique_ptr
-            //*change_ptr = std::make_unique<std::vector<graph_vertex *>>(futures[i].get());
-            //auto temp{std::make_unique<std::vector<graph_vertex *>>(futures[i].get())};
-            //change_ptr = temp.get();
         } catch (const std::future_error &E) {
             std::cerr << E.what() << '\n';
             exit(EXIT_FAILURE);
         }
-        //change_ptr = &futures[i].get();
 
-        //futures[i].get();
         double percent{100 * ((double)progress / (N * cores))};
         for (const auto &VERTEX : SEGMENT) {
             // Progress bar

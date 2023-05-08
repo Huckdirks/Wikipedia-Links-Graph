@@ -179,8 +179,8 @@ inline int wiki_loader::load_links(std::ifstream &file_in, indicators::BlockProg
     }
     file_in.peek();
     const json JSON{};
-    const json *JSON_PTR{&JSON};
     try {
+        const json *JSON_PTR{&JSON};
         json *change_ptr{const_cast<json *>(JSON_PTR)}; // const_cast because I want it to be constant after parsing the line, but I can't initialize it in the try block
         *change_ptr = json::parse(JSON_line);
     } catch (const json::parse_error &E) {
