@@ -69,7 +69,7 @@ int wiki_loader::load() {
     for (auto &title_future : title_futures)
         titles.merge(title_future.get());
 
-    std::cout << "\nLoaded " << titles.size() << " titles in " << std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - START_TITLE_TIME).count() << " seconds";
+    std::cout << "Loaded " << titles.size() << " titles in " << std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - START_TITLE_TIME).count() << " seconds";
         //title_bar.tick();
     /* // Load in each file's titles to a set to make it ordered
     for (const auto &FILE : file_names) {
@@ -126,6 +126,7 @@ int wiki_loader::load() {
         ++progress;
     }
 
+    indicators::show_console_cursor(false);
     if (graph->empty()) {
         indicators::show_console_cursor(true);
         std::cout << "\n\nNo titles loaded into graph\n\n";
@@ -134,8 +135,8 @@ int wiki_loader::load() {
 
     std::cout << termcolor::reset << "\n\nLoading links into graph (Adjacent Nodes)...\n";
     auto START_LINK_TIME = std::chrono::system_clock::now();
-    //indicators::BlockProgressBar links_bar{indicators::option::BarWidth{80}, indicators::option::Start{"["}, indicators::option::End{"]"}, indicators::option::ShowElapsedTime{true}, indicators::option::ShowRemainingTime{true}, indicators::option::ForegroundColor{indicators::Color::red}, indicators::option::FontStyles{std::vector<indicators::FontStyle>{indicators::FontStyle::bold}}};
-    //progress = 0;
+    indicators::BlockProgressBar links_bar{indicators::option::BarWidth{80}, indicators::option::Start{"["}, indicators::option::End{"]"}, indicators::option::ShowElapsedTime{true}, indicators::option::ShowRemainingTime{true}, indicators::option::ForegroundColor{indicators::Color::red}, indicators::option::FontStyles{std::vector<indicators::FontStyle>{indicators::FontStyle::bold}}};
+    progress = 0;
 
     // Load in each file's links
     for (unsigned int i{}; i < file_names.size(); ++i) {
@@ -149,7 +150,8 @@ int wiki_loader::load() {
                 file_in.peek();
 
                 while (!file_in.eof())
-                    load_links(file_in);
+                    load_page_links(file_in, links_bar, progress);
+                    //load_links(file_in);
 
                 file_in.close();
             } catch (const std::ifstream::failure &E) {
@@ -212,12 +214,12 @@ inline int wiki_loader::load_title(std::set<std::string> &titles, std::ifstream 
 
 
 // Load in a link to the graph
-//inline int wiki_loader::load_page_links(indicators::BlockProgressBar &bar, unsigned int &progress) {
-inline int wiki_loader::load_links(std::ifstream &file_in) {
-    //const double PERCENT{100 * ((double)progress / (graph->size() - 1))};
+inline int wiki_loader::load_page_links(indicators::BlockProgressBar &bar, unsigned int &progress) {
+//inline int wiki_loader::load_links(std::ifstream &file_in) {
+    const double PERCENT{100 * ((double)progress / (graph->size() - 1))};
     std::string JSON_line;
 
-    /* if (progress % 1000 == 0 || PERCENT >= 100) {  // Only update progress bar every 1000 titles to save time
+    if (progress % 1000 == 0 || PERCENT >= 100) {  // Only update progress bar every 1000 titles to save time
         if (!bar.is_completed()) {
             if (PERCENT >= 100) {
                 bar.set_option(indicators::option::ShowRemainingTime{false});
@@ -225,7 +227,7 @@ inline int wiki_loader::load_links(std::ifstream &file_in) {
             }
             bar.set_progress(PERCENT);
         }
-    } */
+    }
     
     try {
         std::getline(file_in, JSON_line);
@@ -255,14 +257,22 @@ inline int wiki_loader::load_links(std::ifstream &file_in) {
         
     for (const auto &LINK : JSON[1]) {
         graph_vertex *adjacent_page{graph->find(LINK.get<std::string>())};
+        // Make adjacent page a unique pointer so that it can be moved into the vector
         if (adjacent_page == nullptr)
                 continue;
 
-        page->adjacent.push_back(adjacent_page);    // Shit breaks right here when this function is ran parallel (it's giving an allocation error for the vector so I might just have to cut my losses and not do this parallel)
+        try {
+            page->adjacent.push_back(adjacent_page);
+        } catch (const std::exception &E) {
+            std::cerr << E.what() << "\n\n";
+            exit(EXIT_FAILURE);
+        }
+        //page->adjacent.push_back(adjacent_page);    // Shit breaks right here when this function is ran parallel (it's giving an allocation error for the vector so I might just have to cut my losses and not do this parallel)
+                                                    // Maybe make graph_vertex.adjacent a vector of shared_ptr's, but honestly idk if that'll fix it cause it's saying the problem is with the vector
         ++page->links;
         ++adjacent_page->linked_to;
         ++graph->num_edges;
     }
-    page->adjacent.shrink_to_fit();  // Shrink the adjacent vector to fit the number of adjacent nodes (good for memory 👍)
+    page->adjacent.shrink_to_fit();  // Good for memory 👍
     return EXIT_SUCCESS;
 }
