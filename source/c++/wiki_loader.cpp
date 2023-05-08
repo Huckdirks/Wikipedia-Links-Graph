@@ -32,10 +32,10 @@ int wiki_loader::load() {
     std::set<std::string> titles;   // Set of titles to make sure all titles are sorted before adding to graph
     BS::thread_pool pool;
     const auto START_TITLE_TIME{std::chrono::system_clock::now()};
-    std::cout << "\nLoading " << file_names.size() << " files...\n";
+    std::cout << "\nLoading page titles from " << file_names.size() << " files...\n";
     // Progress bar
     //indicators::BlockProgressBar title_bar{indicators::option::BarWidth{80}, indicators::option::Start{"["}, indicators::option::End{"]"}, indicators::option::ShowElapsedTime{true}, indicators::option::ShowRemainingTime{true}, indicators::option::ForegroundColor{indicators::Color::red}, indicators::option::FontStyles{std::vector<indicators::FontStyle>{indicators::FontStyle::bold}}};
-    //unsigned int progress{};    // I would make this an atomic but it breaks pool.submit()
+    unsigned int progress{};    // I would make this an atomic but it breaks pool.submit()
     std::vector <std::future<std::set<std::string>>> title_futures;
     //double percent{};
     //indicators::show_console_cursor(false); // Hide cursor
@@ -106,7 +106,7 @@ int wiki_loader::load() {
     std::cout << termcolor::reset << "\n\nLoading " << titles.size() << " titles into the graph...\n";
     indicators::BlockProgressBar graph_titles_bar{indicators::option::BarWidth{80}, indicators::option::Start{"["}, indicators::option::End{"]"}, indicators::option::ShowElapsedTime{true}, indicators::option::ShowRemainingTime{true}, indicators::option::ForegroundColor{indicators::Color::red}, indicators::option::FontStyles{std::vector<indicators::FontStyle>{indicators::FontStyle::bold}}};
     indicators::show_console_cursor(false); // Hide cursor
-    unsigned int progress{};
+    //unsigned int progress{};
     double percent{};
     //percent = 0;
 
@@ -139,44 +139,22 @@ int wiki_loader::load() {
     progress = 0;
 
     // Load in each file's links
-    for (unsigned int i{}; i < file_names.size(); ++i) {
-        pool.push_task([this, file_names, i]() {
-            std::ifstream file_in;
-            file_in.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-            const std::string FILE_NAME{file_names[i]};
-
-            try {
-                file_in.open(FILE_NAME);
-                file_in.peek();
-
-                while (!file_in.eof())
-                    load_page_links(file_in, links_bar, progress);
-                    //load_links(file_in);
-
-                file_in.close();
-            } catch (const std::ifstream::failure &E) {
-                std::cerr << E.what() << "\n\n";
-            }
-            return;
-        });
-    }
-    pool.wait_for_tasks();
-
-    /* // Load in each file's links
     for (const auto &FILE : file_names) {
+        std::ifstream file_in;
+        file_in.exceptions(std::ifstream::failbit | std::ifstream::badbit);
         try {
             file_in.open(FILE);
             file_in.peek();
             
             while (!file_in.eof())
-                load_page_links(links_bar, progress);
+                load_page_links(file_in, links_bar, progress);
 
             file_in.close();
         } catch (const std::ifstream::failure &E) {
             std::cerr << E.what() << "\n\n";
             return EXIT_FAILURE;
         }
-    } */
+    }
 
     indicators::show_console_cursor(true);
     std::cout << termcolor::reset << "\nLinks loaded in " << std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - START_LINK_TIME).count() << " seconds, or " << (float)std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - START_LINK_TIME).count() / 60 << " minutes!!!\n\n";
@@ -194,6 +172,7 @@ int wiki_loader::load() {
 
 
 // Load in a title to the set
+//Parallel
 inline int wiki_loader::load_title(std::set<std::string> &titles, std::ifstream &file_in) {
     std::string JSON_line;
     try {
@@ -214,7 +193,7 @@ inline int wiki_loader::load_title(std::set<std::string> &titles, std::ifstream 
 
 
 // Load in a link to the graph
-inline int wiki_loader::load_page_links(indicators::BlockProgressBar &bar, unsigned int &progress) {
+inline int wiki_loader::load_page_links(std::ifstream &file_in, indicators::BlockProgressBar &bar, unsigned int &progress) {
 //inline int wiki_loader::load_links(std::ifstream &file_in) {
     const double PERCENT{100 * ((double)progress / (graph->size() - 1))};
     std::string JSON_line;
@@ -250,7 +229,7 @@ inline int wiki_loader::load_page_links(indicators::BlockProgressBar &bar, unsig
     //const json JSON = json::parse(JSON_line);  // { } Initialization breaks this ¯\_(ツ)_/¯
     const std::string TITLE{JSON[0].get<std::string>()};
 
-    //++progress;
+    ++progress;
     graph_vertex *page{graph->find(TITLE)};
     if (page == nullptr)
         return EXIT_FAILURE;
