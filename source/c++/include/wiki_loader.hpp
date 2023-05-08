@@ -24,15 +24,13 @@ using json = nlohmann::json;
 // File IO
 class wiki_loader {
    public:
-    wiki_loader(wiki_graph &Graph) : graph{&Graph} { /* file_in.exceptions(std::ifstream::failbit | std::ifstream::badbit); */ }
+    wiki_loader(wiki_graph &Graph) : graph{&Graph} {}
     int load();
 
    private:
-    //std::ifstream file_in;
     wiki_graph *graph;
     std::set<std::string> load_titles(const std::string FILE_NAME, unsigned int &progress, const unsigned int NUM_FILES, indicators::BlockProgressBar &title_bar);
     int load_title(std::set<std::string> &titles, std::ifstream &file_in);
-    //int load_links(std::ifstream &file_in);
     int load_page_links(std::ifstream &file_in, indicators::BlockProgressBar &bar, unsigned int &progress);
 };
 
