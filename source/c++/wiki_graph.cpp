@@ -3,12 +3,36 @@
 #include "include/wiki_loader.hpp"
 
 // Graph Vertex Functions:
+
+// Constructors
+
+// Move constructor
+graph_vertex::graph_vertex(graph_vertex &&VERTEX) noexcept {
+    title = std::move(VERTEX.title);
+    adjacent = std::move(VERTEX.adjacent);
+    links = VERTEX.links;
+    linked_to = VERTEX.linked_to;
+}
+
+/* // Constructor
+graph_vertex::graph_vertex(const std::string &TITLE) {
+    title = TITLE;
+} */
+
 // Operator overloads
 
-// = operator overload
+// = Copy assignment operator
 void graph_vertex::operator=(const graph_vertex &VERTEX) {
     title = VERTEX.title;
     adjacent = VERTEX.adjacent;
+}
+
+// Move assignment operator
+void graph_vertex::operator=(graph_vertex &&VERTEX) noexcept {
+    title = std::move(VERTEX.title);
+    adjacent = std::move(VERTEX.adjacent);
+    links = VERTEX.links;
+    linked_to = VERTEX.linked_to;
 }
 
 
@@ -34,7 +58,7 @@ int graph_vertex::display(const bool DISPLAY_LINKS) const {
 // These operator overloads aren't really used here anymore but it's nice if you want to access a vertex by index from outside the class
 
 // [ ] operator overload for ints
-graph_vertex &wiki_graph::operator[](const unsigned int INDEX) {
+graph_vertex &wiki_graph::operator[](const unsigned int &&INDEX) {
     try {
         return vertex_list.at(INDEX);
     } catch (const std::out_of_range &EXCEPTION) {
@@ -44,9 +68,10 @@ graph_vertex &wiki_graph::operator[](const unsigned int INDEX) {
 }
 
 // [ ] operator overload for strings
-graph_vertex &wiki_graph::operator[](const std::string &PAGE) {
+graph_vertex &wiki_graph::operator[](const std::string &&PAGE) {
     try {
-        return vertex_list.at(binary_search_index(PAGE));
+        //return vertex_list.at(binary_search_index(PAGE));
+        return vertex_list.at(binary_search_index(std::move(PAGE)));
     } catch (const std::out_of_range &EXCEPTION) {
         std::cerr << EXCEPTION.what() << '\n';
         exit(1);
@@ -58,23 +83,25 @@ graph_vertex &wiki_graph::operator[](const std::string &PAGE) {
 // Wrapper Functions:
 
 // Binary search for value (wrapper function)
-graph_vertex *wiki_graph::find(const std::string &TO_FIND) {
+graph_vertex *wiki_graph::find(const std::string &&TO_FIND) {
     if (vertex_list.empty())
         return nullptr;
 
-    return binary_search(TO_FIND);
+    //return binary_search(TO_FIND);
+    return binary_search(std::move(TO_FIND));
 }
 
 // Binary search for index (wrapper function)
-int wiki_graph::find_index(const std::string &TO_FIND) {
+int wiki_graph::find_index(const std::string &&TO_FIND) {
     if (vertex_list.empty())
         return -1;
 
-    return binary_search_index(TO_FIND);
+    //return binary_search_index(TO_FIND);
+    return binary_search_index(std::move(TO_FIND));
 }
 
 // Get top n most linked to vertices & display (wrapper function)
-std::vector<graph_vertex *> wiki_graph::top_n(const unsigned int N) {
+std::vector<graph_vertex *> wiki_graph::top_n(const unsigned int &&N) {
     if (N <= 0 || vertex_list.empty())
         return {};
 
@@ -90,7 +117,8 @@ std::vector<graph_vertex *> wiki_graph::top_n(const unsigned int N) {
         return top_n_list;
     }
 
-    auto top_n_list = top_n_linked(N);
+    //auto top_n_list = top_n_linked(N);
+    auto top_n_list = top_n_linked(std::move(N));
     if (top_n_list.empty())  // You never know
         return {};
 
@@ -105,7 +133,8 @@ std::vector<graph_vertex *> wiki_graph::linked_to(const std::string &TO_FIND) {
         return {};
 
     // Only to check if the vertex actually exists
-    graph_vertex *vertex{binary_search(TO_FIND)};
+    //graph_vertex *vertex{binary_search(TO_FIND)};
+    graph_vertex *vertex{binary_search(std::move(TO_FIND))};
     if (vertex == nullptr)
         return {};
 
@@ -165,12 +194,16 @@ void wiki_graph::push_back(const graph_vertex vertex) {
     return vertex_list.push_back(vertex);
 }
 
+/* void wiki_graph::push_back(const graph_vertex &&VERTEX) {
+    return vertex_list.push_back(std::move(VERTEX));
+} */
+
 
 // Private Functions
 
 // Find a vertex in the graph by title
 // Implementation adapted from https://www.geeksforgeeks.org/binary-search/
-graph_vertex *wiki_graph::binary_search(const std::string &TO_FIND) {
+graph_vertex *wiki_graph::binary_search(const std::string &&TO_FIND) {
     unsigned int lo{}, mid{};
     long unsigned int hi{vertex_list.size() - 1};   // Needs to be long unsigned int for { } initialization
 
@@ -194,7 +227,7 @@ graph_vertex *wiki_graph::binary_search(const std::string &TO_FIND) {
 
 // Find the index of a vertex in the graph by title
 // Implementation adapted from https://www.geeksforgeeks.org/binary-search/
-int wiki_graph::binary_search_index(const std::string &TO_FIND) {
+int wiki_graph::binary_search_index(const std::string &&TO_FIND) {
     unsigned int lo{}, mid{};
     long unsigned int hi{vertex_list.size() - 1};   // Needs to be long unsigned int for { } initialization
 
@@ -218,7 +251,7 @@ int wiki_graph::binary_search_index(const std::string &TO_FIND) {
 
 // Find top (n) most linked to pages
 // Parallel
-std::vector<graph_vertex *> wiki_graph::top_n_linked(const unsigned int N) {
+std::vector<graph_vertex *> wiki_graph::top_n_linked(const unsigned int &&N) {
     std::vector<graph_vertex *> top_n;
     unsigned int best{};
 
@@ -418,7 +451,6 @@ std::vector<graph_vertex *> wiki_graph::all_linked_to(const std::string &LINKED_
         } catch (const std::future_error &E) {
             std::cerr << E.what() << '\n';
         }
-        //futures[i] = std::async(std::launch::async, &wiki_graph::all_linked_to_segment, this, LINKED_TO, i * SEGMENT_SIZE, (i + 1) * SEGMENT_SIZE, std::ref(bars));
     }
 
     // Wait for all the functions to finish and get the results

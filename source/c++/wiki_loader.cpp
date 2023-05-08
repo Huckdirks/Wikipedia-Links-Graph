@@ -84,9 +84,13 @@ int wiki_loader::load() {
             }
             graph_titles_bar.set_progress(percent);
         }
-        graph_vertex page;
+        /* graph_vertex page;
         page.title = TITLE;
-        graph->push_back(page);
+        graph->push_back(page); */
+        //graph_vertex page{TITLE};
+        //graph_vertex page{TITLE};
+        const graph_vertex PAGE{std::move(TITLE)};
+        graph->push_back(std::move(PAGE));
         ++progress;
     }
 
@@ -141,7 +145,7 @@ inline int wiki_loader::load_title(std::set<std::string> &titles, std::ifstream 
     std::string JSON_line;
     try {
         std::getline(file_in, JSON_line);
-    } catch (const std::exception &e) {
+    } catch (const std::exception &E) {
         std::cerr << "\n\nError loading line from file\n\n";
         return EXIT_FAILURE;
     }
@@ -161,6 +165,7 @@ inline int wiki_loader::load_links(std::ifstream &file_in, indicators::BlockProg
     const double PERCENT{100 * ((double)progress / (graph->size() - 1))};
     std::string JSON_line;
 
+    // Progress bar stuff
     if (progress % 1000 == 0 || PERCENT >= 100) {  // Only update progress bar every 1000 titles to save time
         if (!bar.is_completed()) {
             if (PERCENT >= 100) {
@@ -173,11 +178,11 @@ inline int wiki_loader::load_links(std::ifstream &file_in, indicators::BlockProg
     
     try {
         std::getline(file_in, JSON_line);
+        file_in.peek();
     } catch (const std::ifstream::failure &E) {
         std::cerr << E.what() << "\n\n";
         return EXIT_FAILURE;
     }
-    file_in.peek();
     const json JSON{};
     try {
         const json *JSON_PTR{&JSON};
