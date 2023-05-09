@@ -9,26 +9,21 @@ int menu_calls::load() {
 
 // Display info on a page
 int menu_calls::display_page() {
-    const std::string TITLE;
+    std::string title;
 
     system("clear");
     std::cout << "\nWhat page would you like to display?\n";
     try {
-        const std::string *TITLE_PTR{&TITLE};
-        //const std::string *LINE_PTR{&TITLE};
-        //std::string *change_ptr{const_cast<std::string *>(LINE_PTR)};
-        std::string *change_ptr{const_cast<std::string *>(TITLE_PTR)};
-        //std::string change_ptr{const_cast<std::string &>(*LINE_PTR)};
-        std::getline(std::cin, *change_ptr);
-        //std::getline(std::cin, title);
+        std::getline(std::cin, title);
     } catch (const std::exception &E) {
         std::cerr << "\nError: " << E.what() << "\n\n";
         return EXIT_FAILURE;
     }
+    //std::getline(std::cin, title);
 
     system("clear");
     //const auto PAGE = graph.find(title);
-    const auto PAGE = graph.find(std::move(TITLE));
+    const auto PAGE = graph.find(std::move(title));
     if (PAGE == nullptr) {
         std::cerr << "\nPage not found\n\n";
         return EXIT_FAILURE;
@@ -44,9 +39,8 @@ int menu_calls::display_page() {
 
 // Display top n
 int menu_calls::display_top_n() {
-    //std::string num;
-    const std::string NUM;
-    const unsigned int N{};
+    std::string num;
+    unsigned int n{};
     bool is_digit{};
     bool save{};
     bool csv{};
@@ -58,10 +52,7 @@ int menu_calls::display_top_n() {
     do {
         is_digit = true;
         try {
-            const std::string *NUM_PTR{&NUM};
-            std::string *change_ptr{const_cast<std::string *>(NUM_PTR)};
-            std::cin >> *change_ptr;
-            //std::cin >> num;
+            std::cin >> num;
             std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         } catch (const std::exception &E) {
             std::cerr << "\nError: " << E.what() << "\n\n";
@@ -71,8 +62,7 @@ int menu_calls::display_top_n() {
         //std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
 
-        //for (const char &C : num) {
-        for (const char &C : NUM) {
+        for (const char &C : num) {
             if (!isdigit(C)) {
                 system("clear");
                 std::cout << "\nPlease enter a number\nTry again\n";
@@ -81,49 +71,28 @@ int menu_calls::display_top_n() {
             }
         }
     } while (!is_digit);
-    try {
-        const unsigned int *N_PTR{&N};
-        unsigned int *change_ptr{const_cast<unsigned int *>(N_PTR)};
-        *change_ptr = std::stoi(NUM);
-    } catch (const std::exception &E) {
-        std::cerr << "\nError: " << E.what() << "\n\n";
-        return EXIT_FAILURE;
-    }
-    //n = std::stoi(NUM);
-    //n = std::stoi(num);
-    if (N > graph.size()) {   // Make sure it doesn't go out of bounds
-        const unsigned int *N_PTR{&N};
-        unsigned int *change_ptr{const_cast<unsigned int *>(N_PTR)};
-        *change_ptr = graph.size();
-        //N = graph.size();
-    }
+    n = std::stoi(num);
+    if (n > graph.size())   // Make sure it doesn't go out of bounds
+        n = graph.size();
 
     system("clear");
-    std::cout << "Would you like to display or save the top " << N << " linked to pages to a file?\nPress D for display and S for save\n";
+    std::cout << "Would you like to display or save the top " << n << " linked to pages to a file?\nPress D for display and S for save\n";
     char response{};
-    //const char RESPONSE{};
     do {
         try {
-            //const char *RESPONSE_PTR{&RESPONSE};
-            //char *change_ptr{const_cast<char *>(RESPONSE_PTR)};
-            //std::cin >> *change_ptr;
             std::cin >> response;
             std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-            //*change_ptr = toupper(*change_ptr);
         } catch (const std::exception &E) {
             std::cerr << "\nError: " << E.what() << "\n\n";
             return EXIT_FAILURE;
         }
 
         response = toupper(response);
-        //if (RESPONSE != 'D' && RESPONSE != 'S'){
         if (response != 'D' && response != 'S'){
             system("clear");
             std::cout << "\nPlease enter D or S\n";
         }
     } while (response != 'D' && response != 'S');
-    //} while (RESPONSE != 'D' && RESPONSE != 'S');
-    //if (RESPONSE == 'S') {
     if (response == 'S') {
         save = true;
         system("clear");
@@ -132,14 +101,14 @@ int menu_calls::display_top_n() {
     }
 
     system("clear");
-    std::cout << "Finding top " << N << " most linked to pages...\n";
+    std::cout << "Finding top " << n << " most linked to pages...\n";
     const auto START_TIME{std::chrono::high_resolution_clock::now()};
-    const auto TOP_N_LIST = graph.top_n(N);
+    const auto TOP_N_LIST = graph.top_n(n);
     const auto END_TIME{std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - START_TIME).count()};
 
     system("clear");
     if (!save) {
-        std::cout << "\nTop " << N << " most linked to pages:" << "\n\n";
+        std::cout << "\nTop " << n << " most linked to pages:" << "\n\n";
         for (const auto &PAGE : TOP_N_LIST)
             PAGE->display(false);
     } else {
@@ -188,7 +157,7 @@ int menu_calls::display_top_n() {
         }
 
         if (csv) {
-            std::string file_name{"top_" + std::to_string(N) + "_linked_articles.csv"};
+            std::string file_name{"top_" + std::to_string(n) + "_linked_articles.csv"};
             try {
                 file_out.open(file_name);
                 file_out << "Title,# Links To\n";
@@ -201,7 +170,7 @@ int menu_calls::display_top_n() {
                 return EXIT_FAILURE;
             }
         } else {
-            std::string file_name{"top_" + std::to_string(N) + "_linked_articles.txt"};
+            std::string file_name{"top_" + std::to_string(n) + "_linked_articles.txt"};
             unsigned int place{1};
             try {
                 file_out.open(file_name);
@@ -226,25 +195,21 @@ int menu_calls::display_top_n() {
         }
     }
 
-    std::cout << "\nTop " << N << " most linked to pages found in " << (float)END_TIME / 1000 << " seconds, or " << ((double)(END_TIME / 1000) / 60) << " minutes\n\n";
+    std::cout << "\nTop " << n << " most linked to pages found in " << (float)END_TIME / 1000 << " seconds, or " << ((double)(END_TIME / 1000) / 60) << " minutes\n\n";
     return EXIT_SUCCESS;
 }
 
 
 // Display all pages linking to a page
 int menu_calls::display_linked_to() {
-    //std::string title;
-    const std::string TITLE;
+    std::string title;
     bool save{};
     bool csv{};
 
     system("clear");
     std::cout << "\nWhat page would you like to find all the other pages linking to?\n";
     try {
-        const std::string *TITLE_PTR{&TITLE};
-        std::string *change_ptr{const_cast<std::string *>(TITLE_PTR)};
-        std::getline(std::cin, *change_ptr);
-        //std::getline(std::cin, title);
+        std::getline(std::cin, title);
     } catch (const std::ios_base::failure &E) {
         std::cerr << "\nError: " << E.what() << "\n\n";
         return EXIT_FAILURE;
@@ -256,10 +221,16 @@ int menu_calls::display_linked_to() {
         std::cerr << "Page not found\n\n";
         return EXIT_FAILURE;
     } */
-
     system("clear");
-    std::cout << "Would you like to display or save the pages linking to " << TITLE << "?\nPress D for display and S for save\n";
-    /* char response{};
+    const auto LINKED_TO{graph.linked_to(title)};
+    if (LINKED_TO.empty()) {
+        std::cout << "\nNo pages link to " << title << ", or " << title << " isn't found\n";
+        return EXIT_FAILURE;
+    }
+
+    //system("clear");
+    std::cout << "Would you like to display or save the pages linking to " << title << "?\nPress D for display and S for save\n";
+    char response{};
     do {
         try {
             std::cin >> response;
@@ -274,43 +245,23 @@ int menu_calls::display_linked_to() {
             system("clear");
             std::cout << "\nPlease enter D or S\n";
         }
-    } while (response != 'D' && response != 'S'); */
-    const char RESPONSE{};
-    do {
-        try {
-            const char *RESPONSE_PTR{&RESPONSE};
-            char *change_ptr{const_cast<char *>(RESPONSE_PTR)};
-            std::cin >> *change_ptr;
-            //std::cin >> response;
-            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-            *change_ptr = toupper(*change_ptr);
-        } catch (const std::exception &E) {
-            std::cerr << "\nError: " << E.what() << "\n\n";
-            return EXIT_FAILURE;
-        }
-
-        //response = toupper(response);
-        if (RESPONSE != 'D' && RESPONSE != 'S'){
-            system("clear");
-            std::cout << "\nPlease enter D or S\n";
-        }
-    } while (RESPONSE != 'D' && RESPONSE != 'S');
-    if (RESPONSE == 'S') {
+    } while (response != 'D' && response != 'S');
+    if (response == 'S') {
         save = true;
         system("clear");
         std::cout << "Would you like to save as a .csv file instead of a .txt?";
         csv = y_or_n();
     }
 
-    system("clear");
-    const auto LINKED_TO{graph.linked_to(TITLE)};
+    /* system("clear");
+    const auto LINKED_TO{graph.linked_to(title)};
     if (LINKED_TO.empty()) {
-        std::cerr << "\nNo pages link to " << TITLE << ", or " << TITLE << " isn't found\n";
+        std::cout << "\nNo pages link to " << title << ", or " << title << " isn't found\n";
         return EXIT_FAILURE;
-    }
+    } */
 
     if (!save) {
-        std::cout << "\nPages that link to " << TITLE << ":\n";
+        std::cout << "\nPages that link to " << title << ":\n";
         for (unsigned int i{}; i < LINKED_TO.size(); ++i)
             std::cout << i + 1 << ") " << LINKED_TO[i]->title << '\n';
     } else {
@@ -359,14 +310,14 @@ int menu_calls::display_linked_to() {
             }
         }
 
-        std::string save_title{TITLE};
+        std::string save_title{title};
         std::replace(save_title.begin(), save_title.end(), ' ', '_');  // Replace spaces with underscores in the title for ✨𝒻ℴ𝓇𝓂𝒶𝓉𝓉𝒾𝓃ℊ✨
 
         if (csv) {
             std::string file_name{"pages_linking_to_" + save_title + ".csv"};
             try {
                 file_out.open(file_name);
-                file_out << "Page,Pages linking to page\n" << TITLE << ',';
+                file_out << "Page,Pages linking to page\n" << title << ',';
                 for (const auto &PAGE : LINKED_TO)
                     file_out << PAGE->title << ',';
             } catch (const std::ofstream::failure &E) {
@@ -380,7 +331,7 @@ int menu_calls::display_linked_to() {
             unsigned int place{1};
             try {
                 file_out.open(file_name);
-                file_out << "Pages that link to " << TITLE << ":\n";
+                file_out << "Pages that link to " << title << ":\n";
                 for (const auto &PAGE : LINKED_TO) {
                     file_out << place << ") " << PAGE->title << '\n';
                     ++place;
@@ -400,7 +351,7 @@ int menu_calls::display_linked_to() {
             std::cerr << "\nError: " << E.what() << "\n\n";
             return EXIT_FAILURE;
         }
-        std::cout << "\nPages that link to " << TITLE << " saved\n";
+        std::cout << "\nPages that link to " << title << " saved\n";
     }
     return EXIT_SUCCESS;
 }
