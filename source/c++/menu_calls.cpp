@@ -19,10 +19,8 @@ int menu_calls::display_page() {
         std::cerr << "\nError: " << E.what() << "\n\n";
         return EXIT_FAILURE;
     }
-    //std::getline(std::cin, title);
 
     system("clear");
-    //const auto PAGE = graph.find(title);
     const auto PAGE = graph.find(std::move(title));
     if (PAGE == nullptr) {
         std::cerr << "\nPage not found\n\n";
@@ -58,9 +56,6 @@ int menu_calls::display_top_n() {
             std::cerr << "\nError: " << E.what() << "\n\n";
             return EXIT_FAILURE;
         }
-        //std::cin >> num;
-        //std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-
 
         for (const char &C : num) {
             if (!isdigit(C)) {
@@ -215,12 +210,6 @@ int menu_calls::display_linked_to() {
         return EXIT_FAILURE;
     }
 
-    /* // Check if the page actually exists
-    if (graph.find(title) == nullptr) {
-        system("clear");
-        std::cerr << "Page not found\n\n";
-        return EXIT_FAILURE;
-    } */
     system("clear");
     const auto LINKED_TO{graph.linked_to(title)};
     if (LINKED_TO.empty()) {
@@ -228,7 +217,6 @@ int menu_calls::display_linked_to() {
         return EXIT_FAILURE;
     }
 
-    //system("clear");
     std::cout << "Would you like to display or save the pages linking to " << title << "?\nPress D for display and S for save\n";
     char response{};
     do {
@@ -252,13 +240,6 @@ int menu_calls::display_linked_to() {
         std::cout << "Would you like to save as a .csv file instead of a .txt?";
         csv = y_or_n();
     }
-
-    /* system("clear");
-    const auto LINKED_TO{graph.linked_to(title)};
-    if (LINKED_TO.empty()) {
-        std::cout << "\nNo pages link to " << title << ", or " << title << " isn't found\n";
-        return EXIT_FAILURE;
-    } */
 
     if (!save) {
         std::cout << "\nPages that link to " << title << ":\n";

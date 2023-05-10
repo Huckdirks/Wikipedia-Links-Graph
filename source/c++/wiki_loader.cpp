@@ -40,7 +40,7 @@ int wiki_loader::load() {
 
     std::cout << "\nLoading Wikipedia page titles from " << file_names.size() << " files...\n";
     for (unsigned int i{}; i < file_names.size(); ++i){
-        /* title_futures.push_back(pool.submit([this, file_names, i]() -> std::set<std::string> {
+        title_futures.push_back(pool.submit([this, file_names, i]() -> std::set<std::string> {
             std::ifstream file_in;
             file_in.exceptions(std::ifstream::failbit | std::ifstream::badbit);
             std::set<std::string> titles;
@@ -58,36 +58,6 @@ int wiki_loader::load() {
                 std::cerr << E.what() << "\n";
                 return titles;
             }
-            return titles;
-        })); */
-        title_futures.push_back(pool.submit([this, file_names, i, &progress, &titles_bar]() -> std::set<std::string> {
-            std::ifstream file_in;
-            file_in.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-            std::set<std::string> titles;
-            const std::string FILE_NAME{file_names[i]};
-
-            double percent{100 * ((double)progress / (titles.size() - 1))};
-            if (progress % 10000 == 0 || percent >= 100) {  // Only update progress bar every 1000 titles to save time
-                if (titles_bar.is_completed() || percent >= 100) {
-                    titles_bar.set_option(indicators::option::ShowRemainingTime{false});
-                    titles_bar.set_option(indicators::option::ForegroundColor{indicators::Color::green});
-                }
-                titles_bar.set_progress(percent);
-            }
-
-            try {
-                file_in.open(FILE_NAME);
-                file_in.peek();
-
-                while (!file_in.eof())
-                    load_title(titles, file_in);
-
-                file_in.close();
-            } catch (const std::ifstream::failure &E) {
-                std::cerr << E.what() << "\n";
-                return titles;
-            }
-            ++progress;
             return titles;
         }));
     }
@@ -120,11 +90,6 @@ int wiki_loader::load() {
             }
             graph_titles_bar.set_progress(percent);
         }
-        /* graph_vertex page;
-        page.title = TITLE;
-        graph->push_back(page); */
-        //graph_vertex page{TITLE};
-        //graph_vertex page{TITLE};
         const graph_vertex PAGE{std::move(TITLE)};
         graph->push_back(std::move(PAGE));
         ++progress;
@@ -178,10 +143,8 @@ int wiki_loader::load() {
 // Load in a title to the set
 //Parallel
 inline int wiki_loader::load_title(std::set<std::string> &titles, std::ifstream &file_in) {
-    //std::string JSON_line;
     const std::string JSON_LINE;
     try {
-        //std::getline(file_in, JSON_line);
         const std::string *LINE_PTR{&JSON_LINE};
         std::string *change_ptr{const_cast<std::string *>(LINE_PTR)};
         std::getline(file_in, *change_ptr);
@@ -191,21 +154,17 @@ inline int wiki_loader::load_title(std::set<std::string> &titles, std::ifstream 
         return EXIT_FAILURE;
     }
 
-    //file_in.peek();
-    //const json JSON = json::parse(JSON_line);  // { } Initialization breaks this ¯\_(ツ)_/¯
     const json JSON;
     try {
         const json *JSON_PTR{&JSON};
         json *change_ptr{const_cast<json *>(JSON_PTR)};
-        *change_ptr = json::parse(JSON_LINE);
+        *change_ptr = json::parse(JSON_LINE);   // { } Initialization breaks this ¯\_(ツ)_/¯
     } catch (const json::parse_error &E) {
         std::cerr << E.what() << "\n\n";
         return EXIT_FAILURE;
     }
 
-    //const std::string TITLE{std::move(JSON[0].get<std::string>())};
     titles.insert(std::move(JSON[0].get<std::string>()));
-    //titles.insert(std::move(TITLE));
     return EXIT_SUCCESS;
 }
 
@@ -231,7 +190,6 @@ inline int wiki_loader::load_links(std::ifstream &file_in, indicators::BlockProg
         const std::string *LINE_PTR{&JSON_LINE};
         std::string *change_ptr{const_cast<std::string *>(LINE_PTR)};
         std::getline(file_in, *change_ptr);
-        //std::getline(file_in, JSON_line);
         file_in.peek();
     } catch (const std::ifstream::failure &E) {
         std::cerr << E.what() << "\n\n";
@@ -247,18 +205,14 @@ inline int wiki_loader::load_links(std::ifstream &file_in, indicators::BlockProg
         std::cerr << E.what() << "\n\n";
         return EXIT_FAILURE;
     }
-    //const std::string TITLE{JSON[0].get<std::string>()};
 
     ++progress;
     graph_vertex *page{graph->find(JSON[0].get<std::string>())};
-    //graph_vertex *page{graph->find(std::move(JSON[0].get<std::string>()))};
-    //graph_vertex *page{graph->find(std::move(TITLE))};
     if (page == nullptr)
         return EXIT_FAILURE;
         
     page->adjacent.reserve(JSON[1].size());
     for (const auto &LINK : JSON[1]) {
-        //graph_vertex *adjacent_page{graph->find(LINK.get<std::string>())};
         graph_vertex *adjacent_page{graph->find(std::move(LINK.get<std::string>()))};
         if (adjacent_page == nullptr)
                 continue;

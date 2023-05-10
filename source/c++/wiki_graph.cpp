@@ -132,12 +132,10 @@ std::vector<graph_vertex *> wiki_graph::linked_to(const std::string &TO_FIND) {
         return {};
 
     // Only to check if the vertex actually exists
-    //graph_vertex *vertex{binary_search(TO_FIND)};
     graph_vertex *vertex{binary_search(std::move(TO_FIND))};
     if (vertex == nullptr)
         return {};
 
-    //auto linked_to = all_linked_to(TO_FIND);
     auto linked_to{all_linked_to(std::move(TO_FIND))};
     linked_to.shrink_to_fit();
     return linked_to;
@@ -193,10 +191,6 @@ unsigned int wiki_graph::size() const {
 void wiki_graph::push_back(const graph_vertex &VERTEX) {
     return vertex_list.push_back(VERTEX);
 }
-
-/* void wiki_graph::push_back(const graph_vertex &&VERTEX) {
-    return vertex_list.push_back(std::move(VERTEX));
-} */
 
 
 // Private Functions
@@ -316,7 +310,6 @@ std::vector<graph_vertex *> wiki_graph::top_n_linked(const unsigned int N) {
             std::cerr << E.what() << '\n';
             exit(EXIT_FAILURE);
         }
-        //const std::vector<graph_vertex *> SEGMENT{futures[i].get()};
 
         double percent{100 * ((double)progress / (N * cores))};
         for (const auto &VERTEX : SEGMENT) {

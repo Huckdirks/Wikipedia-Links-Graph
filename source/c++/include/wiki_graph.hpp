@@ -29,7 +29,7 @@ class graph_vertex {
     unsigned int links{};   // These should be atomic but everything breaks for some reason when I make them atomic
     unsigned int linked_to{};
 
-    // Constructors (I only had to do this because -Werror=deprecated-copy from -Wextra)
+    // Constructors & Destructors
     graph_vertex() = default;                                      // Default constructor
     constexpr graph_vertex(const graph_vertex &VERTEX) = default;  // Copy constructor
     graph_vertex(graph_vertex &&VERTEX) noexcept;                  // Move constructor

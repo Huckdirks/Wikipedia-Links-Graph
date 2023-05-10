@@ -7,7 +7,8 @@ int menu::init_menu() {
     system("clear");
 
     // Initialize python script
-    const std::string PYTHON_PATH{fs::current_path().parent_path().string() + "/python/"};
+    const std::string PYTHON_PATH{fs::current_path().string() + "/source/python/"};
+    //const std::string PYTHON_PATH{fs::current_path().parent_path().string() + "/python/"};
     const std::string MAIN_PY_PATH{PYTHON_PATH + "main.py"};
     FILE *python_file{};
 
