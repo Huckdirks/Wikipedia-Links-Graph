@@ -6,13 +6,13 @@
 
 // Constructors
 
-/* // Move constructor
+// Move constructor
 graph_vertex::graph_vertex(graph_vertex &&VERTEX) noexcept {
     title = std::move(VERTEX.title);
     adjacent = std::move(VERTEX.adjacent);
     links = VERTEX.links;
     linked_to = VERTEX.linked_to;
-} */
+}
 
 
 // Operator overloads
@@ -24,13 +24,13 @@ void graph_vertex::operator=(const graph_vertex &VERTEX) {
 }
 
 
-/* // Move assignment operator
+// Move assignment operator
 void graph_vertex::operator=(graph_vertex &&VERTEX) noexcept {
     title = std::move(VERTEX.title);
     adjacent = std::move(VERTEX.adjacent);
     links = VERTEX.links;
     linked_to = VERTEX.linked_to;
-} */
+}
 
 
 // Display the article title, the number of times it is linked to, and the titles of the articles it links to if display_links is true
@@ -307,7 +307,7 @@ std::vector<graph_vertex *> wiki_graph::top_n_linked(const unsigned int N) {
 
     // Go through the results of top_n_linked_segment's results and find the top n
     for (unsigned int i{}; i < cores; ++i) {
-        /* const std::vector<graph_vertex *> SEGMENT{};    // For exception handling for the future I need to set it's value in the try block, but since it's const after being set I use const_cast to set it
+        const std::vector<graph_vertex *> SEGMENT{};    // For exception handling for the future I need to set it's value in the try block, but since it's const after being set I use const_cast to set it
         try {
             const auto *SEGMENT_PTR{&SEGMENT};
             auto change_ptr{const_cast<std::vector<graph_vertex *> *>(SEGMENT_PTR)};
@@ -315,8 +315,8 @@ std::vector<graph_vertex *> wiki_graph::top_n_linked(const unsigned int N) {
         } catch (const std::future_error &E) {
             std::cerr << E.what() << '\n';
             exit(EXIT_FAILURE);
-        } */
-        const std::vector<graph_vertex *> SEGMENT{futures[i].get()};
+        }
+        //const std::vector<graph_vertex *> SEGMENT{futures[i].get()};
 
         double percent{100 * ((double)progress / (N * cores))};
         for (const auto &VERTEX : SEGMENT) {
@@ -470,7 +470,7 @@ std::vector<graph_vertex *> wiki_graph::all_linked_to(const std::string &&LINKED
         } catch (const std::future_error &E) {
             std::cerr << E.what() << '\n';
         }
-        std::move(temp.begin(), temp.end(), std::back_inserter(linked_to_list));    // moving is faster than copying I guess
+        std::move(temp.begin(), temp.end(), std::back_inserter(linked_to_list));    // moving is faster than copying
     }
 
     // Sort the vector by title to make it fancy

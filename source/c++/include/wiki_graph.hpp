@@ -32,14 +32,14 @@ class graph_vertex {
     // Constructors (I only had to do this because -Werror=deprecated-copy from -Wextra)
     graph_vertex() = default;                                      // Default constructor
     constexpr graph_vertex(const graph_vertex &VERTEX) = default;  // Copy constructor
-    //graph_vertex(graph_vertex &&VERTEX) noexcept;                  // Move constructor
+    graph_vertex(graph_vertex &&VERTEX) noexcept;                  // Move constructor
     explicit graph_vertex(const std::string &TITLE) : title{TITLE} {}               // Constructor from string
     explicit graph_vertex(std::string &&TITLE) noexcept : title{std::move(TITLE)} {}  // Move constructor from string
-    //~graph_vertex() = default;                                     // Destructor
+    ~graph_vertex() = default;                                     // Destructor
 
     // Operators
     void operator=(const graph_vertex &VERTEX);                    // Copy assignment operator
-    //void operator=(graph_vertex &&VERTEX) noexcept;                // Move assignment operator
+    void operator=(graph_vertex &&VERTEX) noexcept;                // Move assignment operator
     int display(const bool DISPLAY_LINKS) const;                   // Display vertex
 };
 
