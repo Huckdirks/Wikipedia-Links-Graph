@@ -27,7 +27,6 @@ int wiki_loader::load() {
     }
 
     unsigned int progress{};
-    //double percent{};
     indicators::BlockProgressBar titles_bar{indicators::option::BarWidth{80}, indicators::option::Start{"["}, indicators::option::End{"]"}, indicators::option::ShowElapsedTime{true}, indicators::option::ShowRemainingTime{true}, indicators::option::ForegroundColor{indicators::Color::red}, indicators::option::FontStyles{std::vector<indicators::FontStyle>{indicators::FontStyle::bold}}};
 
     std::set<std::string> titles;   // Set of titles to make sure all titles are sorted before adding to graph
@@ -53,7 +52,6 @@ int wiki_loader::load() {
                 file_in.close();
             } catch (const std::ifstream::failure &E) {
                 std::cerr << E.what() << "\n";
-                return titles;
             }
             return titles;
         }));
@@ -74,7 +72,6 @@ int wiki_loader::load() {
     indicators::BlockProgressBar graph_titles_bar{indicators::option::BarWidth{80}, indicators::option::Start{"["}, indicators::option::End{"]"}, indicators::option::ShowElapsedTime{true}, indicators::option::ShowRemainingTime{true}, indicators::option::ForegroundColor{indicators::Color::red}, indicators::option::FontStyles{std::vector<indicators::FontStyle>{indicators::FontStyle::bold}}};
     indicators::show_console_cursor(false); // Hide cursor
 
-    //unsigned int progress{};
     double percent{};
 
     // Load in each title to the graph
