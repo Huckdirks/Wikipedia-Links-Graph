@@ -13,9 +13,6 @@ def find_article_links(FILES):
     results = []
 
     # Change directory to Articles-p
-    """ ORIGINAL_DIR = dirname(__file__)
-    PARENT_DIR = dirname(ORIGINAL_DIR)
-    MAIN_DIR = dirname(PARENT_DIR) """
     MAIN_DIR = dirname(dirname(dirname(__file__)))
     CHECK_DIR = MAIN_DIR + "/data/load/Articles-p/"
     # If directory doesn't exist, make it

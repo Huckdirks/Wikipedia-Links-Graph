@@ -32,7 +32,8 @@ def main():
     WIKI_DUMPS_DIR = MAIN_DIR + "/data/load/Wiki_Dumps/"
 
     # Create data directories if they don't exist
-    os.makedirs(MAIN_DIR + "/data/load/")
+    if not isdir(MAIN_DIR + "/data/"):
+        os.makedirs(MAIN_DIR + "/data/load/")
 
     # Check if a file in Articles-p already exists, and remove from files_to_download if it does
     if isdir(ARTICLES_P_DIR):
