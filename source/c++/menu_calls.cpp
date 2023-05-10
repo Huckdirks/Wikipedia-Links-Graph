@@ -111,13 +111,6 @@ int menu_calls::display_top_n() {
         file_out.exceptions(std::ofstream::failbit | std::ofstream::badbit);
         // Change directory to Articles-p
         const fs::path MAIN_DIR{fs::current_path()};
-        /* try {
-            //fs::current_path(MAIN_DIR.parent_path().parent_path() / "data/");
-            fs::current_path(MAIN_DIR / "data/");
-        } catch (const fs::filesystem_error &E) {
-            std::cerr << "\nError: " << E.what() << "\n\n";
-            return EXIT_FAILURE;
-        } */
         try {
             fs::current_path(MAIN_DIR / "data/user_data");
         } catch (const fs::filesystem_error &E) {
@@ -251,12 +244,6 @@ int menu_calls::display_linked_to() {
         file_out.exceptions(std::ofstream::failbit | std::ofstream::badbit);
         // Change directory to Articles-p
         fs::path MAIN_DIR{fs::current_path()};
-        /* try {
-            fs::current_path(MAIN_DIR.parent_path().parent_path() / "data/");
-        } catch (const fs::filesystem_error &E) {
-            std::cerr << "\nError: " << E.what() << "\n\n";
-            return EXIT_FAILURE;
-        } */
         
         try {
             fs::current_path(MAIN_DIR / "data/user_data");
