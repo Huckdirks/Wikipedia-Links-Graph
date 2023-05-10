@@ -31,9 +31,10 @@ int wiki_loader::load() {
 
     std::set<std::string> titles;   // Set of titles to make sure all titles are sorted before adding to graph
     BS::thread_pool pool;
-    const auto START_TITLE_TIME{std::chrono::system_clock::now()};
-    std::cout << "\nLoading page titles from " << file_names.size() << " files...\n";
     std::vector <std::future<std::set<std::string>>> title_futures;
+    const auto START_TITLE_TIME{std::chrono::system_clock::now()};
+
+    std::cout << "\nLoading Wikipedia page titles from " << file_names.size() << " files...\n";
     for (unsigned int i{}; i < file_names.size(); ++i){
         title_futures.push_back(pool.submit([this, file_names, i]() -> std::set<std::string> {
             std::ifstream file_in;

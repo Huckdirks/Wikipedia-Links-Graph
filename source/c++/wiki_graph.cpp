@@ -256,10 +256,10 @@ std::vector<graph_vertex *> wiki_graph::top_n_linked(const unsigned int N) {
     top_n.reserve(N);
     unsigned int best{};
 
-    /* // Fill top_n with blank vertex pointers so there's something to compare to
+    // Fill top_n with blank vertex pointers so there's something to compare to
     graph_vertex blank;
     for (unsigned int i{}; i < N; ++i)
-        top_n.push_back(&blank); */
+        top_n.push_back(&blank);
 
     // Set up for parallelization
     unsigned int cores{std::thread::hardware_concurrency()};
