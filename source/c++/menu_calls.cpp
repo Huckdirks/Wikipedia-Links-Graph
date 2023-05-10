@@ -19,10 +19,9 @@ int menu_calls::display_page() {
         std::cerr << "\nError: " << E.what() << "\n\n";
         return EXIT_FAILURE;
     }
-    //std::getline(std::cin, title);
 
     system("clear");
-    const auto PAGE = graph.find(title);
+    const auto PAGE = graph.find(std::move(title));
     if (PAGE == nullptr) {
         std::cerr << "\nPage not found\n\n";
         return EXIT_FAILURE;
@@ -57,9 +56,6 @@ int menu_calls::display_top_n() {
             std::cerr << "\nError: " << E.what() << "\n\n";
             return EXIT_FAILURE;
         }
-        //std::cin >> num;
-        //std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-
 
         for (const char &C : num) {
             if (!isdigit(C)) {
@@ -116,22 +112,16 @@ int menu_calls::display_top_n() {
         // Change directory to Articles-p
         const fs::path MAIN_DIR{fs::current_path()};
         try {
-            fs::current_path(MAIN_DIR.parent_path().parent_path() / "data/");
-        } catch (const fs::filesystem_error &E) {
-            std::cerr << "\nError: " << E.what() << "\n\n";
-            return EXIT_FAILURE;
-        }
-        try {
-            fs::current_path("user_data");
+            fs::current_path(MAIN_DIR / "data/user_data");
         } catch (const fs::filesystem_error &E) {
             try {
-                fs::create_directory("user_data");
+                fs::create_directory(MAIN_DIR / "data/user_data");
             } catch (const fs::filesystem_error &E) {
                 std::cerr << "\nError: " << E.what() << "\n\n";
                 return EXIT_FAILURE;
             }
             try {
-                fs::current_path("user_data");
+                fs::current_path(MAIN_DIR / "data/user_data");
             } catch (const fs::filesystem_error &E) {
                 std::cerr << "\nError: " << E.what() << "\n\n";
                 return EXIT_FAILURE;
@@ -214,14 +204,13 @@ int menu_calls::display_linked_to() {
         return EXIT_FAILURE;
     }
 
-    // Check if the page actually exists
-    if (graph.find(title) == nullptr) {
-        system("clear");
-        std::cerr << "Page not found\n\n";
+    system("clear");
+    const auto LINKED_TO{graph.linked_to(title)};
+    if (LINKED_TO.empty()) {
+        std::cout << "\nNo pages link to " << title << ", or " << title << " isn't found\n";
         return EXIT_FAILURE;
     }
 
-    system("clear");
     std::cout << "Would you like to display or save the pages linking to " << title << "?\nPress D for display and S for save\n";
     char response{};
     do {
@@ -246,13 +235,6 @@ int menu_calls::display_linked_to() {
         csv = y_or_n();
     }
 
-    system("clear");
-    const auto LINKED_TO{graph.linked_to(title)};
-    if (LINKED_TO.empty()) {
-        std::cout << "\nNo pages link to " << title << ", or " << title << " isn't found\n";
-        return EXIT_FAILURE;
-    }
-
     if (!save) {
         std::cout << "\nPages that link to " << title << ":\n";
         for (unsigned int i{}; i < LINKED_TO.size(); ++i)
@@ -262,24 +244,18 @@ int menu_calls::display_linked_to() {
         file_out.exceptions(std::ofstream::failbit | std::ofstream::badbit);
         // Change directory to Articles-p
         fs::path MAIN_DIR{fs::current_path()};
-        try {
-            fs::current_path(MAIN_DIR.parent_path().parent_path() / "data/");
-        } catch (const fs::filesystem_error &E) {
-            std::cerr << "\nError: " << E.what() << "\n\n";
-            return EXIT_FAILURE;
-        }
         
         try {
-            fs::current_path("user_data");
+            fs::current_path(MAIN_DIR / "data/user_data");
         } catch (const fs::filesystem_error &E) {
             try {
-                fs::create_directory("user_data");
+                fs::create_directory(MAIN_DIR / "data/user_data");
             } catch (const fs::filesystem_error &E) {
                 std::cerr << "\nError: " << E.what() << "\n\n";
                 return EXIT_FAILURE;
             }
             try {
-                fs::current_path("user_data");
+                fs::current_path(MAIN_DIR / "data/user_data");
             } catch (const fs::filesystem_error &E) {
                 std::cerr << "\nError: " << E.what() << "\n\n";
                 return EXIT_FAILURE;

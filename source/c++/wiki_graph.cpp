@@ -3,12 +3,33 @@
 #include "include/wiki_loader.hpp"
 
 // Graph Vertex Functions:
+
+// Constructors
+
+// Move constructor
+graph_vertex::graph_vertex(graph_vertex &&VERTEX) noexcept {
+    title = std::move(VERTEX.title);
+    adjacent = std::move(VERTEX.adjacent);
+    links = VERTEX.links;
+    linked_to = VERTEX.linked_to;
+}
+
+
 // Operator overloads
 
-// = operator overload
+// = Copy assignment operator
 void graph_vertex::operator=(const graph_vertex &VERTEX) {
     title = VERTEX.title;
     adjacent = VERTEX.adjacent;
+}
+
+
+// Move assignment operator
+void graph_vertex::operator=(graph_vertex &&VERTEX) noexcept {
+    title = std::move(VERTEX.title);
+    adjacent = std::move(VERTEX.adjacent);
+    links = VERTEX.links;
+    linked_to = VERTEX.linked_to;
 }
 
 
@@ -30,11 +51,10 @@ int graph_vertex::display(const bool DISPLAY_LINKS) const {
 
 // Wiki Graph Functions:
 // Operator overloads
-
 // These operator overloads aren't really used here anymore but it's nice if you want to access a vertex by index from outside the class
 
 // [ ] operator overload for ints
-graph_vertex &wiki_graph::operator[](const unsigned int INDEX) {
+graph_vertex &wiki_graph::operator[](const unsigned int &&INDEX) {
     try {
         return vertex_list.at(INDEX);
     } catch (const std::out_of_range &EXCEPTION) {
@@ -43,10 +63,12 @@ graph_vertex &wiki_graph::operator[](const unsigned int INDEX) {
     }
 }
 
+
 // [ ] operator overload for strings
-graph_vertex &wiki_graph::operator[](const std::string &PAGE) {
+graph_vertex &wiki_graph::operator[](const std::string &&PAGE) {
     try {
-        return vertex_list.at(binary_search_index(PAGE));
+        //return vertex_list.at(binary_search_index(PAGE));
+        return vertex_list.at(binary_search_index(std::move(PAGE)));
     } catch (const std::out_of_range &EXCEPTION) {
         std::cerr << EXCEPTION.what() << '\n';
         exit(1);
@@ -58,20 +80,24 @@ graph_vertex &wiki_graph::operator[](const std::string &PAGE) {
 // Wrapper Functions:
 
 // Binary search for value (wrapper function)
-graph_vertex *wiki_graph::find(const std::string &TO_FIND) {
+graph_vertex *wiki_graph::find(const std::string &&TO_FIND) {
     if (vertex_list.empty())
         return nullptr;
 
-    return binary_search(TO_FIND);
+    //return binary_search(TO_FIND);
+    return binary_search(std::move(TO_FIND));
 }
 
+
 // Binary search for index (wrapper function)
-int wiki_graph::find_index(const std::string &TO_FIND) {
+int wiki_graph::find_index(const std::string &&TO_FIND) {
     if (vertex_list.empty())
         return -1;
 
-    return binary_search_index(TO_FIND);
+    //return binary_search_index(TO_FIND);
+    return binary_search_index(std::move(TO_FIND));
 }
+
 
 // Get top n most linked to vertices & display (wrapper function)
 std::vector<graph_vertex *> wiki_graph::top_n(const unsigned int N) {
@@ -90,7 +116,8 @@ std::vector<graph_vertex *> wiki_graph::top_n(const unsigned int N) {
         return top_n_list;
     }
 
-    auto top_n_list = top_n_linked(N);
+    //auto top_n_list = top_n_linked(N);
+    auto top_n_list{top_n_linked(std::move(N))};
     if (top_n_list.empty())  // You never know
         return {};
 
@@ -105,11 +132,11 @@ std::vector<graph_vertex *> wiki_graph::linked_to(const std::string &TO_FIND) {
         return {};
 
     // Only to check if the vertex actually exists
-    graph_vertex *vertex{binary_search(TO_FIND)};
+    graph_vertex *vertex{binary_search(std::move(TO_FIND))};
     if (vertex == nullptr)
         return {};
 
-    auto linked_to = all_linked_to(TO_FIND);
+    auto linked_to{all_linked_to(std::move(TO_FIND))};
     linked_to.shrink_to_fit();
     return linked_to;
 }
@@ -161,8 +188,8 @@ unsigned int wiki_graph::size() const {
 
 
 // Add vertex to the end of the list
-void wiki_graph::push_back(const graph_vertex vertex) {
-    return vertex_list.push_back(vertex);
+void wiki_graph::push_back(const graph_vertex &VERTEX) {
+    return vertex_list.push_back(VERTEX);
 }
 
 
@@ -170,7 +197,7 @@ void wiki_graph::push_back(const graph_vertex vertex) {
 
 // Find a vertex in the graph by title
 // Implementation adapted from https://www.geeksforgeeks.org/binary-search/
-graph_vertex *wiki_graph::binary_search(const std::string &TO_FIND) {
+graph_vertex *wiki_graph::binary_search(const std::string &&TO_FIND) {
     unsigned int lo{}, mid{};
     long unsigned int hi{vertex_list.size() - 1};   // Needs to be long unsigned int for { } initialization
 
@@ -194,7 +221,7 @@ graph_vertex *wiki_graph::binary_search(const std::string &TO_FIND) {
 
 // Find the index of a vertex in the graph by title
 // Implementation adapted from https://www.geeksforgeeks.org/binary-search/
-int wiki_graph::binary_search_index(const std::string &TO_FIND) {
+int wiki_graph::binary_search_index(const std::string &&TO_FIND) {
     unsigned int lo{}, mid{};
     long unsigned int hi{vertex_list.size() - 1};   // Needs to be long unsigned int for { } initialization
 
@@ -220,6 +247,7 @@ int wiki_graph::binary_search_index(const std::string &TO_FIND) {
 // Parallel
 std::vector<graph_vertex *> wiki_graph::top_n_linked(const unsigned int N) {
     std::vector<graph_vertex *> top_n;
+    top_n.reserve(N);
     unsigned int best{};
 
     // Fill top_n with blank vertex pointers so there's something to compare to
@@ -277,7 +305,7 @@ std::vector<graph_vertex *> wiki_graph::top_n_linked(const unsigned int N) {
         try {
             const auto *SEGMENT_PTR{&SEGMENT};
             auto change_ptr{const_cast<std::vector<graph_vertex *> *>(SEGMENT_PTR)};
-            *change_ptr = futures[i].get();   // Might need to make the result of futures[i].get() a unique_ptr
+            *change_ptr = futures[i].get();
         } catch (const std::future_error &E) {
             std::cerr << E.what() << '\n';
             exit(EXIT_FAILURE);
@@ -337,6 +365,7 @@ std::vector<graph_vertex *> wiki_graph::top_n_linked(const unsigned int N) {
 // Find top (n) most linked to pages in a segment of the graph
 std::vector<graph_vertex *> wiki_graph::top_n_linked_segment(const unsigned int N, const unsigned int SEGMENT_START, const unsigned int SEGMENT_END, indicators::DynamicProgress<indicators::BlockProgressBar> &bars) {
     std::vector<graph_vertex *> top_n;
+    top_n.reserve(N);
     const unsigned int SEGMENT_SIZE{SEGMENT_END - SEGMENT_START};
     const unsigned int SEGMENT_NUM{(SEGMENT_END / SEGMENT_SIZE) - 1};
     unsigned int best{};
@@ -392,7 +421,7 @@ std::vector<graph_vertex *> wiki_graph::top_n_linked_segment(const unsigned int 
 
 // Find all the pages linking to a given page
 // Parallel
-std::vector<graph_vertex *> wiki_graph::all_linked_to(const std::string &LINKED_TO) {
+std::vector<graph_vertex *> wiki_graph::all_linked_to(const std::string &&LINKED_TO) {
     std::vector<graph_vertex *> linked_to_list;
     // Set up for parallelization
     const unsigned int CORES{std::thread::hardware_concurrency()};
@@ -418,7 +447,6 @@ std::vector<graph_vertex *> wiki_graph::all_linked_to(const std::string &LINKED_
         } catch (const std::future_error &E) {
             std::cerr << E.what() << '\n';
         }
-        //futures[i] = std::async(std::launch::async, &wiki_graph::all_linked_to_segment, this, LINKED_TO, i * SEGMENT_SIZE, (i + 1) * SEGMENT_SIZE, std::ref(bars));
     }
 
     // Wait for all the functions to finish and get the results
@@ -435,7 +463,7 @@ std::vector<graph_vertex *> wiki_graph::all_linked_to(const std::string &LINKED_
         } catch (const std::future_error &E) {
             std::cerr << E.what() << '\n';
         }
-        std::move(temp.begin(), temp.end(), std::back_inserter(linked_to_list));    // moving is faster than copying I guess
+        std::move(temp.begin(), temp.end(), std::back_inserter(linked_to_list));    // moving is faster than copying
     }
 
     // Sort the vector by title to make it fancy
@@ -450,7 +478,7 @@ std::vector<graph_vertex *> wiki_graph::all_linked_to(const std::string &LINKED_
 
 
 // Find all the pages linking to a given page in a segment of the graph
-std::vector<graph_vertex *> wiki_graph::all_linked_to_segment(const std::string &LINKED_TO, const unsigned int SEGMENT_START, const unsigned int SEGMENT_END, indicators::DynamicProgress<indicators::BlockProgressBar> &bars) {
+std::vector<graph_vertex *> wiki_graph::all_linked_to_segment(const std::string &&LINKED_TO, const unsigned int SEGMENT_START, const unsigned int SEGMENT_END, indicators::DynamicProgress<indicators::BlockProgressBar> &bars) {
     std::vector<graph_vertex *> linked_to_list;
     const unsigned int SEGMENT_SIZE{SEGMENT_END - SEGMENT_START};
     const unsigned int SEGMENT_NUM{(SEGMENT_END / SEGMENT_SIZE) - 1};
