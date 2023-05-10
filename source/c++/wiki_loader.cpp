@@ -10,8 +10,8 @@ int wiki_loader::load() {
     // Change directory to Articles-p
     const fs::path MAIN_DIR{fs::current_path()};
     try {
-        fs::current_path(MAIN_DIR.parent_path().parent_path() / "data/load/");
-        fs::current_path("Articles-p");
+        //fs::current_path(MAIN_DIR.parent_path().parent_path() / "data/load/");
+        fs::current_path("data/load/Articles-p");
     } catch (const fs::filesystem_error &E) {
         std::cerr << "\nError: " << E.what() << "\n\n";
         return EXIT_FAILURE;
@@ -19,7 +19,8 @@ int wiki_loader::load() {
 
     // Get all file names ending in .ndjson in directory
     std::vector<std::string> file_names;
-    for (const auto &FILE : fs::directory_iterator(MAIN_DIR.parent_path().parent_path() / "data/load/Articles-p")) {
+    //for (const auto &FILE : fs::directory_iterator(MAIN_DIR.parent_path().parent_path() / "data/load/Articles-p")) {
+    for (const auto &FILE : fs::directory_iterator(MAIN_DIR / "data/load/Articles-p")) {
         if (FILE.path().extension() == ".ndjson" && fs::file_size(FILE) != 0)
                 file_names.push_back(FILE.path().filename());
     }
