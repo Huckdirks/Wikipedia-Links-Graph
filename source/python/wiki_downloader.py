@@ -7,14 +7,14 @@ import tqdm
 
 def download_wiki_dumps(FILES_TO_DOWNLOAD, DUMP_URL):
     # Check if directory to store files exists & create it if it doesn't
-    ORIGINAL_DIR = dirname(__file__)
+    """ ORIGINAL_DIR = dirname(__file__)
     PARENT_DIR = dirname(ORIGINAL_DIR)
-    MAIN_DIR = dirname(PARENT_DIR)
+    MAIN_DIR = dirname(PARENT_DIR) """
+    MAIN_DIR = dirname(dirname(dirname(__file__)))
     CHECK_DIR = MAIN_DIR + "/data/load/Articles-p/"
     NEW_DIR = MAIN_DIR + "/data/load/Wiki_Dumps"
     if not isdir(NEW_DIR):
         os.mkdir(NEW_DIR)
-    # Change directory to the new one
     os.chdir(NEW_DIR)
 
     os.system("clear")
@@ -46,5 +46,5 @@ def download_wiki_dumps(FILES_TO_DOWNLOAD, DUMP_URL):
     else:
         print("\nAll files have been downloaded\n")
 
-    os.chdir(ORIGINAL_DIR)
+    os.chdir(MAIN_DIR)
     return

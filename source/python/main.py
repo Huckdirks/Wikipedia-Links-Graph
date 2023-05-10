@@ -27,19 +27,12 @@ def main():
             download_num += 1
 
     # Change directory to Articles-p
-    """ ORIGINAL_DIR = dirname(__file__)
-    PARENT_DIR = dirname(ORIGINAL_DIR)
-    MAIN_DIR = dirname(PARENT_DIR) """
     MAIN_DIR = dirname(dirname(dirname(__file__)))
     ARTICLES_P_DIR = MAIN_DIR + "/data/load/Articles-p/"
     WIKI_DUMPS_DIR = MAIN_DIR + "/data/load/Wiki_Dumps/"
 
     # Create data directories if they don't exist
     os.makedirs(MAIN_DIR + "/data/load/")
-    """ if not isdir(MAIN_DIR + "/data/"):
-        os.mkdir(MAIN_DIR + "/data/")
-    if not isdir(MAIN_DIR + "/data/load/"):
-        os.mkdir(MAIN_DIR + "/data/load/") """
 
     # Check if a file in Articles-p already exists, and remove from files_to_download if it does
     if isdir(ARTICLES_P_DIR):

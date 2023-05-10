@@ -54,11 +54,12 @@ def process_wiki(TITLE, TEXT):
 # I would declare file as const but since it gets deleted I made it normal (even tho file is technically a const string, not the file itself, but this is python so I'll just use the loose typing)
 def find_articles(file):
     # Set the directory to save the files to & filename
-    ORIGINAL_DIR = dirname(__file__)
+    """ ORIGINAL_DIR = dirname(__file__)
     PARENT_DIR = dirname(ORIGINAL_DIR)
-    MAIN_DIR = dirname(PARENT_DIR)
+    MAIN_DIR = dirname(PARENT_DIR) """
     FILE_NAME = file.split('-')[-1].split('.')[-2]
     FILE_NAME = f"{FILE_NAME}.ndjson"
+    MAIN_DIR = dirname(dirname(dirname(__file__)))
     OUT_DIR = MAIN_DIR + "/data/load/Articles-p/" + FILE_NAME
 
     # If the file already exists, don't parse it again
@@ -91,7 +92,7 @@ def find_articles(file):
     # ONLY KEEP THIS LINE IF YOU WANT TO DELETE THE FILES AFTER THEY'RE PARSED!!! IT'S A BITCH TO REDOWNLOAD THEM
     os.remove(file)
 
-    os.chdir(ORIGINAL_DIR)
+    os.chdir(MAIN_DIR)
     # Memory management
     del handler
     del parser
