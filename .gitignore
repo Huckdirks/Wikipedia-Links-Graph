@@ -4,7 +4,7 @@ source/Python/__pycache__
 .vscode/
 
 # Files
-source/C++/run
+run
 .DS_Store
 *.plist
 *.dSYM
