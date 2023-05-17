@@ -30,7 +30,7 @@ g++ -std=c++20 -Wextra -Wall -Werror -fexceptions -fno-common -D_GLIBCXX_ASSERTI
 # `python3-config --ldflags --embed`: Returns the linker flags needed to link a Python extension library in the same way that the interpreter was linked. This is needed to compile C++ code that uses the Python C API.
 
 if [ $? -eq 0 ]; then
-  echo "\nCompilation successful. Output file: Wikipedia_Graph/source/c++/run"
+  echo "\nCompilation successful. Output file: $SCRIPT_DIR/run"
 else
   echo "\nCompilation failed."
   exit 1

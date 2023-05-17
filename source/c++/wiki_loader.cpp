@@ -28,20 +28,39 @@ int wiki_loader::load() {
 
     //unsigned int progress{};
     std::atomic<unsigned int> progress{};
-    indicators::BlockProgressBar titles_bar{indicators::option::BarWidth{80}, indicators::option::Start{"["}, indicators::option::End{"]"}, indicators::option::ShowElapsedTime{true}, indicators::option::ShowRemainingTime{true}, indicators::option::ForegroundColor{indicators::Color::red}, indicators::option::FontStyles{std::vector<indicators::FontStyle>{indicators::FontStyle::bold}}};
-
     std::set<std::string> titles;   // Set of titles to make sure all titles are sorted before adding to graph
     BS::thread_pool pool;
+    std::mutex mutex;
     std::vector <std::future<std::set<std::string>>> title_futures;
-    const auto START_TITLE_TIME{std::chrono::system_clock::now()};
+
+    //const auto START_TITLE_TIME{std::chrono::system_clock::now()};
+    indicators::BlockProgressBar title_bar{indicators::option::BarWidth{80}, indicators::option::Start{"["}, indicators::option::End{"]"}, indicators::option::ShowElapsedTime{true}, indicators::option::ShowRemainingTime{true}, indicators::option::ForegroundColor{indicators::Color::red}, indicators::option::FontStyles{std::vector<indicators::FontStyle>{indicators::FontStyle::bold}}};
+    indicators::show_console_cursor(false); // Hide cursor
 
     std::cout << "\nLoading Wikipedia page titles from " << file_names.size() << " files...\n";
     for (unsigned int i{}; i < file_names.size(); ++i){
-        title_futures.push_back(pool.submit([this, file_names, i]() -> std::set<std::string> {
+        title_futures.push_back(pool.submit([this, file_names, i, &progress, &title_bar, &mutex]() -> std::set<std::string> {
             std::ifstream file_in;
             file_in.exceptions(std::ifstream::failbit | std::ifstream::badbit);
             std::set<std::string> titles;
             const std::string FILE_NAME{file_names[i]};
+
+            const double PERCENT = 100 * ((double)progress / (file_names.size() - 1));
+            try {   // In a try block so I can make a lock_guard just for the title_bar
+                std::lock_guard<std::mutex> lock(mutex);
+                if (title_bar.is_completed() || PERCENT >= 100) {
+                    title_bar.set_option(indicators::option::ShowRemainingTime{false});
+                    title_bar.set_option(indicators::option::ForegroundColor{indicators::Color::green});
+                }
+                title_bar.set_progress(PERCENT);
+            } catch (const std::exception &E) {
+                std::cerr << E.what() << "\n";
+            }
+            /* if (title_bar.is_completed() || PERCENT >= 100) {
+                title_bar.set_option(indicators::option::ShowRemainingTime{false});
+                title_bar.set_option(indicators::option::ForegroundColor{indicators::Color::green});
+            }
+            title_bar.set_progress(PERCENT); */
 
             try {
                 file_in.open(FILE_NAME);
@@ -54,6 +73,7 @@ int wiki_loader::load() {
             } catch (const std::ifstream::failure &E) {
                 std::cerr << E.what() << "\n";
             }
+            ++progress;
             return titles;
         }));
     }
@@ -66,10 +86,10 @@ int wiki_loader::load() {
         std::cout << "\n\nNo titles found in files\n\n";
         return EXIT_FAILURE;
     }
-    std::cout << termcolor::reset << "Loaded " << titles.size() << " titles in " << std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - START_TITLE_TIME).count() << " seconds";
+    //std::cout << termcolor::reset << "Loaded " << titles.size() << " titles in " << std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - START_TITLE_TIME).count() << " seconds";
     indicators::show_console_cursor(true);
 
-    std::cout << "\n\nLoading " << titles.size() << " titles into the graph...\n";
+    std::cout << termcolor::reset << "\n\nLoading " << titles.size() << " titles into the graph...\n";
     indicators::BlockProgressBar graph_titles_bar{indicators::option::BarWidth{80}, indicators::option::Start{"["}, indicators::option::End{"]"}, indicators::option::ShowElapsedTime{true}, indicators::option::ShowRemainingTime{true}, indicators::option::ForegroundColor{indicators::Color::red}, indicators::option::FontStyles{std::vector<indicators::FontStyle>{indicators::FontStyle::bold}}};
     indicators::show_console_cursor(false); // Hide cursor
 

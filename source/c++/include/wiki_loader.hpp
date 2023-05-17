@@ -12,6 +12,7 @@
 #include <exception>
 #include <filesystem>
 #include <fstream>
+#include <mutex>
 #include <set>
 #include <string>
 #include <vector>
