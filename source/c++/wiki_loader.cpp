@@ -101,10 +101,13 @@ int wiki_loader::load() {
     indicators::BlockProgressBar links_bar{indicators::option::BarWidth{80}, indicators::option::Start{"["}, indicators::option::End{"]"}, indicators::option::ShowElapsedTime{true}, indicators::option::ShowRemainingTime{true}, indicators::option::ForegroundColor{indicators::Color::red}, indicators::option::FontStyles{std::vector<indicators::FontStyle>{indicators::FontStyle::bold}}};
     progress = 0;
 
+
+    std::ifstream file_in;
+    file_in.exceptions(std::ifstream::failbit | std::ifstream::badbit);
     // Load in each file's links
     for (const auto &FILE : file_names) {
-        std::ifstream file_in;
-        file_in.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+        //std::ifstream file_in;
+        //file_in.exceptions(std::ifstream::failbit | std::ifstream::badbit);
         try {
             file_in.open(FILE);
             file_in.peek();
