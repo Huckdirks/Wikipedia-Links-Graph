@@ -158,7 +158,8 @@ inline int wiki_loader::load_title(std::set<std::string> &titles, std::ifstream 
         return EXIT_FAILURE;
     }
 
-    titles.insert(std::move(JSON[0].get<std::string>()));
+    //titles.insert(std::move(JSON[0].get<std::string>()));
+    titles.insert(JSON[0].get<std::string>());
     return EXIT_SUCCESS;
 }
 
