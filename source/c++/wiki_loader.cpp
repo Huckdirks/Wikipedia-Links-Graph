@@ -28,39 +28,35 @@ int wiki_loader::load() {
 
     //unsigned int progress{};
     std::atomic<unsigned int> progress{};
+    std::atomic<double> percent{};
     std::set<std::string> titles;   // Set of titles to make sure all titles are sorted before adding to graph
     BS::thread_pool pool;
     std::mutex mutex;
     std::vector <std::future<std::set<std::string>>> title_futures;
 
-    //const auto START_TITLE_TIME{std::chrono::system_clock::now()};
     indicators::BlockProgressBar title_bar{indicators::option::BarWidth{80}, indicators::option::Start{"["}, indicators::option::End{"]"}, indicators::option::ShowElapsedTime{true}, indicators::option::ShowRemainingTime{true}, indicators::option::ForegroundColor{indicators::Color::red}, indicators::option::FontStyles{std::vector<indicators::FontStyle>{indicators::FontStyle::bold}}};
     indicators::show_console_cursor(false); // Hide cursor
 
     std::cout << "\nLoading Wikipedia page titles from " << file_names.size() << " files...\n";
     for (unsigned int i{}; i < file_names.size(); ++i){
-        title_futures.push_back(pool.submit([this, file_names, i, &progress, &title_bar, &mutex]() -> std::set<std::string> {
+        title_futures.push_back(pool.submit([this, file_names, i, &progress, &percent, &title_bar, &mutex]() -> std::set<std::string> {
             std::ifstream file_in;
             file_in.exceptions(std::ifstream::failbit | std::ifstream::badbit);
             std::set<std::string> titles;
             const std::string FILE_NAME{file_names[i]};
 
-            const double PERCENT = 100 * ((double)progress / (file_names.size() - 1));
+            //const double PERCENT = 100 * ((double)progress / (file_names.size() - 1));
+            percent = 100 * ((double)progress / (file_names.size() - 1));
             try {   // In a try block so I can make a lock_guard just for the title_bar
                 std::lock_guard<std::mutex> lock(mutex);
-                if (title_bar.is_completed() || PERCENT >= 100) {
+                /* if (title_bar.is_completed() || percent >= 100) {
                     title_bar.set_option(indicators::option::ShowRemainingTime{false});
                     title_bar.set_option(indicators::option::ForegroundColor{indicators::Color::green});
-                }
-                title_bar.set_progress(PERCENT);
+                } */
+                title_bar.set_progress(percent);
             } catch (const std::exception &E) {
                 std::cerr << E.what() << "\n";
             }
-            /* if (title_bar.is_completed() || PERCENT >= 100) {
-                title_bar.set_option(indicators::option::ShowRemainingTime{false});
-                title_bar.set_option(indicators::option::ForegroundColor{indicators::Color::green});
-            }
-            title_bar.set_progress(PERCENT); */
 
             try {
                 file_in.open(FILE_NAME);
@@ -78,8 +74,27 @@ int wiki_loader::load() {
         }));
     }
     pool.wait_for_tasks();
-    for (auto &title_future : title_futures)
+
+    title_bar.set_progress(100);
+    title_bar.set_option(indicators::option::ShowRemainingTime{false});
+    title_bar.set_option(indicators::option::ForegroundColor{indicators::Color::green});
+    title_bar.mark_as_completed();
+
+    progress = 0;
+    percent = 0;
+
+    indicators::BlockProgressBar title_merge_bar{indicators::option::BarWidth{80}, indicators::option::Start{"["}, indicators::option::End{"]"}, indicators::option::ShowElapsedTime{true}, indicators::option::ShowRemainingTime{true}, indicators::option::ForegroundColor{indicators::Color::red}, indicators::option::FontStyles{std::vector<indicators::FontStyle>{indicators::FontStyle::bold}}};
+
+    for (auto &title_future : title_futures){
+        percent = 100 * ((double)progress / (title_futures.size() - 1));
+        if (title_merge_bar.is_completed() || percent >= 100) {
+            title_merge_bar.set_option(indicators::option::ShowRemainingTime{false});
+            title_merge_bar.set_option(indicators::option::ForegroundColor{indicators::Color::green});
+        }
+        title_merge_bar.set_progress(percent);
         titles.merge(title_future.get());
+        ++progress;
+    }
 
     if (titles.empty()) {
         indicators::show_console_cursor(true);
@@ -87,30 +102,38 @@ int wiki_loader::load() {
         return EXIT_FAILURE;
     }
     //std::cout << termcolor::reset << "Loaded " << titles.size() << " titles in " << std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - START_TITLE_TIME).count() << " seconds";
-    indicators::show_console_cursor(true);
+    //indicators::show_console_cursor(true);
 
     std::cout << termcolor::reset << "\n\nLoading " << titles.size() << " titles into the graph...\n";
     indicators::BlockProgressBar graph_titles_bar{indicators::option::BarWidth{80}, indicators::option::Start{"["}, indicators::option::End{"]"}, indicators::option::ShowElapsedTime{true}, indicators::option::ShowRemainingTime{true}, indicators::option::ForegroundColor{indicators::Color::red}, indicators::option::FontStyles{std::vector<indicators::FontStyle>{indicators::FontStyle::bold}}};
-    indicators::show_console_cursor(false); // Hide cursor
+    //indicators::show_console_cursor(false); // Hide cursor
 
-    double percent{};
+    //double percent{};
 
     // Load in each title to the graph
     for (const auto &TITLE : titles) {
         percent = 100 * ((double)progress / (titles.size() - 1));
-        if (progress % 10000 == 0 || percent >= 100) {  // Only update progress bar every 1000 titles to save time
+        if (progress % 10000 == 0 && percent < 100)  // Only update progress bar every 1000 titles to save time
+            graph_titles_bar.set_progress(percent);
+        /* if (progress % 10000 == 0 || percent >= 100) {  // Only update progress bar every 1000 titles to save time
             if (graph_titles_bar.is_completed() || percent >= 100) {
                 graph_titles_bar.set_option(indicators::option::ShowRemainingTime{false});
                 graph_titles_bar.set_option(indicators::option::ForegroundColor{indicators::Color::green});
             }
-            graph_titles_bar.set_progress(percent);
-        }
+            if (percent < 100)
+                graph_titles_bar.set_progress(percent);
+            //graph_titles_bar.set_progress(percent);
+        } */
         const graph_vertex PAGE{std::move(TITLE)};
         graph->push_back(std::move(PAGE));
         ++progress;
     }
+    graph_titles_bar.set_progress(100);
+    graph_titles_bar.set_option(indicators::option::ShowRemainingTime{false});
+    graph_titles_bar.set_option(indicators::option::ForegroundColor{indicators::Color::green});
+    graph_titles_bar.mark_as_completed();
 
-    indicators::show_console_cursor(false);
+    //indicators::show_console_cursor(false);
     if (graph->empty()) {
         indicators::show_console_cursor(true);
         std::cout << "\n\nNo titles loaded into graph\n\n";
