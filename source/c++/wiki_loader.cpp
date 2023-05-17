@@ -26,21 +26,28 @@ int wiki_loader::load() {
         return EXIT_FAILURE;
     }
 
-    unsigned int progress{};
-    indicators::BlockProgressBar titles_bar{indicators::option::BarWidth{80}, indicators::option::Start{"["}, indicators::option::End{"]"}, indicators::option::ShowElapsedTime{true}, indicators::option::ShowRemainingTime{true}, indicators::option::ForegroundColor{indicators::Color::red}, indicators::option::FontStyles{std::vector<indicators::FontStyle>{indicators::FontStyle::bold}}};
-
     std::set<std::string> titles;   // Set of titles to make sure all titles are sorted before adding to graph
     BS::thread_pool pool;
     std::vector <std::future<std::set<std::string>>> title_futures;
-    const auto START_TITLE_TIME{std::chrono::system_clock::now()};
+
+    indicators::BlockProgressBar title_bar{indicators::option::BarWidth{76}, indicators::option::Start{"["}, indicators::option::End{"]"}, indicators::option::PrefixText{"1/2 "}, indicators::option::ShowElapsedTime{true}, indicators::option::ShowRemainingTime{true}, indicators::option::ForegroundColor{indicators::Color::red}, indicators::option::FontStyles{std::vector<indicators::FontStyle>{indicators::FontStyle::bold}}};
+    indicators::show_console_cursor(false); // Hide cursor
 
     std::cout << "\nLoading Wikipedia page titles from " << file_names.size() << " files...\n";
     for (unsigned int i{}; i < file_names.size(); ++i){
-        title_futures.push_back(pool.submit([this, file_names, i]() -> std::set<std::string> {
+        title_futures.push_back(pool.submit([this, file_names, i, &title_bar]() -> std::set<std::string> {
             std::ifstream file_in;
             file_in.exceptions(std::ifstream::failbit | std::ifstream::badbit);
             std::set<std::string> titles;
             const std::string FILE_NAME{file_names[i]};
+
+            percent = 100 * ((double)progress / (file_names.size() - 1));
+            try {   // In a try block so I can make a lock_guard just for the title_bar
+                std::lock_guard<std::mutex> lock(mutex);
+                title_bar.set_progress(percent);
+            } catch (const std::exception &E) {
+                std::cerr << E.what() << "\n";
+            }
 
             try {
                 file_in.open(FILE_NAME);
@@ -53,43 +60,56 @@ int wiki_loader::load() {
             } catch (const std::ifstream::failure &E) {
                 std::cerr << E.what() << "\n";
             }
+            ++progress;
             return titles;
         }));
     }
     pool.wait_for_tasks();
-    for (auto &title_future : title_futures)
+
+    title_bar.set_progress(100);
+    title_bar.set_option(indicators::option::ShowRemainingTime{false});
+    title_bar.set_option(indicators::option::ForegroundColor{indicators::Color::green});
+    title_bar.mark_as_completed();
+
+    progress = 0;
+    percent = 0;
+
+    indicators::BlockProgressBar title_merge_bar{indicators::option::BarWidth{76}, indicators::option::Start{"["}, indicators::option::End{"]"}, indicators::option::PrefixText{"2/2 "}, indicators::option::ShowElapsedTime{true}, indicators::option::ShowRemainingTime{true}, indicators::option::ForegroundColor{indicators::Color::red}, indicators::option::FontStyles{std::vector<indicators::FontStyle>{indicators::FontStyle::bold}}};
+
+    for (auto &title_future : title_futures){
+        percent = 100 * ((double)progress / (title_futures.size() - 1));
+        if (title_merge_bar.is_completed() || percent >= 100) {
+            title_merge_bar.set_option(indicators::option::ShowRemainingTime{false});
+            title_merge_bar.set_option(indicators::option::ForegroundColor{indicators::Color::green});
+        }
+        title_merge_bar.set_progress(percent);
         titles.merge(title_future.get());
+        ++progress;
+    }
 
     if (titles.empty()) {
         indicators::show_console_cursor(true);
         std::cout << "\n\nNo titles found in files\n\n";
         return EXIT_FAILURE;
     }
-    std::cout << termcolor::reset << "Loaded " << titles.size() << " titles in " << std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - START_TITLE_TIME).count() << " seconds";
-    indicators::show_console_cursor(true);
 
-    std::cout << "\n\nLoading " << titles.size() << " titles into the graph...\n";
+    std::cout << termcolor::reset << "\n\nLoading " << titles.size() << " titles into the graph...\n";
     indicators::BlockProgressBar graph_titles_bar{indicators::option::BarWidth{80}, indicators::option::Start{"["}, indicators::option::End{"]"}, indicators::option::ShowElapsedTime{true}, indicators::option::ShowRemainingTime{true}, indicators::option::ForegroundColor{indicators::Color::red}, indicators::option::FontStyles{std::vector<indicators::FontStyle>{indicators::FontStyle::bold}}};
-    indicators::show_console_cursor(false); // Hide cursor
-
-    double percent{};
 
     // Load in each title to the graph
     for (const auto &TITLE : titles) {
         percent = 100 * ((double)progress / (titles.size() - 1));
-        if (progress % 10000 == 0 || percent >= 100) {  // Only update progress bar every 1000 titles to save time
-            if (graph_titles_bar.is_completed() || percent >= 100) {
-                graph_titles_bar.set_option(indicators::option::ShowRemainingTime{false});
-                graph_titles_bar.set_option(indicators::option::ForegroundColor{indicators::Color::green});
-            }
+        if (progress % 10000 == 0 && percent < 100)  // Only update progress bar every 1000 titles to save time
             graph_titles_bar.set_progress(percent);
-        }
         const graph_vertex PAGE{std::move(TITLE)};
         graph->push_back(std::move(PAGE));
         ++progress;
     }
+    graph_titles_bar.set_progress(100);
+    graph_titles_bar.set_option(indicators::option::ShowRemainingTime{false});
+    graph_titles_bar.set_option(indicators::option::ForegroundColor{indicators::Color::green});
+    graph_titles_bar.mark_as_completed();
 
-    indicators::show_console_cursor(false);
     if (graph->empty()) {
         indicators::show_console_cursor(true);
         std::cout << "\n\nNo titles loaded into graph\n\n";
@@ -101,16 +121,19 @@ int wiki_loader::load() {
     indicators::BlockProgressBar links_bar{indicators::option::BarWidth{80}, indicators::option::Start{"["}, indicators::option::End{"]"}, indicators::option::ShowElapsedTime{true}, indicators::option::ShowRemainingTime{true}, indicators::option::ForegroundColor{indicators::Color::red}, indicators::option::FontStyles{std::vector<indicators::FontStyle>{indicators::FontStyle::bold}}};
     progress = 0;
 
+
+    std::ifstream file_in;
+    file_in.exceptions(std::ifstream::failbit | std::ifstream::badbit);
     // Load in each file's links
     for (const auto &FILE : file_names) {
-        std::ifstream file_in;
-        file_in.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+        //std::ifstream file_in;
+        //file_in.exceptions(std::ifstream::failbit | std::ifstream::badbit);
         try {
             file_in.open(FILE);
             file_in.peek();
             
             while (!file_in.eof())
-                load_links(file_in, links_bar, progress);
+                load_links(file_in, links_bar);
 
             file_in.close();
         } catch (const std::ifstream::failure &E) {
@@ -118,6 +141,10 @@ int wiki_loader::load() {
             return EXIT_FAILURE;
         }
     }
+    links_bar.set_progress(100);
+    links_bar.set_option(indicators::option::ShowRemainingTime{false});
+    links_bar.set_option(indicators::option::ForegroundColor{indicators::Color::green});
+    links_bar.mark_as_completed();
 
     indicators::show_console_cursor(true);
     std::cout << termcolor::reset << "\nLinks loaded in " << std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - START_LINK_TIME).count() << " seconds, or " << (float)std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - START_LINK_TIME).count() / 60 << " minutes!!!\n\n";
@@ -165,19 +192,12 @@ inline int wiki_loader::load_title(std::set<std::string> &titles, std::ifstream 
 
 // Load in a link to the graph
 // I would make this parallel, but I tried and it gave an allocation error (malloc: *** error for object 0x11ef65120: pointer being freed was not allocated) for the vector on the line "page->adjacent.push_back(adjacent_page);" while doing it parallel so I know I somehow fucked it up pretty bad ¯\_(ツ)_/¯
-inline int wiki_loader::load_links(std::ifstream &file_in, indicators::BlockProgressBar &bar, unsigned int &progress) {
-    const double PERCENT{100 * ((double)progress / (graph->size() - 1))};
+inline int wiki_loader::load_links(std::ifstream &file_in, indicators::BlockProgressBar &bar) {
+    percent = 100 * ((double)progress / (graph->size() - 1));
 
     // Progress bar stuff
-    if (progress % 1000 == 0 || PERCENT >= 100) {  // Only update progress bar every 1000 titles to save time
-        if (!bar.is_completed()) {
-            if (PERCENT >= 100) {
-                bar.set_option(indicators::option::ShowRemainingTime{false});
-                bar.set_option(indicators::option::ForegroundColor{indicators::Color::green});
-            }
-            bar.set_progress(PERCENT);
-        }
-    }
+    if (progress % 1000 == 0 && percent < 100)
+        bar.set_progress(percent);
     
     const std::string JSON_LINE;
     try {
@@ -201,6 +221,7 @@ inline int wiki_loader::load_links(std::ifstream &file_in, indicators::BlockProg
     }
 
     ++progress;
+
     graph_vertex *page{graph->find(JSON[0].get<std::string>())};
     if (page == nullptr)
         return EXIT_FAILURE;

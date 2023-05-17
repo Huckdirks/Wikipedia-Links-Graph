@@ -8,9 +8,11 @@
 #include "wiki_graph.hpp"
 
 // Libraries
+#include <atomic>
 #include <exception>
 #include <filesystem>
 #include <fstream>
+#include <mutex>
 #include <set>
 #include <string>
 #include <vector>
@@ -29,8 +31,12 @@ class wiki_loader {
 
    private:
     wiki_graph *graph;
+    std::atomic<unsigned int> progress{};
+    std::atomic<double> percent{};
+    std::mutex mutex;
+
     int load_title(std::set<std::string> &titles, std::ifstream &file_in);
-    int load_links(std::ifstream &file_in, indicators::BlockProgressBar &bar, unsigned int &progress);
+    int load_links(std::ifstream &file_in, indicators::BlockProgressBar &bar);
 };
 
 #endif
