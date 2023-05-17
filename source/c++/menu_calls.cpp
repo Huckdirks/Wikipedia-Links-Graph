@@ -204,14 +204,14 @@ int menu_calls::display_linked_to() {
         return EXIT_FAILURE;
     }
 
-    system("clear");
+    /* system("clear");
     const auto LINKED_TO{graph.linked_to(title)};
     if (LINKED_TO.empty()) {
         std::cout << "\nNo pages link to " << title << ", or " << title << " isn't found\n";
         return EXIT_FAILURE;
-    }
+    } */
 
-    std::cout << "Would you like to display or save the pages linking to " << title << "?\nPress D for display and S for save\n";
+    std::cout << "\nWould you like to display or save the pages linking to " << title << "?\nPress D for display and S for save\n";
     char response{};
     do {
         try {
@@ -233,6 +233,13 @@ int menu_calls::display_linked_to() {
         system("clear");
         std::cout << "Would you like to save as a .csv file instead of a .txt?";
         csv = y_or_n();
+    }
+
+    system("clear");
+    const auto LINKED_TO{graph.linked_to(title)};
+    if (LINKED_TO.empty()) {
+        std::cout << "\nNo pages link to " << title << ", or " << title << " isn't found\n";
+        return EXIT_FAILURE;
     }
 
     if (!save) {
