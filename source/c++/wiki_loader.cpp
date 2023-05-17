@@ -45,14 +45,9 @@ int wiki_loader::load() {
             std::set<std::string> titles;
             const std::string FILE_NAME{file_names[i]};
 
-            //const double PERCENT = 100 * ((double)progress / (file_names.size() - 1));
             percent = 100 * ((double)progress / (file_names.size() - 1));
             try {   // In a try block so I can make a lock_guard just for the title_bar
                 std::lock_guard<std::mutex> lock(mutex);
-                /* if (title_bar.is_completed() || percent >= 100) {
-                    title_bar.set_option(indicators::option::ShowRemainingTime{false});
-                    title_bar.set_option(indicators::option::ForegroundColor{indicators::Color::green});
-                } */
                 title_bar.set_progress(percent);
             } catch (const std::exception &E) {
                 std::cerr << E.what() << "\n";
@@ -101,29 +96,15 @@ int wiki_loader::load() {
         std::cout << "\n\nNo titles found in files\n\n";
         return EXIT_FAILURE;
     }
-    //std::cout << termcolor::reset << "Loaded " << titles.size() << " titles in " << std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - START_TITLE_TIME).count() << " seconds";
-    //indicators::show_console_cursor(true);
 
     std::cout << termcolor::reset << "\n\nLoading " << titles.size() << " titles into the graph...\n";
     indicators::BlockProgressBar graph_titles_bar{indicators::option::BarWidth{80}, indicators::option::Start{"["}, indicators::option::End{"]"}, indicators::option::ShowElapsedTime{true}, indicators::option::ShowRemainingTime{true}, indicators::option::ForegroundColor{indicators::Color::red}, indicators::option::FontStyles{std::vector<indicators::FontStyle>{indicators::FontStyle::bold}}};
-    //indicators::show_console_cursor(false); // Hide cursor
-
-    //double percent{};
 
     // Load in each title to the graph
     for (const auto &TITLE : titles) {
         percent = 100 * ((double)progress / (titles.size() - 1));
         if (progress % 10000 == 0 && percent < 100)  // Only update progress bar every 1000 titles to save time
             graph_titles_bar.set_progress(percent);
-        /* if (progress % 10000 == 0 || percent >= 100) {  // Only update progress bar every 1000 titles to save time
-            if (graph_titles_bar.is_completed() || percent >= 100) {
-                graph_titles_bar.set_option(indicators::option::ShowRemainingTime{false});
-                graph_titles_bar.set_option(indicators::option::ForegroundColor{indicators::Color::green});
-            }
-            if (percent < 100)
-                graph_titles_bar.set_progress(percent);
-            //graph_titles_bar.set_progress(percent);
-        } */
         const graph_vertex PAGE{std::move(TITLE)};
         graph->push_back(std::move(PAGE));
         ++progress;
@@ -133,7 +114,6 @@ int wiki_loader::load() {
     graph_titles_bar.set_option(indicators::option::ForegroundColor{indicators::Color::green});
     graph_titles_bar.mark_as_completed();
 
-    //indicators::show_console_cursor(false);
     if (graph->empty()) {
         indicators::show_console_cursor(true);
         std::cout << "\n\nNo titles loaded into graph\n\n";
