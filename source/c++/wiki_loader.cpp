@@ -27,19 +27,20 @@ int wiki_loader::load() {
     }
 
     //unsigned int progress{};
-    std::atomic<unsigned int> progress{};
-    std::atomic<double> percent{};
+    //std::atomic<unsigned int> progress{};
+    //std::atomic<double> percent{};
     std::set<std::string> titles;   // Set of titles to make sure all titles are sorted before adding to graph
     BS::thread_pool pool;
-    std::mutex mutex;
+    //std::mutex mutex;
     std::vector <std::future<std::set<std::string>>> title_futures;
 
-    indicators::BlockProgressBar title_bar{indicators::option::BarWidth{80}, indicators::option::Start{"["}, indicators::option::End{"]"}, indicators::option::ShowElapsedTime{true}, indicators::option::ShowRemainingTime{true}, indicators::option::ForegroundColor{indicators::Color::red}, indicators::option::FontStyles{std::vector<indicators::FontStyle>{indicators::FontStyle::bold}}};
+    indicators::BlockProgressBar title_bar{indicators::option::BarWidth{76}, indicators::option::Start{"["}, indicators::option::End{"]"}, indicators::option::PrefixText{"1/2 "}, indicators::option::ShowElapsedTime{true}, indicators::option::ShowRemainingTime{true}, indicators::option::ForegroundColor{indicators::Color::red}, indicators::option::FontStyles{std::vector<indicators::FontStyle>{indicators::FontStyle::bold}}};
     indicators::show_console_cursor(false); // Hide cursor
 
     std::cout << "\nLoading Wikipedia page titles from " << file_names.size() << " files...\n";
     for (unsigned int i{}; i < file_names.size(); ++i){
-        title_futures.push_back(pool.submit([this, file_names, i, &progress, &percent, &title_bar, &mutex]() -> std::set<std::string> {
+        //title_futures.push_back(pool.submit([this, file_names, i, &progress, &percent, &title_bar, &mutex]() -> std::set<std::string> {
+        title_futures.push_back(pool.submit([this, file_names, i, &title_bar]() -> std::set<std::string> {
             std::ifstream file_in;
             file_in.exceptions(std::ifstream::failbit | std::ifstream::badbit);
             std::set<std::string> titles;
@@ -78,7 +79,7 @@ int wiki_loader::load() {
     progress = 0;
     percent = 0;
 
-    indicators::BlockProgressBar title_merge_bar{indicators::option::BarWidth{80}, indicators::option::Start{"["}, indicators::option::End{"]"}, indicators::option::ShowElapsedTime{true}, indicators::option::ShowRemainingTime{true}, indicators::option::ForegroundColor{indicators::Color::red}, indicators::option::FontStyles{std::vector<indicators::FontStyle>{indicators::FontStyle::bold}}};
+    indicators::BlockProgressBar title_merge_bar{indicators::option::BarWidth{76}, indicators::option::Start{"["}, indicators::option::End{"]"}, indicators::option::PrefixText{"2/2 "}, indicators::option::ShowElapsedTime{true}, indicators::option::ShowRemainingTime{true}, indicators::option::ForegroundColor{indicators::Color::red}, indicators::option::FontStyles{std::vector<indicators::FontStyle>{indicators::FontStyle::bold}}};
 
     for (auto &title_future : title_futures){
         percent = 100 * ((double)progress / (title_futures.size() - 1));
@@ -137,7 +138,8 @@ int wiki_loader::load() {
             file_in.peek();
             
             while (!file_in.eof())
-                load_links(file_in, links_bar, progress);
+                load_links(file_in, links_bar);
+                //load_links(file_in, links_bar, progress);
 
             file_in.close();
         } catch (const std::ifstream::failure &E) {
@@ -145,6 +147,10 @@ int wiki_loader::load() {
             return EXIT_FAILURE;
         }
     }
+    links_bar.set_progress(100);
+    links_bar.set_option(indicators::option::ShowRemainingTime{false});
+    links_bar.set_option(indicators::option::ForegroundColor{indicators::Color::green});
+    links_bar.mark_as_completed();
 
     indicators::show_console_cursor(true);
     std::cout << termcolor::reset << "\nLinks loaded in " << std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - START_LINK_TIME).count() << " seconds, or " << (float)std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - START_LINK_TIME).count() / 60 << " minutes!!!\n\n";
@@ -192,12 +198,15 @@ inline int wiki_loader::load_title(std::set<std::string> &titles, std::ifstream 
 
 // Load in a link to the graph
 // I would make this parallel, but I tried and it gave an allocation error (malloc: *** error for object 0x11ef65120: pointer being freed was not allocated) for the vector on the line "page->adjacent.push_back(adjacent_page);" while doing it parallel so I know I somehow fucked it up pretty bad ¯\_(ツ)_/¯
-//inline int wiki_loader::load_links(std::ifstream &file_in, indicators::BlockProgressBar &bar, unsigned int &progress) {
-inline int wiki_loader::load_links(std::ifstream &file_in, indicators::BlockProgressBar &bar, std::atomic<unsigned int> &progress) {
-    const double PERCENT{100 * ((double)progress / (graph->size() - 1))};
+//inline int wiki_loader::load_links(std::ifstream &file_in, indicators::BlockProgressBar &bar, std::atomic<unsigned int> &progress) {
+inline int wiki_loader::load_links(std::ifstream &file_in, indicators::BlockProgressBar &bar) {
+    //const double PERCENT{100 * ((double)progress / (graph->size() - 1))};
+    percent = 100 * ((double)progress / (graph->size() - 1));
 
     // Progress bar stuff
-    if (progress % 1000 == 0 || PERCENT >= 100) {  // Only update progress bar every 1000 titles to save time
+    if (progress % 1000 == 0 && percent < 100)
+        bar.set_progress(percent);
+    /* if (progress % 1000 == 0 || PERCENT >= 100) {  // Only update progress bar every 1000 titles to save time
         if (!bar.is_completed()) {
             if (PERCENT >= 100) {
                 bar.set_option(indicators::option::ShowRemainingTime{false});
@@ -205,7 +214,7 @@ inline int wiki_loader::load_links(std::ifstream &file_in, indicators::BlockProg
             }
             bar.set_progress(PERCENT);
         }
-    }
+    } */
     
     const std::string JSON_LINE;
     try {
@@ -229,6 +238,7 @@ inline int wiki_loader::load_links(std::ifstream &file_in, indicators::BlockProg
     }
 
     ++progress;
+
     graph_vertex *page{graph->find(JSON[0].get<std::string>())};
     if (page == nullptr)
         return EXIT_FAILURE;
