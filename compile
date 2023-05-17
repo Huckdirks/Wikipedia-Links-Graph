@@ -6,6 +6,7 @@ echo "Compiling..."
 
 # Release Build (Max Optimization with No Debug)
 g++ -std=c++20 -Wextra -Wall -Werror -fexceptions -fno-common -D_GLIBCXX_ASSERTIONS -O3 `python3-config --includes --embed` $SCRIPT_DIR/source/c++/*.cpp -o run `python3.11-config --ldflags --embed`
+#clang++ -std=c++20 -Wextra -Wall -Werror -fexceptions -fno-common -D_GLIBCXX_ASSERTIONS -O3 `python3-config --includes --embed` $SCRIPT_DIR/source/c++/*.cpp -o run `python3.11-config --ldflags --embed`
 
 # Debug Build (No Optimization with Max Debug)
 #
