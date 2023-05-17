@@ -8,3 +8,4 @@ run
 .DS_Store
 *.plist
 *.dSYM
+.cache
