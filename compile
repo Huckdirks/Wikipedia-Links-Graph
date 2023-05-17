@@ -8,6 +8,10 @@ echo "Compiling..."
 g++ -std=c++20 -Wextra -Wall -Werror -fexceptions -fno-common -D_GLIBCXX_ASSERTIONS -O3 `python3-config --includes --embed` $SCRIPT_DIR/source/c++/*.cpp -o run `python3.11-config --ldflags --embed`
 #clang++ -std=c++20 -Wextra -Wall -Werror -fexceptions -fno-common -D_GLIBCXX_ASSERTIONS -O3 `python3-config --includes --embed` $SCRIPT_DIR/source/c++/*.cpp -o run `python3.11-config --ldflags --embed`
 
+
+# Quick Debug Build (O1 with Max Debug)
+#g++ -std=c++20 -Wextra -Wall -Werror -fexceptions -fno-common -D_GLIBCXX_ASSERTIONS -g3 -O1 `python3-config --includes --embed` $SCRIPT_DIR/source/c++/*.cpp -o run `python3.11-config --ldflags --embed`
+#
 # Debug Build (No Optimization with Max Debug)
 #
 # WARNING!!! Loading in the files into the graph (wiki_loader.cpp) will cause your computer to heat up very quick (due to the multiprocessing on load_titles() not being compiler optimized)

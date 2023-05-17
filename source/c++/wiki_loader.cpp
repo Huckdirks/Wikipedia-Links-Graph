@@ -34,7 +34,7 @@ int wiki_loader::load() {
     indicators::show_console_cursor(false); // Hide cursor
 
     std::cout << "\nLoading Wikipedia page titles from " << file_names.size() << " files...\n";
-    for (unsigned int i{}; i < file_names.size(); ++i){
+    for (unsigned int i{}; i < file_names.size(); ++i){ // Using a for loop for setup instead of the thread pool's built in parallel loop because I need to pass i by value
         title_futures.push_back(pool.submit([this, file_names, i, &title_bar]() -> std::set<std::string> {
             std::ifstream file_in;
             file_in.exceptions(std::ifstream::failbit | std::ifstream::badbit);
@@ -43,7 +43,7 @@ int wiki_loader::load() {
 
             percent = 100 * ((double)progress / (file_names.size() - 1));
             try {   // In a try block so I can make a lock_guard just for the title_bar
-                std::lock_guard<std::mutex> lock(mutex);
+                std::lock_guard<std::mutex> lock(progress_bar_mutex);
                 title_bar.set_progress(percent);
             } catch (const std::exception &E) {
                 std::cerr << E.what() << "\n";
@@ -122,7 +122,7 @@ int wiki_loader::load() {
     progress = 0;
 
 
-    std::ifstream file_in;
+    /* std::ifstream file_in;
     file_in.exceptions(std::ifstream::failbit | std::ifstream::badbit);
     // Load in each file's links
     for (const auto &FILE : file_names) {
@@ -140,7 +140,28 @@ int wiki_loader::load() {
             std::cerr << E.what() << "\n\n";
             return EXIT_FAILURE;
         }
+    } */
+    for (unsigned int i{}; i < file_names.size(); ++i){
+        pool.push_task([this, file_names, i, &links_bar](){
+            std::ifstream file_in;
+            file_in.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+            try {
+                file_in.open(file_names[i]);
+                file_in.peek();
+                
+                while (!file_in.eof())
+                    load_links(file_in, links_bar);
+
+                file_in.close();
+            } catch (const std::ifstream::failure &E) {
+                std::cerr << E.what() << "\n\n";
+                return EXIT_FAILURE;
+            }
+            return EXIT_SUCCESS;
+        });
     }
+    pool.wait_for_tasks();
+
     links_bar.set_progress(100);
     links_bar.set_option(indicators::option::ShowRemainingTime{false});
     links_bar.set_option(indicators::option::ForegroundColor{indicators::Color::green});
@@ -196,8 +217,10 @@ inline int wiki_loader::load_links(std::ifstream &file_in, indicators::BlockProg
     percent = 100 * ((double)progress / (graph->size() - 1));
 
     // Progress bar stuff
-    if (progress % 1000 == 0 && percent < 100)
+    if (progress % 1000 == 0 && percent < 100){
+        std::lock_guard<std::mutex> lock(progress_bar_mutex);
         bar.set_progress(percent);
+    }
     
     const std::string JSON_LINE;
     try {
@@ -227,16 +250,18 @@ inline int wiki_loader::load_links(std::ifstream &file_in, indicators::BlockProg
         return EXIT_FAILURE;
         
     page->adjacent.reserve(JSON[1].size());
+    std::lock_guard<std::mutex> lock(graph_mutex);
     for (const auto &LINK : JSON[1]) {
         graph_vertex *adjacent_page{graph->find(std::move(LINK.get<std::string>()))};
         if (adjacent_page == nullptr)
                 continue;
 
+        //std::lock_guard<std::mutex> lock(graph_mutex);
         page->adjacent.push_back(adjacent_page);
         ++page->links;
         ++adjacent_page->linked_to;
         ++graph->num_edges;
     }
-    page->adjacent.shrink_to_fit();  // Good for memory 👍
+    //page->adjacent.shrink_to_fit();  // Good for memory 👍
     return EXIT_SUCCESS;
 }
