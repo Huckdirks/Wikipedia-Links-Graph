@@ -36,7 +36,6 @@ class wiki_loader {
     std::mutex mutex;
 
     int load_title(std::set<std::string> &titles, std::ifstream &file_in);
-    //int load_links(std::ifstream &file_in, indicators::BlockProgressBar &bar, std::atomic<unsigned int> &progress);
     int load_links(std::ifstream &file_in, indicators::BlockProgressBar &bar);
 };
 
