@@ -59,7 +59,6 @@ class wiki_graph {
     bool empty() const;                                                // Check if empty
     unsigned int size() const;                                         // Get size
     void push_back(const graph_vertex &VERTEX);                         // Push vertex to back
-    //void push_back(graph_vertex &&VERTEX) noexcept;                    // Move push vertex to back
     graph_vertex *find(const std::string &&TO_FIND);                     // Binary search for value wrapper function
     int find_index(const std::string &&TO_FIND);                         // Binary search for index wrapper function
     std::vector<graph_vertex *> top_n(const unsigned int N);           // Get top (n) most linked to vertices & display
@@ -67,7 +66,7 @@ class wiki_graph {
 
    private:
     // Adjacency list implementation
-    std::deque<graph_vertex> vertex_list;  // Can use a vector instead, but holding all the pages on Wikipedia contiguously in memory is a bad idea
+    std::deque<graph_vertex> vertex_list;  // Can use a vector instead, but holding all the pages on Wikipedia contiguously in memory is a bad idea, so I'm using a deque instead
 
     graph_vertex *binary_search(const std::string &&TO_FIND);                                                                                                                                                        // Binary search for value
     int binary_search_index(const std::string &&TO_FIND);                                                                                                                                                            // Binary search for index

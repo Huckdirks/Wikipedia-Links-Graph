@@ -21,6 +21,8 @@ graph_vertex::graph_vertex(graph_vertex &&VERTEX) noexcept {
 void graph_vertex::operator=(const graph_vertex &VERTEX) {
     title = VERTEX.title;
     adjacent = VERTEX.adjacent;
+    links = VERTEX.links;
+    linked_to = VERTEX.linked_to;
 }
 
 
@@ -67,7 +69,6 @@ graph_vertex &wiki_graph::operator[](const unsigned int &&INDEX) {
 // [ ] operator overload for strings
 graph_vertex &wiki_graph::operator[](const std::string &&PAGE) {
     try {
-        //return vertex_list.at(binary_search_index(PAGE));
         return vertex_list.at(binary_search_index(std::move(PAGE)));
     } catch (const std::out_of_range &EXCEPTION) {
         std::cerr << EXCEPTION.what() << '\n';
@@ -84,7 +85,6 @@ graph_vertex *wiki_graph::find(const std::string &&TO_FIND) {
     if (vertex_list.empty())
         return nullptr;
 
-    //return binary_search(TO_FIND);
     return binary_search(std::move(TO_FIND));
 }
 
@@ -94,7 +94,6 @@ int wiki_graph::find_index(const std::string &&TO_FIND) {
     if (vertex_list.empty())
         return -1;
 
-    //return binary_search_index(TO_FIND);
     return binary_search_index(std::move(TO_FIND));
 }
 
@@ -116,7 +115,6 @@ std::vector<graph_vertex *> wiki_graph::top_n(const unsigned int N) {
         return top_n_list;
     }
 
-    //auto top_n_list = top_n_linked(N);
     auto top_n_list{top_n_linked(std::move(N))};
     if (top_n_list.empty())  // You never know
         return {};

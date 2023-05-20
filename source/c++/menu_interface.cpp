@@ -26,9 +26,6 @@ int menu::init_menu() {
         std::cerr << "\nError loading python script\n";
         return EXIT_FAILURE;
     }
-    /* // Run the main python script & finalize python
-    PyRun_SimpleFile(python_file, MAIN_PY_PATH.c_str());
-    Py_Finalize(); */
 
     if (load()){
         std::cout << "\nError loading graph\n";
