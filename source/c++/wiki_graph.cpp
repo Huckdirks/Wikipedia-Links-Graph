@@ -329,7 +329,7 @@ std::vector<graph_vertex *> wiki_graph::top_n_linked(const unsigned int N) {
             // Actual work
             // If the current vertex has less links than the current bottom
             if (VERTEX->linked_to < top_n.back()->linked_to)
-                continue;
+                continue;   // Using continues & breaks here because it becomes indentation hell otherwise
 
             // If the current vertex has more linked_to than the current best
             if (VERTEX->linked_to >= best) {
@@ -387,7 +387,7 @@ std::vector<graph_vertex *> wiki_graph::top_n_linked_segment(const unsigned int 
         // Actual work
         // If the current vertex has less links than the current bottom
         if (vertex_list[i].linked_to < top_n.back()->linked_to)
-            continue;
+            continue;   // Using continues & breaks here because it becomes indentation hell otherwise
 
         // If the current vertex has more links than the current best
         if (vertex_list[i].linked_to > best) {
