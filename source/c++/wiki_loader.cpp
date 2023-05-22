@@ -34,7 +34,7 @@ int wiki_loader::load() {
     indicators::show_console_cursor(false); // Hide cursor
 
     std::cout << "\nLoading Wikipedia page titles from " << file_names.size() << " files...\n";
-    for (unsigned int i{}; i < file_names.size(); ++i){
+    for (unsigned int i{}; i < file_names.size(); ++i){ // Using a for loop for setup instead of the thread pool's built in parallel loop because I need to pass i by value
         title_futures.push_back(pool.submit([this, file_names, i, &title_bar]() -> std::set<std::string> {
             std::ifstream file_in;
             file_in.exceptions(std::ifstream::failbit | std::ifstream::badbit);
@@ -43,7 +43,7 @@ int wiki_loader::load() {
 
             percent = 100 * ((double)progress / (file_names.size() - 1));
             try {   // In a try block so I can make a lock_guard just for the title_bar
-                std::lock_guard<std::mutex> lock(mutex);
+                std::lock_guard<std::mutex> lock(progress_bar_mutex);
                 title_bar.set_progress(percent);
             } catch (const std::exception &E) {
                 std::cerr << E.what() << "\n";
@@ -121,26 +121,28 @@ int wiki_loader::load() {
     indicators::BlockProgressBar links_bar{indicators::option::BarWidth{80}, indicators::option::Start{"["}, indicators::option::End{"]"}, indicators::option::ShowElapsedTime{true}, indicators::option::ShowRemainingTime{true}, indicators::option::ForegroundColor{indicators::Color::red}, indicators::option::FontStyles{std::vector<indicators::FontStyle>{indicators::FontStyle::bold}}};
     progress = 0;
 
+    // Load in each link to the graph
+    for (unsigned int i{}; i < file_names.size(); ++i){
+        pool.push_task([this, file_names, i, &links_bar](){
+            std::ifstream file_in;
+            file_in.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+            try {
+                file_in.open(file_names[i]);
+                file_in.peek();
+                
+                while (!file_in.eof())
+                    load_links(file_in, links_bar);
 
-    std::ifstream file_in;
-    file_in.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-    // Load in each file's links
-    for (const auto &FILE : file_names) {
-        //std::ifstream file_in;
-        //file_in.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-        try {
-            file_in.open(FILE);
-            file_in.peek();
-            
-            while (!file_in.eof())
-                load_links(file_in, links_bar);
-
-            file_in.close();
-        } catch (const std::ifstream::failure &E) {
-            std::cerr << E.what() << "\n\n";
-            return EXIT_FAILURE;
-        }
+                file_in.close();
+            } catch (const std::ifstream::failure &E) {
+                std::cerr << E.what() << "\n\n";
+                return EXIT_FAILURE;
+            }
+            return EXIT_SUCCESS;
+        });
     }
+    pool.wait_for_tasks();
+
     links_bar.set_progress(100);
     links_bar.set_option(indicators::option::ShowRemainingTime{false});
     links_bar.set_option(indicators::option::ForegroundColor{indicators::Color::green});
@@ -150,6 +152,7 @@ int wiki_loader::load() {
     std::cout << termcolor::reset << "\nLinks loaded in " << std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - START_LINK_TIME).count() << " seconds, or " << (float)std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - START_LINK_TIME).count() / 60 << " minutes!!!\n\n";
     auto file_load_time{std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - START_TIME).count()};
     std::cout << termcolor::reset << "\n\n" << graph->size() << " articles loaded from file in " << file_load_time << " seconds, or " << (float)file_load_time / 60 << " minutes!!!\n\n";
+
     try {
         fs::current_path(MAIN_DIR);
     } catch (const fs::filesystem_error &E) {
@@ -162,7 +165,7 @@ int wiki_loader::load() {
 
 
 // Load in a title to the set
-//Parallel
+// Parallel
 inline int wiki_loader::load_title(std::set<std::string> &titles, std::ifstream &file_in) {
     const std::string JSON_LINE;
     try {
@@ -191,13 +194,15 @@ inline int wiki_loader::load_title(std::set<std::string> &titles, std::ifstream 
 
 
 // Load in a link to the graph
-// I would make this parallel, but I tried and it gave an allocation error (malloc: *** error for object 0x11ef65120: pointer being freed was not allocated) for the vector on the line "page->adjacent.push_back(adjacent_page);" while doing it parallel so I know I somehow fucked it up pretty bad ¯\_(ツ)_/¯
+// The JSON parsing is parallel, but adding adjacent nodes to the graph is forced to be sequential because it keeps giving vector allocation/deallocation errors at the "page->adjacent.push_back(adjacent_page);" line if I don't have the mutex above ¯\_(ツ)_/¯
 inline int wiki_loader::load_links(std::ifstream &file_in, indicators::BlockProgressBar &bar) {
     percent = 100 * ((double)progress / (graph->size() - 1));
 
     // Progress bar stuff
-    if (progress % 1000 == 0 && percent < 100)
+    if (progress % 1000 == 0 && percent < 100){
+        std::lock_guard<std::mutex> lock(progress_bar_mutex);
         bar.set_progress(percent);
+    }
     
     const std::string JSON_LINE;
     try {
@@ -227,6 +232,7 @@ inline int wiki_loader::load_links(std::ifstream &file_in, indicators::BlockProg
         return EXIT_FAILURE;
         
     page->adjacent.reserve(JSON[1].size());
+    std::lock_guard<std::mutex> lock(graph_mutex);  // Lock Guard has to be here because of the push_back line below. It sadly didn't work inside the for loop
     for (const auto &LINK : JSON[1]) {
         graph_vertex *adjacent_page{graph->find(std::move(LINK.get<std::string>()))};
         if (adjacent_page == nullptr)
@@ -237,6 +243,5 @@ inline int wiki_loader::load_links(std::ifstream &file_in, indicators::BlockProg
         ++adjacent_page->linked_to;
         ++graph->num_edges;
     }
-    page->adjacent.shrink_to_fit();  // Good for memory 👍
     return EXIT_SUCCESS;
 }

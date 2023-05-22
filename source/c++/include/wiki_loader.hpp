@@ -33,7 +33,8 @@ class wiki_loader {
     wiki_graph *graph;
     std::atomic<unsigned int> progress{};
     std::atomic<double> percent{};
-    std::mutex mutex;
+    std::mutex progress_bar_mutex;
+    std::mutex graph_mutex;
 
     int load_title(std::set<std::string> &titles, std::ifstream &file_in);
     int load_links(std::ifstream &file_in, indicators::BlockProgressBar &bar);

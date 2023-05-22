@@ -204,13 +204,6 @@ int menu_calls::display_linked_to() {
         return EXIT_FAILURE;
     }
 
-    /* system("clear");
-    const auto LINKED_TO{graph.linked_to(title)};
-    if (LINKED_TO.empty()) {
-        std::cout << "\nNo pages link to " << title << ", or " << title << " isn't found\n";
-        return EXIT_FAILURE;
-    } */
-
     std::cout << "\nWould you like to display or save the pages linking to " << title << "?\nPress D for display and S for save\n";
     char response{};
     do {
