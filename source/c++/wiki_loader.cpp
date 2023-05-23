@@ -29,11 +29,45 @@ int wiki_loader::load() {
     std::set<std::string> titles;   // Set of titles to make sure all titles are sorted before adding to graph
     BS::thread_pool pool;
     std::vector <std::future<std::set<std::string>>> title_futures;
+    //const long unsigned int LOAD_FILES_SIZE{file_names.size() - 1};
 
     indicators::BlockProgressBar title_bar{indicators::option::BarWidth{76}, indicators::option::Start{"["}, indicators::option::End{"]"}, indicators::option::PrefixText{"1/2 "}, indicators::option::ShowElapsedTime{true}, indicators::option::ShowRemainingTime{true}, indicators::option::ForegroundColor{indicators::Color::red}, indicators::option::FontStyles{std::vector<indicators::FontStyle>{indicators::FontStyle::bold}}};
     indicators::show_console_cursor(false); // Hide cursor
 
     std::cout << "\nLoading Wikipedia page titles from " << file_names.size() << " files...\n";
+
+    /* // Rewrite with range based for loop
+    for (const std::string &FILE: file_names) {
+        title_futures.push_back(pool.submit([this, FILE, LOAD_FILES_SIZE, &title_bar]() -> std::set<std::string> {
+            std::ifstream file_in;
+            file_in.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+            std::set<std::string> titles;
+
+            percent = 100 * ((double)progress / (LOAD_FILES_SIZE));
+            try {   // In a try block so I can make a lock_guard just for the title_bar
+                std::lock_guard<std::mutex> lock(progress_bar_mutex);
+                title_bar.set_progress(percent);
+            } catch (const std::exception &E) {
+                std::cerr << E.what() << "\n";
+            }
+
+            try {
+                file_in.open(FILE);
+                file_in.peek();
+
+                while (!file_in.eof())
+                    load_title(titles, file_in);
+
+                file_in.close();
+            } catch (const std::ifstream::failure &E) {
+                std::cerr << "\nError: " << E.what() << "\n\n";
+                return titles;
+            }
+            ++progress;
+            return titles;
+        }));
+    } */
+
     for (unsigned int i{}; i < file_names.size(); ++i){ // Using a for loop for setup instead of the thread pool's built in parallel loop because I need to pass i by value
         title_futures.push_back(pool.submit([this, file_names, i, &title_bar]() -> std::set<std::string> {
             std::ifstream file_in;
