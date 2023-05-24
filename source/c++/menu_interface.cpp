@@ -20,12 +20,18 @@ int menu::init_menu() {
     try {
         python_file = fopen(MAIN_PY_PATH.c_str(), "r");
         // Run the main python script & finalize python
-        PyRun_SimpleFile(python_file, MAIN_PY_PATH.c_str());
-        Py_Finalize();
+        //PyRun_SimpleFile(python_file, MAIN_PY_PATH.c_str());
+        //Py_Finalize();
     } catch (const std::exception &E) {
         std::cerr << "\nError loading python script\n";
         return EXIT_FAILURE;
     }
+    PyRun_SimpleFile(python_file, MAIN_PY_PATH.c_str());
+    // Wait for the python script to finish
+    
+
+    Py_FinalizeEx();
+    fclose(python_file);
 
     if (load()){
         std::cout << "\nError loading graph\n";

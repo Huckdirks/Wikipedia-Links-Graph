@@ -29,14 +29,14 @@ int wiki_loader::load() {
     std::set<std::string> titles;   // Set of titles to make sure all titles are sorted before adding to graph
     BS::thread_pool pool;
     std::vector <std::future<std::set<std::string>>> title_futures;
-    //const long unsigned int LOAD_FILES_SIZE{file_names.size() - 1};
+    const long unsigned int LOAD_FILES_SIZE{file_names.size() - 1};
 
     indicators::BlockProgressBar title_bar{indicators::option::BarWidth{76}, indicators::option::Start{"["}, indicators::option::End{"]"}, indicators::option::PrefixText{"1/2 "}, indicators::option::ShowElapsedTime{true}, indicators::option::ShowRemainingTime{true}, indicators::option::ForegroundColor{indicators::Color::red}, indicators::option::FontStyles{std::vector<indicators::FontStyle>{indicators::FontStyle::bold}}};
     indicators::show_console_cursor(false); // Hide cursor
 
     std::cout << "\nLoading Wikipedia page titles from " << file_names.size() << " files...\n";
 
-    /* // Rewrite with range based for loop
+    // Rewrite with range based for loop
     for (const std::string &FILE: file_names) {
         title_futures.push_back(pool.submit([this, FILE, LOAD_FILES_SIZE, &title_bar]() -> std::set<std::string> {
             std::ifstream file_in;
@@ -66,9 +66,9 @@ int wiki_loader::load() {
             ++progress;
             return titles;
         }));
-    } */
+    }
 
-    for (unsigned int i{}; i < file_names.size(); ++i){ // Using a for loop for setup instead of the thread pool's built in parallel loop because I need to pass i by value
+    /* for (unsigned int i{}; i < file_names.size(); ++i){ // Using a for loop for setup instead of the thread pool's built in parallel loop because I need to pass i by value
         title_futures.push_back(pool.submit([this, file_names, i, &title_bar]() -> std::set<std::string> {
             std::ifstream file_in;
             file_in.exceptions(std::ifstream::failbit | std::ifstream::badbit);
@@ -97,7 +97,7 @@ int wiki_loader::load() {
             ++progress;
             return titles;
         }));
-    }
+    } */
     pool.wait_for_tasks();
 
     title_bar.set_progress(100);
@@ -135,10 +135,12 @@ int wiki_loader::load() {
         percent = 100 * ((double)progress / (titles.size() - 1));
         if (progress % 10000 == 0 && percent < 100)  // Only update progress bar every 1000 titles to save time
             graph_titles_bar.set_progress(percent);
+
         const graph_vertex PAGE{std::move(TITLE)};
         graph->push_back(std::move(PAGE));
         ++progress;
     }
+
     graph_titles_bar.set_progress(100);
     graph_titles_bar.set_option(indicators::option::ShowRemainingTime{false});
     graph_titles_bar.set_option(indicators::option::ForegroundColor{indicators::Color::green});
@@ -156,7 +158,24 @@ int wiki_loader::load() {
     progress = 0;
 
     // Load in each link to the graph
-    for (unsigned int i{}; i < file_names.size(); ++i){
+    /* std::for_each(std::execution::par, file_names.begin(), file_names.end(), [this, &links_bar](const std::string &FILE_NAME){
+        std::ifstream file_in;
+        file_in.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+        try {
+            file_in.open(FILE_NAME);
+            file_in.peek();
+            
+            while (!file_in.eof())
+                load_links(file_in, links_bar);
+
+            file_in.close();
+        } catch (const std::ifstream::failure &E) {
+            std::cerr << E.what() << "\n\n";
+            return EXIT_FAILURE;
+        }
+        return EXIT_SUCCESS;
+    }); */
+    /* for (unsigned int i{}; i < file_names.size(); ++i){
         pool.push_task([this, file_names, i, &links_bar](){
             std::ifstream file_in;
             file_in.exceptions(std::ifstream::failbit | std::ifstream::badbit);
@@ -174,7 +193,27 @@ int wiki_loader::load() {
             }
             return EXIT_SUCCESS;
         });
+    } */
+    for (const std::string &FILE: file_names){
+        pool.push_task([this, FILE, &links_bar](){
+            std::ifstream file_in;
+            file_in.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+            try {
+                file_in.open(FILE);
+                file_in.peek();
+                
+                while (!file_in.eof())
+                    load_links(file_in, links_bar);
+
+                file_in.close();
+            } catch (const std::ifstream::failure &E) {
+                std::cerr << E.what() << "\n\n";
+                return EXIT_FAILURE;
+            }
+            return EXIT_SUCCESS;
+        });
     }
+    // Wait for all tasks to finish (all links to be loaded
     pool.wait_for_tasks();
 
     links_bar.set_progress(100);
