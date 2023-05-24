@@ -8,11 +8,7 @@ int menu::init_menu() {
 
     // For some Goddamn reason when I try to call the python script it runs on a separate thread which completely breaks literally everything (It doesn't even let me properly close out of my terminal), so I gotta go back to the shitty way of calling it ¯\_(ツ)_/¯
     // Get current directory
-    //const fs::path MAIN_DIR{fs::current_path()};
     const fs::path PYTHON_DIR{fs::current_path()/"source"/"python/main.py"};
-    //fs::current_path(MAIN_DIR/"source"/"python");
-    //system("./run");
-    //fs::current_path(MAIN_DIR);
     const std::string RUN_PYTHON{"python3 " + PYTHON_DIR.string()};
     system(RUN_PYTHON.c_str());
 
