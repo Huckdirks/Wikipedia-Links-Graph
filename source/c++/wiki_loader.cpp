@@ -26,7 +26,6 @@ int wiki_loader::load() {
         return EXIT_FAILURE;
     }
 
-    std::set<std::string> titles;   // Set of titles to make sure all titles are sorted before adding to graph
     BS::thread_pool pool;
     std::vector <std::future<std::set<std::string>>> title_futures;
     const long unsigned int LOAD_FILES_SIZE{file_names.size() - 1};
@@ -34,6 +33,7 @@ int wiki_loader::load() {
     indicators::BlockProgressBar title_bar{indicators::option::BarWidth{76}, indicators::option::Start{"["}, indicators::option::End{"]"}, indicators::option::PrefixText{"1/2 "}, indicators::option::ShowElapsedTime{true}, indicators::option::ShowRemainingTime{true}, indicators::option::ForegroundColor{indicators::Color::red}, indicators::option::FontStyles{std::vector<indicators::FontStyle>{indicators::FontStyle::bold}}};
     indicators::show_console_cursor(false); // Hide cursor
 
+    // Load in the titles from all files to individual sets from threads
     std::cout << "\nLoading Wikipedia page titles from " << file_names.size() << " files...\n";
 
     // Load the titles from each file into individual sets from each thread
@@ -74,6 +74,7 @@ int wiki_loader::load() {
     title_bar.set_option(indicators::option::ForegroundColor{indicators::Color::green});
     title_bar.mark_as_completed();
 
+    std::set<std::string> titles;   // For all the titles from all the files
     progress = 0;
     percent = 0;
 
