@@ -27,21 +27,23 @@ int wiki_loader::load() {
     }
 
     BS::thread_pool pool;
-    std::vector <std::future<std::set<std::string>>> title_futures;  // Set of titles to make sure all titles are sorted before adding to graph
+    std::vector <std::future<std::set<std::string>>> title_futures;
+    const long unsigned int LOAD_FILES_SIZE{file_names.size() - 1};
 
     indicators::BlockProgressBar title_bar{indicators::option::BarWidth{76}, indicators::option::Start{"["}, indicators::option::End{"]"}, indicators::option::PrefixText{"1/2 "}, indicators::option::ShowElapsedTime{true}, indicators::option::ShowRemainingTime{true}, indicators::option::ForegroundColor{indicators::Color::red}, indicators::option::FontStyles{std::vector<indicators::FontStyle>{indicators::FontStyle::bold}}};
     indicators::show_console_cursor(false); // Hide cursor
 
     // Load in the titles from all files to individual sets from threads
     std::cout << "\nLoading Wikipedia page titles from " << file_names.size() << " files...\n";
-    for (unsigned int i{}; i < file_names.size(); ++i){ // Using a for loop for setup instead of the thread pool's built in parallel loop because I need to pass i by value
-        title_futures.push_back(pool.submit([this, file_names, i, &title_bar]() -> std::set<std::string> {
+
+    // Load the titles from each file into individual sets from each thread
+    for (const std::string &FILE: file_names) {
+        title_futures.push_back(pool.submit([this, FILE, LOAD_FILES_SIZE, &title_bar]() -> std::set<std::string> {
             std::ifstream file_in;
             file_in.exceptions(std::ifstream::failbit | std::ifstream::badbit);
             std::set<std::string> titles;
-            const std::string FILE_NAME{file_names[i]};
 
-            percent = 100 * ((double)progress / (file_names.size() - 1));
+            percent = 100 * ((double)progress / (LOAD_FILES_SIZE));
             try {   // In a try block so I can make a lock_guard just for the title_bar
                 std::lock_guard<std::mutex> lock(progress_bar_mutex);
                 title_bar.set_progress(percent);
@@ -50,7 +52,7 @@ int wiki_loader::load() {
             }
 
             try {
-                file_in.open(FILE_NAME);
+                file_in.open(FILE);
                 file_in.peek();
 
                 while (!file_in.eof())
@@ -58,7 +60,8 @@ int wiki_loader::load() {
 
                 file_in.close();
             } catch (const std::ifstream::failure &E) {
-                std::cerr << E.what() << "\n";
+                std::cerr << "\nError: " << E.what() << "\n\n";
+                return titles;
             }
             ++progress;
             return titles;
@@ -77,7 +80,7 @@ int wiki_loader::load() {
 
     indicators::BlockProgressBar title_merge_bar{indicators::option::BarWidth{76}, indicators::option::Start{"["}, indicators::option::End{"]"}, indicators::option::PrefixText{"2/2 "}, indicators::option::ShowElapsedTime{true}, indicators::option::ShowRemainingTime{true}, indicators::option::ForegroundColor{indicators::Color::red}, indicators::option::FontStyles{std::vector<indicators::FontStyle>{indicators::FontStyle::bold}}};
 
-    // Merge all title sets into one set
+    // Merge all the title sets into one set
     for (auto &title_future : title_futures){
         percent = 100 * ((double)progress / (title_futures.size() - 1));
         if (title_merge_bar.is_completed() || percent >= 100) {
@@ -103,10 +106,12 @@ int wiki_loader::load() {
         percent = 100 * ((double)progress / (titles.size() - 1));
         if (progress % 10000 == 0 && percent < 100)  // Only update progress bar every 1000 titles to save time
             graph_titles_bar.set_progress(percent);
+
         const graph_vertex PAGE{std::move(TITLE)};
         graph->push_back(std::move(PAGE));
         ++progress;
     }
+
     graph_titles_bar.set_progress(100);
     graph_titles_bar.set_option(indicators::option::ShowRemainingTime{false});
     graph_titles_bar.set_option(indicators::option::ForegroundColor{indicators::Color::green});
@@ -124,12 +129,12 @@ int wiki_loader::load() {
     progress = 0;
 
     // Load in each link to the graph
-    for (unsigned int i{}; i < file_names.size(); ++i){
-        pool.push_task([this, file_names, i, &links_bar](){
+    for (const std::string &FILE: file_names){
+        pool.push_task([this, FILE, &links_bar](){
             std::ifstream file_in;
             file_in.exceptions(std::ifstream::failbit | std::ifstream::badbit);
             try {
-                file_in.open(file_names[i]);
+                file_in.open(FILE);
                 file_in.peek();
                 
                 while (!file_in.eof())

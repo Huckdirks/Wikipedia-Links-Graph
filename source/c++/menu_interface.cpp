@@ -6,24 +6,12 @@ int menu::init_menu() {
     bool flag{};
     system("clear");
 
-    // Initialize python script
-    const std::string PYTHON_PATH{fs::current_path().string() + "/source/python/"};
-    const std::string MAIN_PY_PATH{PYTHON_PATH + "main.py"};
-    FILE *python_file{};
-
-    Py_Initialize();
-
-    // Add any other files besides main.py in Wikipedia_Graph/source/python/ to the python path
-    PyObject* sys_path = PySys_GetObject("path");
-    PyList_Append(sys_path, PyUnicode_FromString(PYTHON_PATH.c_str()));
-
-    try {
-        python_file = fopen(MAIN_PY_PATH.c_str(), "r");
-        // Run the main python script & finalize python
-        PyRun_SimpleFile(python_file, MAIN_PY_PATH.c_str());
-        Py_Finalize();
-    } catch (const std::exception &E) {
-        std::cerr << "\nError loading python script\n";
+    // For some Goddamn reason when I try to call the python script with the official python/c api it runs on a separate thread which completely breaks literally everything (It doesn't even let me properly close out of my terminal), so I gotta go back to the shitty way of calling it ¯\_(ツ)_/¯
+    // Get current directory
+    const fs::path PYTHON_DIR{fs::current_path()/"source"/"python/main.py"};
+    const std::string RUN_PYTHON{"python3 " + PYTHON_DIR.string()};
+    if (system(RUN_PYTHON.c_str())) {
+        std::cout << "\nError loading python program\n";
         return EXIT_FAILURE;
     }
 
