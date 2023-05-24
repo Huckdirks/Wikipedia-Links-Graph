@@ -6,45 +6,14 @@ int menu::init_menu() {
     bool flag{};
     system("clear");
 
-    // For some Goddamn reason when I try to call the python script it runs on a separate thread which completely breaks literally everything (It doesn't even let me properly close out of my terminal), so I gotta go back to the shitty way of calling it ¯\_(ツ)_/¯
+    // For some Goddamn reason when I try to call the python script with the official python/c api it runs on a separate thread which completely breaks literally everything (It doesn't even let me properly close out of my terminal), so I gotta go back to the shitty way of calling it ¯\_(ツ)_/¯
     // Get current directory
     const fs::path PYTHON_DIR{fs::current_path()/"source"/"python/main.py"};
     const std::string RUN_PYTHON{"python3 " + PYTHON_DIR.string()};
-    system(RUN_PYTHON.c_str());
-
-    // If I figure out a function that possibly runs all the files instead of PyRun_SimpleFile() that would be good, because I think execution is suspended for the running of the first file (main.py), but as soon as it runs a function from a separate file it resumes execution, which breaks everything
-
-    /* // Initialize python script
-    const std::string PYTHON_PATH{fs::current_path().string() + "/source/python/"};
-    const std::string MAIN_PY_PATH{PYTHON_PATH + "main.py"};
-    FILE *python_file{};
-
-    Py_Initialize();
-
-    // Add any other files besides main.py in Wikipedia_Graph/source/python/ to the python path
-    PyObject* sys_path = PySys_GetObject("path");
-    PyList_Append(sys_path, PyUnicode_FromString(PYTHON_PATH.c_str()));
-
-    try {
-        python_file = fopen(MAIN_PY_PATH.c_str(), "r");
-        // Run the main python script & finalize python
-        PyRun_SimpleFile(python_file, MAIN_PY_PATH.c_str());
-        //Py_Finalize();
-    } catch (const std::exception &E) {
-        std::cerr << "\nError loading python script\n";
+    if (system(RUN_PYTHON.c_str())) {
+        std::cout << "\nError loading python program\n";
         return EXIT_FAILURE;
     }
-    //PyRun_SimpleFile(python_file, MAIN_PY_PATH.c_str());
-    // Wait for the python script to finish
-    PyRun_SimpleString("import time\n"
-                       "from threading import enumerate\n"
-                       "while True:\n"
-                       "    if not any(t for t in enumerate() if t.daemon):\n"
-                       "        break\n"
-                       "    time.sleep(0.1)");
-
-    Py_Finalize();
-    fclose(python_file); */
 
     if (load()){
         std::cout << "\nError loading graph\n";

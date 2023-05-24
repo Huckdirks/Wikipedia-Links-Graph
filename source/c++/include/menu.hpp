@@ -14,9 +14,6 @@
 #include <limits>
 #include <string>
 
-// External Libraries
-//#include <Python.h>
-
 // Namespaces
 namespace fs = std::filesystem;
 
