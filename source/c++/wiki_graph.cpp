@@ -56,7 +56,7 @@ int graph_vertex::display(const bool DISPLAY_LINKS) const {
 // These operator overloads aren't really used here anymore but it's nice if you want to access a vertex by index from outside the class
 
 // [ ] operator overload for ints
-graph_vertex &wiki_graph::operator[](const unsigned int &&INDEX) {
+graph_vertex &wiki_graph::operator[](const unsigned int INDEX) {
     try {
         return vertex_list.at(INDEX);
     } catch (const std::out_of_range &EXCEPTION) {

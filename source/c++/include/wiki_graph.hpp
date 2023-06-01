@@ -50,7 +50,7 @@ class wiki_graph {
    public:
     unsigned int num_edges{};                                     // Number of edges in graph
     
-    graph_vertex &operator[](const unsigned int &&INDEX);  // [] operator overload for ints
+    graph_vertex &operator[](const unsigned int INDEX);  // [] operator overload for ints
     graph_vertex &operator[](const std::string &&VALUE);   // [] operator overload
 
     int load();                                                        // Load graph from file
