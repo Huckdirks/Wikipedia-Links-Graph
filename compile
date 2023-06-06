@@ -5,8 +5,8 @@ SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 echo "Compiling..."
 
 # Release Build (Max Optimization with No Debug)
-g++ -std=c++20 -Wextra -Wall -Werror -Wpedantic -fexceptions -fno-common -D_GLIBCXX_ASSERTIONS -O3 `python3-config --includes --embed` $SCRIPT_DIR/source/c++/*.cpp -o run `python3.11-config --ldflags --embed`
-#clang++ -std=c++20 -Wextra -Wall -Werror -Wpedantic -fexceptions -fno-common -D_GLIBCXX_ASSERTIONS -O3 `python3-config --includes --embed` $SCRIPT_DIR/source/c++/*.cpp -o run `python3.11-config --ldflags --embed`
+g++ -std=c++20 -Wextra -Wall -Werror -Wpedantic -fexceptions -fno-common -D_GLIBCXX_ASSERTIONS -O3 $SCRIPT_DIR/source/c++/*.cpp -o run
+#clang++ -std=c++20 -Wextra -Wall -Werror -Wpedantic -fexceptions -fno-common -D_GLIBCXX_ASSERTIONS -O3 $SCRIPT_DIR/source/c++/*.cpp -o run
 
 
 # Quick Debug Build (O1 with Max Debug)
@@ -30,8 +30,7 @@ g++ -std=c++20 -Wextra -Wall -Werror -Wpedantic -fexceptions -fno-common -D_GLIB
 # _GLIBCXX_ASSERTIONS: Undefined by default. When defined, enables extra error checking in the form of precondition assertions, such as bounds checking in strings and null pointer checks when dereferencing smart pointers.
 # -O3: Optimize yet more. -O3 turns on all optimizations specified by -O2 and also turns on the -finline-functions, -funswitch-loops, -fpredictive-commoning, -fgcse-after-reload, -ftree-vectorize, -ftree-partial-pre and -fipa-cp-clone options.
 # -g3: Produce debugging information for use by GDB. This means to use the most expressive format available (DWARF 2, stabs, or the native format if neither of those are supported), including GDB extensions if at all possible.
-# `python3-config --includes --embed`: Returns the include directories and flags needed to compile a Python extension in the same way that the interpreter was compiled. This is needed to compile C++ code that uses the Python C API.
-# `python3-config --ldflags --embed`: Returns the linker flags needed to link a Python extension library in the same way that the interpreter was linked. This is needed to compile C++ code that uses the Python C API.
+
 
 if [ $? -eq 0 ]; then
   echo "\nCompilation successful. Output file: $SCRIPT_DIR/run"
