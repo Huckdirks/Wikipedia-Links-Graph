@@ -95,7 +95,6 @@ int wiki_loader::load() {
         } catch (const std::exception &E) {
             std::cerr << E.what() << "\n";
         }
-        //titles.merge(title_future.get());
         ++progress;
     }
 
