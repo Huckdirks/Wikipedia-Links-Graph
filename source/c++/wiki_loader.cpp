@@ -88,7 +88,14 @@ int wiki_loader::load() {
             title_merge_bar.set_option(indicators::option::ForegroundColor{indicators::Color::green});
         }
         title_merge_bar.set_progress(percent);
-        titles.merge(title_future.get());
+
+        // In a try block just in case anything went wrong with the thread
+        try {
+            titles.merge(title_future.get());
+        } catch (const std::exception &E) {
+            std::cerr << E.what() << "\n";
+        }
+        //titles.merge(title_future.get());
         ++progress;
     }
 
@@ -129,8 +136,8 @@ int wiki_loader::load() {
     progress = 0;
 
     // Load in each link to the graph
-    for (const std::string &FILE: file_names){
-        pool.push_task([this, FILE, &links_bar](){
+    for (const std::string &FILE: file_names) {
+        pool.push_task([this, FILE, &links_bar]() {
             std::ifstream file_in;
             file_in.exceptions(std::ifstream::failbit | std::ifstream::badbit);
             try {
