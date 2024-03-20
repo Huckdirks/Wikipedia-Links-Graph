@@ -9,6 +9,7 @@
 
 // Libraries
 #include <atomic>
+#include <chrono>
 #include <exception>
 #include <filesystem>
 #include <fstream>
