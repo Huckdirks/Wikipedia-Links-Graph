@@ -25,6 +25,7 @@ g++ -std=c++20 -Wextra -Wall -Werror -Wpedantic -fexceptions -fno-common -D_GLIB
 # -Wextra: Enables some extra warning flags that are not enabled by -Wall.
 # -Wall: Enables all the warnings about constructions that some users consider questionable, and that are easy to avoid (or modify to prevent the warning), even in conjunction with macros.
 # -Werror: Make all warnings into errors.
+# -Wpedantic: Issue all the warnings demanded by strict ISO C and ISO C++; reject all programs that use forbidden extensions, and some other programs that do not follow ISO C and ISO C++.
 # -fexceptions: Enable exception handling. Also recommended for hardening of multi-threaded C and C++ code.
 # -fno-common: Specifies that the compiler places uninitialized global variables in the BSS section of the object file. This inhibits the merging of tentative definitions by the linker so you get a multiple-definition error if the same variable is accidentally defined in more than one compilation unit.
 # -D_GLIBCXX_ASSERTIONS: Undefined by default. When defined, enables extra error checking in the form of precondition assertions, such as bounds checking in strings and null pointer checks when dereferencing smart pointers.
