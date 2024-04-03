@@ -2,6 +2,7 @@
 data/
 source/Python/__pycache__
 .vscode/
+venv/
 
 # Files
 run
