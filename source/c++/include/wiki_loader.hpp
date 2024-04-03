@@ -5,6 +5,7 @@
 #include "BS_thread_pool.hpp"
 #include "indicators/indicators.hpp"
 #include "json.hpp"
+#include "simdjson.h"
 #include "wiki_graph.hpp"
 
 // Libraries
